@@ -3,6 +3,7 @@ QRadar Ariel Data Export
 
 Date: September 2025
 Copyright 2025 Palo Alto Networks, Inc.
+
 Paul Vinson - dl-qradar-data-export@paloaltonetworks.com
 
 QRadar Ariel Export Process Overview
