@@ -1,0 +1,5280 @@
+\input texinfo
+@setfilename parallel.info
+
+@settitle parallel - build and execute shell command lines from standard input in parallel
+
+@node Top
+@top parallel
+
+@node NAME
+@chapter NAME
+
+parallel - build and execute shell command lines from standard input
+in parallel
+
+@node SYNOPSIS
+@chapter SYNOPSIS
+
+@strong{parallel} [options] [@emph{command} [arguments]] < list_of_arguments
+
+@strong{parallel} [options] [@emph{command} [arguments]] ( @strong{:::} arguments |
+@strong{:::+} arguments | @strong{::::} argfile(s) | @strong{::::+} argfile(s) ) ...
+
+@strong{parallel} @asis{}-@asis{}-@asis{}semaphore [options] @emph{command}
+
+@strong{#!/usr/bin/parallel} @asis{}-@asis{}-@asis{}shebang [options] [@emph{command} [arguments]]
+
+@strong{#!/usr/bin/parallel} @asis{}-@asis{}-@asis{}shebang-wrap [options] [@emph{command}
+[arguments]]
+
+@node DESCRIPTION
+@chapter DESCRIPTION
+
+STOP!
+
+Read the @strong{Reader's guide} below if you are new to GNU @strong{parallel}.
+
+GNU @strong{parallel} is a shell tool for executing jobs in parallel using
+one or more computers. A job can be a single command or a small script
+that has to be run for each of the lines in the input. The typical
+input is a list of files, a list of hosts, a list of users, a list of
+URLs, or a list of tables. A job can also be a command that reads from
+a pipe. GNU @strong{parallel} can then split the input into blocks and pipe
+a block into each command in parallel.
+
+If you use xargs and tee today you will find GNU @strong{parallel} very easy
+to use as GNU @strong{parallel} is written to have the same options as
+xargs. If you write loops in shell, you will find GNU @strong{parallel} may
+be able to replace most of the loops and make them run faster by
+running several jobs in parallel.
+
+GNU @strong{parallel} makes sure output from the commands is the same output
+as you would get had you run the commands sequentially. This makes it
+possible to use output from GNU @strong{parallel} as input for other
+programs.
+
+For each line of input GNU @strong{parallel} will execute @emph{command} with
+the line as arguments. If no @emph{command} is given, the line of input is
+executed. Several lines will be run in parallel. GNU @strong{parallel} can
+often be used as a substitute for @strong{xargs} or @strong{cat | bash}.
+
+@node Reader's guide
+@section Reader's guide
+
+GNU @strong{parallel} includes the 4 types of documentation: Tutorial,
+how-to, reference and explanation/design.
+
+@node Tutorial
+@subsection Tutorial
+
+If you prefer reading a book buy @strong{GNU Parallel 2018} at
+https://www.lulu.com/shop/ole-tange/gnu-parallel-2018/paperback/product-23558902.html
+or download it at: https://doi.org/10.5281/zenodo.1146014 Read at
+least chapter 1+2. It should take you less than 20 minutes.
+
+Otherwise start by watching the intro videos for a quick introduction:
+https://youtube.com/playlist?list=PL284C9FF2488BC6D1
+
+If you want to dive deeper: spend a couple of hours walking through
+the tutorial (@strong{man parallel_tutorial}). Your command line will love
+you for it.
+
+@node How-to
+@subsection How-to
+
+You can find a lot of examples of use in @strong{man
+parallel_examples}. They will give you an idea of what GNU @strong{parallel}
+is capable of, and you may find a solution you can simply adapt to
+your situation.
+
+If the example do not cover your exact needs, the options map
+(https://www.gnu.org/software/parallel/parallel_options_map.pdf) can
+help you identify options that are related, so you can look these up
+in the man page.
+
+@node Reference
+@subsection Reference
+
+If you need a one page printable cheat sheet you can find it on:
+https://www.gnu.org/software/parallel/parallel_cheat.pdf
+
+The man page is the reference for all options, and reading the man
+page from cover to cover is probably not what you need.
+
+@node Design discussion
+@subsection Design discussion
+
+If you want to know the design decisions behind GNU @strong{parallel}, try:
+@strong{man parallel_design}. This is also a good intro if you intend to
+change GNU @strong{parallel}.
+
+@node OPTIONS
+@chapter OPTIONS
+
+@table @asis
+@item @emph{command}
+@anchor{@emph{command}}
+
+Command to execute.
+
+If @emph{command} or the following arguments contain
+replacement strings (such as @strong{@{@}}) every instance will be substituted
+with the input.
+
+If @emph{command} is given, GNU @strong{parallel} solve the same tasks as
+@strong{xargs}. If @emph{command} is not given GNU @strong{parallel} will behave
+similar to @strong{cat | sh}.
+
+The @emph{command} must be an executable, a script, a composed command, an
+alias, or a function.
+
+@strong{Bash functions}: @strong{export -f} the function first or use @strong{env_parallel}.
+
+@strong{Bash, Csh, or Tcsh aliases}: Use @strong{env_parallel}.
+
+@strong{Zsh, Fish, Ksh, and Pdksh functions and aliases}: Use @strong{env_parallel}.
+
+@item @strong{@{@}}
+@anchor{@strong{@{@}}}
+
+Input line.
+
+This replacement string will be replaced by a full line read from the
+input source. The input source is normally stdin (standard input), but
+can also be given with @strong{@asis{}-@asis{}-@asis{}arg-file}, @strong{:::}, or @strong{::::}.
+
+The replacement string @strong{@{@}} can be changed with @strong{-I}.
+
+If the command line contains no replacement strings then @strong{@{@}} will be
+appended to the command line.
+
+Replacement strings are normally quoted, so special characters are not
+parsed by the shell. The exception is if the command starts with a
+replacement string; then the string is not quoted.
+
+See also: @strong{@asis{}-@asis{}-@asis{}plus} @strong{@{.@}} @strong{@{/@}} @strong{@{//@}} @strong{@{/.@}} @strong{@{#@}} @strong{@{%@}}
+@strong{@{}@emph{n}@strong{@}} @strong{@{=}@emph{perl expression}@strong{=@}}
+
+@item @strong{@{.@}}
+@anchor{@strong{@{.@}}}
+
+Input line without extension.
+
+This replacement string will be replaced by the input with the
+extension removed. If the input line contains @strong{.} after the last
+@strong{/}, the last @strong{.} until the end of the string will be removed and
+@strong{@{.@}} will be replaced with the remaining. E.g. @emph{foo.jpg} becomes
+@emph{foo}, @emph{subdir/foo.jpg} becomes @emph{subdir/foo},
+@emph{sub.dir/foo.jpg} becomes @emph{sub.dir/foo}, @emph{sub.dir/bar} remains
+@emph{sub.dir/bar}. If the input line does not contain @strong{.} it will remain
+unchanged.
+
+The replacement string @strong{@{.@}} can be changed with @strong{@asis{}-@asis{}-@asis{}extensionreplace}
+
+See also: @strong{@{@}} @strong{@asis{}-@asis{}-@asis{}extensionreplace}
+
+@item @strong{@{/@}}
+@anchor{@strong{@{/@}}}
+
+Basename of input line.
+
+This replacement string will be replaced by the input with the
+directory part removed.
+
+See also: @strong{@{@}} @strong{@asis{}-@asis{}-@asis{}basenamereplace}
+
+@item @strong{@{//@}}
+@anchor{@strong{@{//@}}}
+
+Dirname of input line.
+
+This replacement string will be replaced by the dir of the input
+line. See @strong{dirname}(1).
+
+See also: @strong{@{@}} @strong{@asis{}-@asis{}-@asis{}dirnamereplace}
+
+@item @strong{@{/.@}}
+@anchor{@strong{@{/.@}}}
+
+Basename of input line without extension.
+
+This replacement string will be replaced by the input with the
+directory and extension part removed.  @strong{@{/.@}} is a combination of
+@strong{@{/@}} and @strong{@{.@}}.
+
+See also: @strong{@{@}} @strong{@asis{}-@asis{}-@asis{}basenameextensionreplace}
+
+@item @strong{@{#@}}
+@anchor{@strong{@{#@}}}
+
+Sequence number of the job to run.
+
+This replacement string will be replaced by the sequence number of the
+job being run. It contains the same number as $PARALLEL_SEQ.
+
+See also: @strong{@{@}} @strong{@asis{}-@asis{}-@asis{}seqreplace}
+
+@item @strong{@{%@}}
+@anchor{@strong{@{%@}}}
+
+Job slot number.
+
+This replacement string will be replaced by the job's slot number
+between 1 and number of jobs to run in parallel. There will never be 2
+jobs running at the same time with the same job slot number.
+
+If the job needs to be retried (e.g using @strong{@asis{}-@asis{}-@asis{}retries} or
+@strong{@asis{}-@asis{}-@asis{}retry-failed}) the job slot is not automatically updated. You
+should then instead use @strong{$PARALLEL_JOBSLOT}:
+
+@verbatim
+  $ do_test() {
+      id="$3 {%}=$1 PARALLEL_JOBSLOT=$2"
+      echo run "$id";
+      sleep 1
+      # fail if {%} is odd
+      return `echo $1%2 | bc`
+    }
+  $ export -f do_test
+  $ parallel -j3 --jl mylog do_test {%} \$PARALLEL_JOBSLOT {} ::: A B C D
+  run A {%}=1 PARALLEL_JOBSLOT=1
+  run B {%}=2 PARALLEL_JOBSLOT=2
+  run C {%}=3 PARALLEL_JOBSLOT=3
+  run D {%}=1 PARALLEL_JOBSLOT=1
+  $ parallel --retry-failed -j3 --jl mylog do_test {%} \$PARALLEL_JOBSLOT {} ::: A B C D
+  run A {%}=1 PARALLEL_JOBSLOT=1
+  run C {%}=3 PARALLEL_JOBSLOT=2
+  run D {%}=1 PARALLEL_JOBSLOT=3
+@end verbatim
+
+Notice how @{%@} and $PARALLEL_JOBSLOT differ in the retry run of C and D.
+
+See also: @strong{@{@}} @strong{@asis{}-@asis{}-@asis{}jobs} @strong{@asis{}-@asis{}-@asis{}slotreplace}
+
+@item @strong{@{}@emph{n}@strong{@}}
+@anchor{@strong{@{}@emph{n}@strong{@}}}
+
+Argument from input source @emph{n} or the @emph{n}'th argument.
+
+This positional replacement string will be replaced by the input from
+input source @emph{n} (when used with @strong{@asis{}-@asis{}-@asis{}arg-file} or @strong{::::}) or with the
+@emph{n}'th argument (when used with @strong{-N} or @strong{@asis{}-@asis{}-@asis{}colsep}).
+
+If @emph{n} is negative it refers to the @emph{n}'th last argument.
+
+See also: @strong{@{@}} @strong{@{}@emph{n}.@strong{@}} @strong{@{}@emph{n}/@strong{@}} @strong{@{}@emph{n}//@strong{@}}
+@strong{@{}@emph{n}/.@strong{@}} @strong{@asis{}-@asis{}-@asis{}colsep}
+
+@item @strong{@{}@emph{n}.@strong{@}}
+@anchor{@strong{@{}@emph{n}.@strong{@}}}
+
+Argument from input source @emph{n} or the @emph{n}'th argument without
+extension.
+
+@strong{@{}@emph{n}.@strong{@}} is a combination of @strong{@{}@emph{n}@strong{@}} and @strong{@{.@}}.
+
+This positional replacement string will be replaced by the input from
+input source @emph{n} (when used with @strong{@asis{}-@asis{}-@asis{}arg-file} or @strong{::::}) or with the
+@emph{n}'th argument (when used with @strong{-N}). The input will have the
+extension removed.
+
+See also: @strong{@{}@emph{n}@strong{@}} @strong{@{.@}}
+
+@item @strong{@{}@emph{n}/@strong{@}}
+@anchor{@strong{@{}@emph{n}/@strong{@}}}
+
+Basename of argument from input source @emph{n} or the @emph{n}'th argument.
+
+@strong{@{}@emph{n}/@strong{@}} is a combination of @strong{@{}@emph{n}@strong{@}} and @strong{@{/@}}.
+
+This positional replacement string will be replaced by the input from
+input source @emph{n} (when used with @strong{@asis{}-@asis{}-@asis{}arg-file} or @strong{::::}) or with the
+@emph{n}'th argument (when used with @strong{-N}). The input will have the
+directory (if any) removed.
+
+See also: @strong{@{}@emph{n}@strong{@}} @strong{@{/@}}
+
+@item @strong{@{}@emph{n}//@strong{@}}
+@anchor{@strong{@{}@emph{n}//@strong{@}}}
+
+Dirname of argument from input source @emph{n} or the @emph{n}'th argument.
+
+@strong{@{}@emph{n}//@strong{@}} is a combination of @strong{@{}@emph{n}@strong{@}} and @strong{@{//@}}.
+
+This positional replacement string will be replaced by the dir of the
+input from input source @emph{n} (when used with @strong{@asis{}-@asis{}-@asis{}arg-file} or @strong{::::}) or with
+the @emph{n}'th argument (when used with @strong{-N}). See @strong{dirname}(1).
+
+See also: @strong{@{}@emph{n}@strong{@}} @strong{@{//@}}
+
+@item @strong{@{}@emph{n}/.@strong{@}}
+@anchor{@strong{@{}@emph{n}/.@strong{@}}}
+
+Basename of argument from input source @emph{n} or the @emph{n}'th argument
+without extension.
+
+@strong{@{}@emph{n}/.@strong{@}} is a combination of @strong{@{}@emph{n}@strong{@}}, @strong{@{/@}}, and
+@strong{@{.@}}.
+
+This positional replacement string will be replaced by the input from
+input source @emph{n} (when used with @strong{@asis{}-@asis{}-@asis{}arg-file} or @strong{::::}) or with the
+@emph{n}'th argument (when used with @strong{-N}). The input will have the
+directory (if any) and extension removed.
+
+See also: @strong{@{}@emph{n}@strong{@}} @strong{@{/.@}}
+
+@item @strong{@{=}@emph{perl expression}@strong{=@}}
+@anchor{@strong{@{=}@emph{perl expression}@strong{=@}}}
+
+Replace with calculated @emph{perl expression}.
+
+@strong{$_} will contain the same as @strong{@{@}}. After evaluating @emph{perl
+expression} @strong{$_} will be used as the value. It is recommended to only
+change $_ but you have full access to all of GNU @strong{parallel}'s
+internal functions and data structures.
+
+The expression must give the same result if evaluated twice -
+otherwise the behaviour is undefined. E.g. in some versions of GNU
+@strong{parallel} this will not work as expected:
+
+@verbatim
+    parallel echo '{= $_= ++$wrong_counter =}' ::: a b c
+@end verbatim
+
+A few convenience functions and data structures have been made:
+
+@table @asis
+@item @strong{Q(}@emph{string}@strong{)}
+@anchor{@strong{Q(}@emph{string}@strong{)}}
+
+Shell quote a string. Example:
+
+@verbatim
+  parallel echo {} is quoted as '{= $_=Q($_) =}' ::: \$PWD
+@end verbatim
+
+@item @strong{pQ(}@emph{string}@strong{)}
+@anchor{@strong{pQ(}@emph{string}@strong{)}}
+
+Perl quote a string. Example:
+
+@verbatim
+  parallel echo {} is quoted as '{= $_=pQ($_) =}' ::: \$PWD
+@end verbatim
+
+@item @strong{uq()} (or @strong{uq})
+@anchor{@strong{uq()} (or @strong{uq})}
+
+Do not quote current replacement string. Example:
+
+@verbatim
+  parallel echo {} has the value '{= uq =}' ::: \$PWD
+@end verbatim
+
+@item @strong{hash(val)}
+@anchor{@strong{hash(val)}}
+
+Compute B::hash(val). Example:
+
+@verbatim
+  parallel echo Hash of {} is '{= $_=hash($_) =}' ::: a b c
+@end verbatim
+
+@item @strong{total_jobs()}
+@anchor{@strong{total_jobs()}}
+
+Number of jobs in total. Example:
+
+@verbatim
+  parallel echo Number of jobs: '{= $_=total_jobs() =}' ::: a b c
+@end verbatim
+
+@item @strong{slot()}
+@anchor{@strong{slot()}}
+
+Slot number of job. Example:
+
+@verbatim
+  parallel echo Job slot of {} is '{= $_=slot() =}' ::: a b c
+@end verbatim
+
+@item @strong{seq()}
+@anchor{@strong{seq()}}
+
+Sequence number of job. Example:
+
+@verbatim
+  parallel echo Seq number of {} is '{= $_=seq() =}' ::: a b c
+@end verbatim
+
+@item @strong{@@arg}
+@anchor{@strong{@@arg}}
+
+The arguments counting from 1 ($arg[1] = @{1@} = first argument). Example:
+
+@verbatim
+  parallel echo {1}+{2}='{=1 $_=$arg[1]+$arg[2] =}' \
+    ::: 1 2 3 ::: 2 3 4
+@end verbatim
+
+('@{=1' forces this to be a positional replacement string, and
+therefore will not repeat the value for each arg.)
+
+@item @strong{skip()}
+@anchor{@strong{skip()}}
+
+Skip this job (see also @strong{@asis{}-@asis{}-@asis{}filter}). Example:
+
+@verbatim
+  parallel echo '{= $arg[1] >= $arg[2] and skip =}' \
+    ::: 1 2 3 ::: 2 3 4
+@end verbatim
+
+@item @strong{yyyy_mm_dd_hh_mm_ss(sec)}
+@anchor{@strong{yyyy_mm_dd_hh_mm_ss(sec)}}
+
+@item @strong{yyyy_mm_dd_hh_mm(sec)}
+@anchor{@strong{yyyy_mm_dd_hh_mm(sec)}}
+
+@item @strong{yyyy_mm_dd(sec)}
+@anchor{@strong{yyyy_mm_dd(sec)}}
+
+@item @strong{hh_mm_ss(sec)}
+@anchor{@strong{hh_mm_ss(sec)}}
+
+@item @strong{hh_mm(sec)}
+@anchor{@strong{hh_mm(sec)}}
+
+@item @strong{yyyymmddhhmmss(sec)}
+@anchor{@strong{yyyymmddhhmmss(sec)}}
+
+@item @strong{yyyymmddhhmm(sec)}
+@anchor{@strong{yyyymmddhhmm(sec)}}
+
+@item @strong{yyyymmdd(sec)}
+@anchor{@strong{yyyymmdd(sec)}}
+
+@item @strong{hhmmss(sec)}
+@anchor{@strong{hhmmss(sec)}}
+
+@item @strong{hhmm(sec)}
+@anchor{@strong{hhmm(sec)}}
+
+Time functions. @emph{sec} is number of seconds since epoch. If left out
+it will use current local time. Example:
+
+@verbatim
+  parallel echo 'Now: {= $_=yyyy_mm_dd_hh_mm_ss() =}' ::: Dummy
+  parallel echo 'The end: {= $_=yyyy_mm_dd_hh_mm_ss($_) =}' \
+    ::: 2147483648
+@end verbatim
+
+@end table
+
+Example:
+
+@verbatim
+  seq 10 | parallel echo {} + 1 is {= '$_++' =}
+  parallel csh -c {= '$_="mkdir ".Q($_)' =} ::: '12" dir'
+  seq 50 | parallel echo job {#} of {= '$_=total_jobs()' =}
+@end verbatim
+
+See also: @strong{@asis{}-@asis{}-@asis{}rpl} @strong{@asis{}-@asis{}-@asis{}parens} @strong{@{@}} @strong{@{=}@emph{n} @emph{perl expression}@strong{=@}}
+@strong{@asis{}-@asis{}-@asis{}filter}
+
+@item @strong{@{=}@emph{n} @emph{perl expression}@strong{=@}}
+@anchor{@strong{@{=}@emph{n} @emph{perl expression}@strong{=@}}}
+
+Positional equivalent to @strong{@{=}@emph{perl expression}@strong{=@}}.
+
+To understand positional replacement strings see @strong{@{}@emph{n}@strong{@}}.
+
+See also: @strong{@{=}@emph{perl expression}@strong{=@}} @strong{@{}@emph{n}@strong{@}}
+
+@item @strong{@{}@emph{rpl}:@emph{format}@strong{@}}
+@anchor{@strong{@{}@emph{rpl}@asis{:}@emph{format}@strong{@}}}
+
+Format replacement string.
+
+Use @emph{format} to format @emph{rpl}. @emph{format} is a format string used in
+@strong{printf}. @emph{rpl} is a replacement string.
+
+Examples:
+
+@verbatim
+  {#:%04d} - Job number ({#}) with 4 digits prepended with 0
+  {%:%02d} - Job slot ({%}) with 2 digits prepended with 0
+  {:%6s} - Input line ({}) right aligned 6 chars wide
+  {/:%12s} - Basename ({/}) right aligned 12 chars wide
+  {2:%8.2f} - Second input source ({2}) 8 chars wide, 2 decimals
+@end verbatim
+
+Format strings also works on replacement strings defined via @strong{@asis{}-@asis{}-@asis{}rpl}
+that start with '@{'.
+
+See also: @strong{@{@}} @strong{@{}@emph{n}@strong{@}} @strong{@asis{}-@asis{}-@asis{}rpl}
+
+@item @strong{:::} @emph{arguments}
+@anchor{@strong{@asis{:::}} @emph{arguments}}
+
+Use arguments on the command line as input source.
+
+Unlike other options for GNU @strong{parallel} @strong{:::} is placed after the
+@emph{command} and before the arguments.
+
+The following are equivalent:
+
+@verbatim
+  (echo file1; echo file2) | parallel gzip
+  parallel gzip ::: file1 file2
+  parallel gzip {} ::: file1 file2
+  parallel --arg-sep ,, gzip {} ,, file1 file2
+  parallel --arg-sep ,, gzip ,, file1 file2
+  parallel ::: "gzip file1" "gzip file2"
+@end verbatim
+
+To avoid treating @strong{:::} as special use @strong{@asis{}-@asis{}-@asis{}arg-sep} to set the
+argument separator to something else.
+
+If multiple @strong{:::} are given, each group will be treated as an input
+source, and all combinations of input sources will be
+generated. E.g. ::: 1 2 ::: a b c will result in the combinations
+(1,a) (1,b) (1,c) (2,a) (2,b) (2,c). This is useful for replacing
+nested for-loops.
+
+@strong{:::}, @strong{::::}, and @strong{@asis{}-@asis{}-@asis{}arg-file} can be mixed. So these are equivalent:
+
+@verbatim
+  parallel echo {1} {2} {3} ::: 6 7 ::: 4 5 ::: 1 2 3
+  parallel echo {1} {2} {3} :::: <(seq 6 7) <(seq 4 5) \
+    :::: <(seq 1 3)
+  parallel -a <(seq 6 7) echo {1} {2} {3} :::: <(seq 4 5) \
+    :::: <(seq 1 3)
+  parallel -a <(seq 6 7) -a <(seq 4 5) echo {1} {2} {3} \
+    ::: 1 2 3
+  seq 6 7 | parallel -a - -a <(seq 4 5) echo {1} {2} {3} \
+    ::: 1 2 3
+  seq 4 5 | parallel echo {1} {2} {3} :::: <(seq 6 7) - \
+    ::: 1 2 3
+@end verbatim
+
+See also: @strong{@asis{}-@asis{}-@asis{}arg-sep} @strong{@asis{}-@asis{}-@asis{}arg-file} @strong{::::} @strong{:::+} @strong{::::+} @strong{@asis{}-@asis{}-@asis{}link}
+
+@item @strong{:::+} @emph{arguments}
+@anchor{@strong{@asis{:::}+} @emph{arguments}}
+
+Like @strong{:::} but linked like @strong{@asis{}-@asis{}-@asis{}link} to the previous input source.
+
+Contrary to @strong{@asis{}-@asis{}-@asis{}link}, values do not wrap: The shortest input source
+determines the length.
+
+Example:
+
+@verbatim
+  parallel echo ::: a b c :::+ 1 2 3 ::: X Y :::+ 11 22
+@end verbatim
+
+See also: @strong{::::+} @strong{@asis{}-@asis{}-@asis{}link}
+
+@item @strong{::::} @emph{argfiles}
+@anchor{@strong{@asis{::::}} @emph{argfiles}}
+
+Another way to write @strong{@asis{}-@asis{}-@asis{}arg-file} @emph{argfile1} @strong{@asis{}-@asis{}-@asis{}arg-file} @emph{argfile2} ...
+
+@strong{:::} and @strong{::::} can be mixed.
+
+See also: @strong{@asis{}-@asis{}-@asis{}arg-file} @strong{:::} @strong{::::+} @strong{@asis{}-@asis{}-@asis{}link}
+
+@item @strong{::::+} @emph{argfiles}
+@anchor{@strong{@asis{::::}+} @emph{argfiles}}
+
+Like @strong{::::} but linked like @strong{@asis{}-@asis{}-@asis{}link} to the previous input source.
+
+Contrary to @strong{@asis{}-@asis{}-@asis{}link}, values do not wrap: The shortest input source
+determines the length.
+
+See also: @strong{@asis{}-@asis{}-@asis{}arg-file} @strong{:::+} @strong{@asis{}-@asis{}-@asis{}link}
+
+@item @strong{@asis{}-@asis{}-@asis{}null}
+@anchor{@strong{@asis{}-@asis{}-@asis{}null}}
+
+@item @strong{-0}
+@anchor{@strong{-0}}
+
+Use NUL as delimiter.
+
+Normally input lines will end in \n (newline). If they end in \0
+(NUL), then use this option. It is useful for processing arguments
+that may contain \n (newline).
+
+Shorthand for @strong{@asis{}-@asis{}-@asis{}delimiter '\0'}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}delimiter}
+
+@item @strong{@asis{}-@asis{}-@asis{}arg-file} @emph{input-file}
+@anchor{@strong{@asis{}-@asis{}-@asis{}arg-file} @emph{input-file}}
+
+@item @strong{-a} @emph{input-file}
+@anchor{@strong{-a} @emph{input-file}}
+
+Use @emph{input-file} as input source.
+
+If multiple @strong{@asis{}-@asis{}-@asis{}arg-file} are given, each @emph{input-file} will be treated as an
+input source, and all combinations of input sources will be
+generated. E.g. The file @strong{foo} contains @strong{1 2}, the file
+@strong{bar} contains @strong{a b c}.  @strong{-a foo} @strong{-a bar} will result in the combinations
+(1,a) (1,b) (1,c) (2,a) (2,b) (2,c). This is useful for replacing
+nested for-loops.
+
+If @emph{input-file} starts with @strong{+} the file will be linked to the
+previous @strong{@asis{}-@asis{}-@asis{}arg-file} E.g. The file @strong{foo} contains @strong{1 2}, the file
+@strong{bar} contains @strong{a b}.  @strong{-a foo} @strong{-a +bar} will result in the
+combinations (1,a) (2,b) like @strong{@asis{}-@asis{}-@asis{}link} instead of generating all
+combinations.
+
+See also: @strong{@asis{}-@asis{}-@asis{}link} @strong{@{}@emph{n}@strong{@}} @strong{::::} @strong{::::+} @strong{:::}
+
+@item @strong{@asis{}-@asis{}-@asis{}arg-file-sep} @emph{sep-str}
+@anchor{@strong{@asis{}-@asis{}-@asis{}arg-file-sep} @emph{sep-str}}
+
+Use @emph{sep-str} instead of @strong{::::} as separator string between command
+and argument files.
+
+Useful if @strong{::::} is used for something else by the command.
+
+See also: @strong{::::}
+
+@item @strong{@asis{}-@asis{}-@asis{}arg-sep} @emph{sep-str}
+@anchor{@strong{@asis{}-@asis{}-@asis{}arg-sep} @emph{sep-str}}
+
+Use @emph{sep-str} instead of @strong{:::} as separator string.
+
+Useful if @strong{:::} is used for something else by the command.
+
+Also useful if you command uses @strong{:::} but you still want to read
+arguments from stdin (standard input): Simply change @strong{@asis{}-@asis{}-@asis{}arg-sep} to a
+string that is not in the command line.
+
+See also: @strong{:::}
+
+@item @strong{@asis{}-@asis{}-@asis{}bar}
+@anchor{@strong{@asis{}-@asis{}-@asis{}bar}}
+
+Show progress as a progress bar.
+
+In the bar is shown: % of jobs completed, estimated seconds left, and
+number of jobs started.
+
+It is compatible with @strong{zenity}:
+
+@verbatim
+  seq 1000 | parallel -j30 --bar '(echo {};sleep 0.1)' \
+    2> >(perl -pe 'BEGIN{$/="\r";$|=1};s/\r/\n/g' |
+         zenity --progress --auto-kill) | wc
+@end verbatim
+
+See also: @strong{@asis{}-@asis{}-@asis{}eta} @strong{@asis{}-@asis{}-@asis{}progress} @strong{@asis{}-@asis{}-@asis{}total-jobs}
+
+@item @strong{@asis{}-@asis{}-@asis{}basefile} @emph{file}
+@anchor{@strong{@asis{}-@asis{}-@asis{}basefile} @emph{file}}
+
+@item @strong{@asis{}-@asis{}-@asis{}bf} @emph{file}
+@anchor{@strong{@asis{}-@asis{}-@asis{}bf} @emph{file}}
+
+@emph{file} will be transferred to each sshlogin before first job is
+started.
+
+It will be removed if @strong{@asis{}-@asis{}-@asis{}cleanup} is active. The file may be a script
+to run or some common base data needed for the job.  Multiple
+@strong{@asis{}-@asis{}-@asis{}bf} can be specified to transfer more basefiles. The @emph{file} will be
+transferred the same way as @strong{@asis{}-@asis{}-@asis{}transferfile}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}sshlogin} @strong{@asis{}-@asis{}-@asis{}transfer} @strong{@asis{}-@asis{}-@asis{}return} @strong{@asis{}-@asis{}-@asis{}cleanup}
+@strong{@asis{}-@asis{}-@asis{}workdir}
+
+@item @strong{@asis{}-@asis{}-@asis{}basenamereplace} @emph{replace-str}
+@anchor{@strong{@asis{}-@asis{}-@asis{}basenamereplace} @emph{replace-str}}
+
+@item @strong{@asis{}-@asis{}-@asis{}bnr} @emph{replace-str}
+@anchor{@strong{@asis{}-@asis{}-@asis{}bnr} @emph{replace-str}}
+
+Use the replacement string @emph{replace-str} instead of @strong{@{/@}} for
+basename of input line.
+
+See also: @strong{@{/@}}
+
+@item @strong{@asis{}-@asis{}-@asis{}basenameextensionreplace} @emph{replace-str}
+@anchor{@strong{@asis{}-@asis{}-@asis{}basenameextensionreplace} @emph{replace-str}}
+
+@item @strong{@asis{}-@asis{}-@asis{}bner} @emph{replace-str}
+@anchor{@strong{@asis{}-@asis{}-@asis{}bner} @emph{replace-str}}
+
+Use the replacement string @emph{replace-str} instead of @strong{@{/.@}} for basename of input line without extension.
+
+See also: @strong{@{/.@}}
+
+@item @strong{@asis{}-@asis{}-@asis{}bin} @emph{binexpr}
+@anchor{@strong{@asis{}-@asis{}-@asis{}bin} @emph{binexpr}}
+
+Use @emph{binexpr} as binning key and bin input to the jobs.
+
+@emph{binexpr} is [column number|column name] [perlexpression] e.g.:
+
+@verbatim
+  3
+  Address
+  3 $_%=100
+  Address s/\D//g
+@end verbatim
+
+Each input line is split using @strong{@asis{}-@asis{}-@asis{}colsep}. The value of the column is
+put into $_, the perl expression is executed, the resulting value is
+is the job slot that will be given the line. If the value is bigger
+than the number of jobslots the value will be modulo number of jobslots.
+
+This is similar to @strong{@asis{}-@asis{}-@asis{}shard} but the hashing algorithm is a simple
+modulo, which makes it predictible which jobslot will receive which
+value.
+
+The performance is in the order of 100K rows per second. Faster if the
+@emph{bincol} is small (<10), slower if it is big (>100).
+
+@strong{@asis{}-@asis{}-@asis{}bin} requires @strong{@asis{}-@asis{}-@asis{}pipe} and a fixed numeric value for @strong{@asis{}-@asis{}-@asis{}jobs}.
+
+See also: SPREADING BLOCKS OF DATA @strong{@asis{}-@asis{}-@asis{}group-by} @strong{@asis{}-@asis{}-@asis{}round-robin}
+@strong{@asis{}-@asis{}-@asis{}shard}
+
+@item @strong{@asis{}-@asis{}-@asis{}bg}
+@anchor{@strong{@asis{}-@asis{}-@asis{}bg}}
+
+Run command in background.
+
+GNU @strong{parallel} will normally wait for the completion of a job. With
+@strong{@asis{}-@asis{}-@asis{}bg} GNU @strong{parallel} will not wait for completion of the command
+before exiting.
+
+This is the default if @strong{@asis{}-@asis{}-@asis{}semaphore} is set.
+
+Implies @strong{@asis{}-@asis{}-@asis{}semaphore}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}fg} @strong{man sem}
+
+@item @strong{@asis{}-@asis{}-@asis{}bibtex}
+@anchor{@strong{@asis{}-@asis{}-@asis{}bibtex}}
+
+@item @strong{@asis{}-@asis{}-@asis{}citation}
+@anchor{@strong{@asis{}-@asis{}-@asis{}citation}}
+
+Print the citation notice and BibTeX entry for GNU @strong{parallel},
+silence citation notice for all future runs, and exit. It will not run
+any commands.
+
+If it is impossible for you to run @strong{@asis{}-@asis{}-@asis{}citation} you can instead use
+@strong{@asis{}-@asis{}-@asis{}will-cite}, which will run commands, but which will only silence
+the citation notice for this single run.
+
+If you use @strong{@asis{}-@asis{}-@asis{}will-cite} in scripts to be run by others you are
+making it harder for others to see the citation notice.  The
+development of GNU @strong{parallel} is indirectly financed through
+citations, so if your users do not know they should cite then you are
+making it harder to finance development. However, if you pay 10000
+EUR, you have done your part to finance future development and should
+feel free to use @strong{@asis{}-@asis{}-@asis{}will-cite} in scripts.
+
+If you do not want to help financing future development by letting
+other users see the citation notice or by paying, then please consider
+using another tool instead of GNU @strong{parallel}. You can find some of
+the alternatives in @strong{man parallel_alternatives}.
+
+@item @strong{@asis{}-@asis{}-@asis{}block} @emph{size}
+@anchor{@strong{@asis{}-@asis{}-@asis{}block} @emph{size}}
+
+@item @strong{@asis{}-@asis{}-@asis{}block-size} @emph{size}
+@anchor{@strong{@asis{}-@asis{}-@asis{}block-size} @emph{size}}
+
+Size of block in bytes to read at a time.
+
+The @emph{size} can be postfixed with K, M, G, T, P, k, m, g, t, or p.
+
+GNU @strong{parallel} tries to meet the block size but can be off by the
+length of one record. For performance reasons @emph{size} should be bigger
+than a two records. GNU @strong{parallel} will warn you and automatically
+increase the size if you choose a @emph{size} that is too small.
+
+@emph{size} defaults to 1M.
+
+A negative block size is not interpreted as a blocksize but as the
+number of blocks each jobslot should have. So @strong{@asis{}-@asis{}-@asis{}block -3} will make
+3 jobs for each jobslot. In other words: this will run 3*5 = 15 jobs
+in total:
+
+@verbatim
+  parallel --pipe-part -a myfile --block -3 -j5 wc
+  cat myfile | parallel --pipe --block -3 -j5 wc
+@end verbatim
+
+@strong{@asis{}-@asis{}-@asis{}pipe-part @asis{}-@asis{}-@asis{}block} is an efficient alternative to @strong{@asis{}-@asis{}-@asis{}round-robin}
+because data is never read by GNU @strong{parallel}, but you can still have
+very few jobslots process huge amounts of data.
+
+On the other hand, @strong{@asis{}-@asis{}-@asis{}pipe @asis{}-@asis{}-@asis{}block} is quite @emph{inefficient}: It reads
+the whole file into memory before splitting it. Thus input must be
+able to fit in memory.
+
+If you use @strong{@asis{}-@asis{}-@asis{}block} -@emph{size}, input should be bigger than @emph{size}+1 records.
+
+See also: UNIT PREFIX @strong{-N} @strong{@asis{}-@asis{}-@asis{}pipe} @strong{@asis{}-@asis{}-@asis{}pipe-part} @strong{@asis{}-@asis{}-@asis{}round-robin}
+@strong{@asis{}-@asis{}-@asis{}block-timeout}
+
+@item @strong{@asis{}-@asis{}-@asis{}block-timeout} @emph{duration}
+@anchor{@strong{@asis{}-@asis{}-@asis{}block-timeout} @emph{duration}}
+
+@item @strong{@asis{}-@asis{}-@asis{}bt} @emph{duration}
+@anchor{@strong{@asis{}-@asis{}-@asis{}bt} @emph{duration}}
+
+Timeout for reading block when using @strong{@asis{}-@asis{}-@asis{}pipe}.
+
+If it takes longer than @emph{duration} to read a full block, use the
+partial block read so far.
+
+@emph{duration} is in seconds, but can be postfixed with s, m, h, or d.
+
+See also: TIME POSTFIXES @strong{@asis{}-@asis{}-@asis{}pipe} @strong{@asis{}-@asis{}-@asis{}block}
+
+@item @strong{@asis{}-@asis{}-@asis{}cat}
+@anchor{@strong{@asis{}-@asis{}-@asis{}cat}}
+
+Create a temporary file with content.
+
+Normally @strong{@asis{}-@asis{}-@asis{}pipe}/@strong{@asis{}-@asis{}-@asis{}pipe-part} will give data to the program on
+stdin (standard input). With @strong{@asis{}-@asis{}-@asis{}cat} GNU @strong{parallel} will create a
+temporary file with the name in @strong{@{@}}, so you can do: @strong{parallel
+@asis{}-@asis{}-@asis{}pipe @asis{}-@asis{}-@asis{}cat wc @{@}}.
+
+Implies @strong{@asis{}-@asis{}-@asis{}pipe} unless @strong{@asis{}-@asis{}-@asis{}pipe-part} is used.
+
+See also: @strong{@asis{}-@asis{}-@asis{}pipe} @strong{@asis{}-@asis{}-@asis{}pipe-part} @strong{@asis{}-@asis{}-@asis{}fifo}
+
+@item @strong{@asis{}-@asis{}-@asis{}cleanup}
+@anchor{@strong{@asis{}-@asis{}-@asis{}cleanup}}
+
+Remove transferred files.
+
+@strong{@asis{}-@asis{}-@asis{}cleanup} will remove the transferred files on the remote computer
+after processing is done.
+
+@verbatim
+  find log -name '*gz' | parallel \
+    --sshlogin server.example.com --transferfile {} \
+    --return {.}.bz2 --cleanup "zcat {} | bzip -9 >{.}.bz2"
+@end verbatim
+
+With @strong{@asis{}-@asis{}-@asis{}transferfile @{@}} the file transferred to the remote computer
+will be removed on the remote computer. Directories on the remote
+computer containing the file will be removed if they are empty.
+
+With @strong{@asis{}-@asis{}-@asis{}return} the file transferred from the remote computer will be
+removed on the remote computer. Directories on the remote
+computer containing the file will be removed if they are empty.
+
+@strong{@asis{}-@asis{}-@asis{}cleanup} is ignored when not used with @strong{@asis{}-@asis{}-@asis{}basefile},
+@strong{@asis{}-@asis{}-@asis{}transfer}, @strong{@asis{}-@asis{}-@asis{}transferfile} or @strong{@asis{}-@asis{}-@asis{}return}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}basefile} @strong{@asis{}-@asis{}-@asis{}transfer} @strong{@asis{}-@asis{}-@asis{}transferfile} @strong{@asis{}-@asis{}-@asis{}sshlogin}
+@strong{@asis{}-@asis{}-@asis{}return}
+
+@item @strong{@asis{}-@asis{}-@asis{}color}
+@anchor{@strong{@asis{}-@asis{}-@asis{}color}}
+
+Colour output.
+
+Colour the output. Each job gets its own colour combination
+(background+foreground).
+
+@strong{@asis{}-@asis{}-@asis{}color} is ignored when using @strong{-u}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}color-failed}
+
+@item @strong{@asis{}-@asis{}-@asis{}color-failed}
+@anchor{@strong{@asis{}-@asis{}-@asis{}color-failed}}
+
+@item @strong{@asis{}-@asis{}-@asis{}cf}
+@anchor{@strong{@asis{}-@asis{}-@asis{}cf}}
+
+Colour the output from failing jobs white on red.
+
+Useful if you have a lot of jobs and want to focus on the failing
+jobs.
+
+@strong{@asis{}-@asis{}-@asis{}color-failed} is ignored when using @strong{-u}, @strong{@asis{}-@asis{}-@asis{}line-buffer} and
+unreliable when using @strong{@asis{}-@asis{}-@asis{}latest-line}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}color}
+
+@item @strong{@asis{}-@asis{}-@asis{}colsep} @emph{regexp}
+@anchor{@strong{@asis{}-@asis{}-@asis{}colsep} @emph{regexp}}
+
+@item @strong{-C} @emph{regexp}
+@anchor{@strong{-C} @emph{regexp}}
+
+Column separator.
+
+The input will be treated as a table with @emph{regexp} separating the
+columns. The n'th column can be accessed using @strong{@{}@emph{n}@strong{@}} or
+@strong{@{}@emph{n}.@strong{@}}. E.g. @strong{@{3@}} is the 3rd column.
+
+If there are more input sources, each input source will be separated,
+but the columns from each input source will be linked. Here @{4@} refers
+to column 2 in input source 2:
+
+@verbatim
+  parallel --colsep '-' echo {4} {3} {2} {1} \
+    ::: A-B C-D ::: e-f g-h
+@end verbatim
+
+@strong{@asis{}-@asis{}-@asis{}colsep} implies @strong{@asis{}-@asis{}-@asis{}trim rl}, which can be overridden with
+@strong{@asis{}-@asis{}-@asis{}trim n}.
+
+@emph{regexp} is a Perl Regular Expression:
+https://perldoc.perl.org/perlre.html
+
+See also: @strong{@asis{}-@asis{}-@asis{}csv} @strong{@{}@emph{n}@strong{@}} @strong{@asis{}-@asis{}-@asis{}trim} @strong{@asis{}-@asis{}-@asis{}link} @strong{@asis{}-@asis{}-@asis{}match}
+
+@item @strong{@asis{}-@asis{}-@asis{}combineexec} @emph{name}
+@anchor{@strong{@asis{}-@asis{}-@asis{}combineexec} @emph{name}}
+
+@item @strong{@asis{}-@asis{}-@asis{}combine-executable} @emph{name}
+@anchor{@strong{@asis{}-@asis{}-@asis{}combine-executable} @emph{name}}
+
+Combine GNU @strong{parallel} with another program into a single executable.
+
+Let us say you have developed @emph{myprg} which takes a single
+argument. You do not want to parallelize it yourself.
+
+You could write a wrapper that uses GNU @strong{parallel} called @strong{myparprg}:
+
+@verbatim
+   #!/bin/sh
+
+   parallel myprg ::: "$@"
+@end verbatim
+
+But for others to use this, they need to install: GNU @strong{parallel},
+@strong{myprg}, and @strong{myparprg}.
+
+It would be easier to install if all could be packed into a single
+executable.
+
+If @strong{myprg} is written in shell, you can use @strong{@asis{}-@asis{}-@asis{}embed}.
+
+If @strong{myprg} is a binary you can use @strong{@asis{}-@asis{}-@asis{}combineexec}.
+
+Here we use @strong{gzip} as example:
+
+@verbatim
+   parallel --combineexec pargzip gzip -9 :::
+@end verbatim
+
+You can now do:
+
+@verbatim
+   ./pargzip foo bar baz
+@end verbatim
+
+If you want to pass options to @strong{gzip} you can do:
+
+@verbatim
+   parallel --combineexec pargzip gzip
+@end verbatim
+
+Followed by:
+
+@verbatim
+   ./pargzip -1 ::: foo bar baz
+@end verbatim
+
+See also: @strong{@asis{}-@asis{}-@asis{}embed} @strong{@asis{}-@asis{}-@asis{}shebang} @strong{@asis{}-@asis{}-@asis{}shebang-wrap}
+
+@item @strong{@asis{}-@asis{}-@asis{}compress}
+@anchor{@strong{@asis{}-@asis{}-@asis{}compress}}
+
+Compress temporary files.
+
+If the output is big and very compressible this will take up less disk
+space in $TMPDIR and possibly be faster due to less disk I/O.
+
+GNU @strong{parallel} will try @strong{pzstd}, @strong{lbzip2}, @strong{pbzip2}, @strong{zstd},
+@strong{pigz}, @strong{lz4}, @strong{lzop}, @strong{plzip}, @strong{lzip}, @strong{lrz}, @strong{gzip}, @strong{pxz},
+@strong{lzma}, @strong{bzip2}, @strong{xz}, @strong{clzip}, in that order, and use the first
+available.
+
+GNU @strong{parallel} will use up to 8 processes per job waiting to be
+printed. See @strong{man parallel_design} for details.
+
+See also: @strong{@asis{}-@asis{}-@asis{}compress-program}
+
+@item @strong{@asis{}-@asis{}-@asis{}compress-program} @emph{prg}
+@anchor{@strong{@asis{}-@asis{}-@asis{}compress-program} @emph{prg}}
+
+@item @strong{@asis{}-@asis{}-@asis{}decompress-program} @emph{prg}
+@anchor{@strong{@asis{}-@asis{}-@asis{}decompress-program} @emph{prg}}
+
+Use @emph{prg} for (de)compressing temporary files.
+
+It is assumed that @emph{prg -dc} will decompress stdin (standard input)
+to stdout (standard output) unless @strong{@asis{}-@asis{}-@asis{}decompress-program} is given.
+
+See also: @strong{@asis{}-@asis{}-@asis{}compress}
+
+@item @strong{@asis{}-@asis{}-@asis{}csv}
+@anchor{@strong{@asis{}-@asis{}-@asis{}csv}}
+
+Treat input as CSV-format.
+
+@strong{@asis{}-@asis{}-@asis{}colsep} sets the field delimiter. @strong{@asis{}-@asis{}-@asis{}csv} works very much like
+@strong{@asis{}-@asis{}-@asis{}colsep} except it deals correctly with quoting. Compare:
+
+@verbatim
+   echo '"1 big, 2 small","2""x4"" plank",12.34' |
+     parallel --csv echo {1} of {2} at {3}
+
+   echo '"1 big, 2 small","2""x4"" plank",12.34' |
+     parallel --colsep ',' echo {1} of {2} at {3}
+@end verbatim
+
+Even quoted newlines are parsed correctly:
+
+@verbatim
+   (echo '"Start of field 1 with newline'
+    echo 'Line 2 in field 1";value 2') |
+     parallel --csv --colsep ';' echo Field 1: {1} Field 2: {2}
+@end verbatim
+
+When used with @strong{@asis{}-@asis{}-@asis{}pipe} it will only pass full CSV-records.
+
+See also: @strong{@asis{}-@asis{}-@asis{}pipe} @strong{@asis{}-@asis{}-@asis{}link} @strong{@{}@emph{n}@strong{@}} @strong{@asis{}-@asis{}-@asis{}colsep} @strong{@asis{}-@asis{}-@asis{}header} @strong{@asis{}-@asis{}-@asis{}match}
+
+@item @strong{@asis{}-@asis{}-@asis{}ctag} (obsolete: use @strong{@asis{}-@asis{}-@asis{}color} @strong{@asis{}-@asis{}-@asis{}tag})
+@anchor{@strong{@asis{}-@asis{}-@asis{}ctag} (obsolete@asis{:} use @strong{@asis{}-@asis{}-@asis{}color} @strong{@asis{}-@asis{}-@asis{}tag})}
+
+Color tag.
+
+If the values look very similar looking at the output it can be hard
+to tell when a new value is used. @strong{@asis{}-@asis{}-@asis{}ctag} gives each value a random
+color.
+
+See also: @strong{@asis{}-@asis{}-@asis{}color} @strong{@asis{}-@asis{}-@asis{}tag}
+
+@item @strong{@asis{}-@asis{}-@asis{}ctagstring} @emph{str} (obsolete: use @strong{@asis{}-@asis{}-@asis{}color} @strong{@asis{}-@asis{}-@asis{}tagstring})
+@anchor{@strong{@asis{}-@asis{}-@asis{}ctagstring} @emph{str} (obsolete@asis{:} use @strong{@asis{}-@asis{}-@asis{}color} @strong{@asis{}-@asis{}-@asis{}tagstring})}
+
+Color tagstring.
+
+See also: @strong{@asis{}-@asis{}-@asis{}color} @strong{@asis{}-@asis{}-@asis{}ctag} @strong{@asis{}-@asis{}-@asis{}tagstring}
+
+@item @strong{@asis{}-@asis{}-@asis{}delay} @emph{duration}
+@anchor{@strong{@asis{}-@asis{}-@asis{}delay} @emph{duration}}
+
+Delay starting next job by @emph{duration}.
+
+GNU @strong{parallel} will not start another job for the next @emph{duration}.
+
+@emph{duration} is in seconds, but can be postfixed with s, m, h, or d.
+
+If you append 'auto' to @emph{duration} (e.g. 13m3sauto) GNU @strong{parallel}
+will automatically try to find the optimal value: If a job fails,
+@emph{duration} is increased by 30%. If a job succeeds, @emph{duration} is
+decreased by 10%.
+
+See also: TIME POSTFIXES @strong{@asis{}-@asis{}-@asis{}retries} @strong{@asis{}-@asis{}-@asis{}ssh-delay}
+
+@item @strong{@asis{}-@asis{}-@asis{}delimiter} @emph{delim}
+@anchor{@strong{@asis{}-@asis{}-@asis{}delimiter} @emph{delim}}
+
+@item @strong{-d} @emph{delim}
+@anchor{@strong{-d} @emph{delim}}
+
+Input records are terminated by @emph{delim}.
+
+The specified delimiter may be characters, C-style character escapes
+such as \n, or octal (\012) or hexadecimal (\x0A) escape codes.  Octal and
+hexadecimal escape codes are understood as for the printf command.
+
+See also: @strong{@asis{}-@asis{}-@asis{}colsep}
+
+@item @strong{@asis{}-@asis{}-@asis{}dirnamereplace} @emph{replace-str}
+@anchor{@strong{@asis{}-@asis{}-@asis{}dirnamereplace} @emph{replace-str}}
+
+@item @strong{@asis{}-@asis{}-@asis{}dnr} @emph{replace-str}
+@anchor{@strong{@asis{}-@asis{}-@asis{}dnr} @emph{replace-str}}
+
+Use the replacement string @emph{replace-str} instead of @strong{@{//@}} for
+dirname of input line.
+
+See also: @strong{@{//@}}
+
+@item @strong{@asis{}-@asis{}-@asis{}dry-run}
+@anchor{@strong{@asis{}-@asis{}-@asis{}dry-run}}
+
+Print the job to run on stdout (standard output), but do not run the
+job.
+
+Use @strong{-v -v} to include the wrapping that GNU @strong{parallel} generates
+(for remote jobs, @strong{@asis{}-@asis{}-@asis{}tmux}, @strong{@asis{}-@asis{}-@asis{}nice}, @strong{@asis{}-@asis{}-@asis{}pipe}, @strong{@asis{}-@asis{}-@asis{}pipe-part},
+@strong{@asis{}-@asis{}-@asis{}fifo} and @strong{@asis{}-@asis{}-@asis{}cat}). Do not count on this literally, though, as
+the job may be scheduled on another computer or the local computer if
+: is in the list.
+
+See also: @strong{-v}
+
+@item @strong{-E} @emph{eof-str}
+@anchor{@strong{-E} @emph{eof-str}}
+
+Set the end of file string to @emph{eof-str}.
+
+If the end of file string occurs as a line of input, the rest of the
+input is not read.  If neither @strong{-E} nor @strong{-e} is used, no end of file
+string is used.
+
+@item @strong{@asis{}-@asis{}-@asis{}eof}[=@emph{eof-str}]
+@anchor{@strong{@asis{}-@asis{}-@asis{}eof}[=@emph{eof-str}]}
+
+@item @strong{-e}[@emph{eof-str}]
+@anchor{@strong{-e}[@emph{eof-str}]}
+
+This option is a synonym for the @strong{-E} option.
+
+Use @strong{-E} instead, because it is POSIX compliant for @strong{xargs} while
+this option is not.  If @emph{eof-str} is omitted, there is no end of file
+string.  If neither @strong{-E} nor @strong{-e} is used, no end of file string is
+used.
+
+@item @strong{@asis{}-@asis{}-@asis{}embed}
+@anchor{@strong{@asis{}-@asis{}-@asis{}embed}}
+
+Embed GNU @strong{parallel} in a shell script.
+
+If you need to distribute your script to someone who does not want to
+install GNU @strong{parallel} you can embed GNU @strong{parallel} in your own
+shell script:
+
+@verbatim
+  parallel --embed > new_script
+@end verbatim
+
+After which you add your code at the end of @strong{new_script}. This is tested
+on @strong{ash}, @strong{bash}, @strong{dash}, @strong{ksh}, @strong{sh}, and @strong{zsh}.
+
+@item @strong{@asis{}-@asis{}-@asis{}env} @emph{var}
+@anchor{@strong{@asis{}-@asis{}-@asis{}env} @emph{var}}
+
+Copy exported environment variable @emph{var}.
+
+This will copy @emph{var} to the environment that the command is run
+in. This is especially useful for remote execution.
+
+In Bash @emph{var} can also be a Bash function - just remember to @strong{export
+-f} the function.
+
+The variable '_' is special. It will copy all exported environment
+variables except for the ones mentioned in ~/.parallel/ignored_vars.
+
+To copy the full environment (both exported and not exported
+variables, arrays, and functions) use @strong{env_parallel}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}record-env} @strong{@asis{}-@asis{}-@asis{}session} @strong{@asis{}-@asis{}-@asis{}sshlogin} @emph{command}
+@strong{env_parallel}
+
+@item @strong{@asis{}-@asis{}-@asis{}eta}
+@anchor{@strong{@asis{}-@asis{}-@asis{}eta}}
+
+Show the estimated number of seconds before finishing.
+
+This forces GNU @strong{parallel} to read all jobs before starting to find
+the number of jobs (unless you use @strong{@asis{}-@asis{}-@asis{}total-jobs}). GNU @strong{parallel}
+normally only reads the next job to run.
+
+The estimate is based on the runtime of finished jobs, so the first
+estimate will only be shown when the first job has finished.
+
+Implies @strong{@asis{}-@asis{}-@asis{}progress}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}bar} @strong{@asis{}-@asis{}-@asis{}progress} @strong{@asis{}-@asis{}-@asis{}total-jobs}
+
+@item @strong{@asis{}-@asis{}-@asis{}extensionreplace} @emph{replace-str}
+@anchor{@strong{@asis{}-@asis{}-@asis{}extensionreplace} @emph{replace-str}}
+
+@item @strong{@asis{}-@asis{}-@asis{}er} @emph{replace-str}
+@anchor{@strong{@asis{}-@asis{}-@asis{}er} @emph{replace-str}}
+
+Use the replacement string @emph{replace-str} instead of @strong{@{.@}} for input
+line without extension.
+
+See also: @strong{@{.@}}
+
+@item @strong{@asis{}-@asis{}-@asis{}fast} (alpha testing)
+@anchor{@strong{@asis{}-@asis{}-@asis{}fast} (alpha testing)}
+
+Run jobs fast.
+
+This disables a lot of functionality of GNU @strong{parallel} to make jobs
+run as fast as possible: Think of it as the nitro racing car compared
+to the Volvo.
+
+Useful for benchmarking and if you have 1000's of tiny jobs.
+
+Compare:
+
+@verbatim
+    time parallel echo ::: {1..10} ::: {1..10} ::: {1..10}
+    time parallel --fast echo ::: {1..10} ::: {1..10} ::: {1..10}
+    time parallel --fast echo ::: {1..100} ::: {1..100} ::: {1..100}
+@end verbatim
+
+Supported options: @strong{@asis{}-@asis{}-@asis{}group} @strong{@asis{}-@asis{}-@asis{}keep-order}
+
+If you need more options: File a bug.
+
+@item @strong{@asis{}-@asis{}-@asis{}fg}
+@anchor{@strong{@asis{}-@asis{}-@asis{}fg}}
+
+Run command in foreground.
+
+With @strong{@asis{}-@asis{}-@asis{}tmux} and @strong{@asis{}-@asis{}-@asis{}tmuxpane} GNU @strong{parallel} will start @strong{tmux} in
+the foreground.
+
+With @strong{@asis{}-@asis{}-@asis{}semaphore} GNU @strong{parallel} will run the command in the
+foreground (opposite @strong{@asis{}-@asis{}-@asis{}bg}), and wait for completion of the command
+before exiting. Exit code will be that of the command.
+
+See also: @strong{@asis{}-@asis{}-@asis{}bg} @strong{man sem}
+
+@item @strong{@asis{}-@asis{}-@asis{}fifo}
+@anchor{@strong{@asis{}-@asis{}-@asis{}fifo}}
+
+Create a temporary fifo with content.
+
+Normally @strong{@asis{}-@asis{}-@asis{}pipe} and @strong{@asis{}-@asis{}-@asis{}pipe-part} will give data to the program on
+stdin (standard input). With @strong{@asis{}-@asis{}-@asis{}fifo} GNU @strong{parallel} will create a
+temporary fifo with the name in @strong{@{@}}, so you can do:
+
+@verbatim
+  parallel --pipe --fifo wc {}
+@end verbatim
+
+Beware: If the fifo is never opened for reading, the job will block forever:
+
+@verbatim
+  seq 1000000 | parallel --fifo echo This will block forever
+  seq 1000000 | parallel --fifo 'echo This will not block < {}'
+@end verbatim
+
+By using @strong{@asis{}-@asis{}-@asis{}fifo} instead of @strong{@asis{}-@asis{}-@asis{}cat} you may save I/O as @strong{@asis{}-@asis{}-@asis{}cat}
+will write to a temporary file, whereas @strong{@asis{}-@asis{}-@asis{}fifo} will not.
+
+Implies @strong{@asis{}-@asis{}-@asis{}pipe} unless @strong{@asis{}-@asis{}-@asis{}pipe-part} is used.
+
+See also: @strong{@asis{}-@asis{}-@asis{}cat} @strong{@asis{}-@asis{}-@asis{}pipe} @strong{@asis{}-@asis{}-@asis{}pipe-part}
+
+@item @strong{@asis{}-@asis{}-@asis{}filter} @emph{filter}
+@anchor{@strong{@asis{}-@asis{}-@asis{}filter} @emph{filter}}
+
+Only run jobs where @emph{filter} is true.
+
+@emph{filter} can contain replacement strings and Perl code. Example:
+
+@verbatim
+  parallel --filter '{1}+{2}+{3} < 10' echo {1},{2},{3} \
+    ::: {1..10} ::: {3..8} ::: {3..10}
+@end verbatim
+
+Outputs: 1,3,3 1,3,4 1,3,5 1,4,3 1,4,4 1,5,3 2,3,3 2,3,4 2,4,3 3,3,3
+
+@verbatim
+  parallel --filter '{1} < {2}*{2}' echo {1},{2} \
+    ::: {1..10} ::: {1..3}
+@end verbatim
+
+Outputs: 1,2 1,3 2,2 2,3 3,2 3,3 4,3 5,3 6,3 7,3 8,3
+
+@verbatim
+  parallel --filter '{choose_k}' --plus echo {1},{2},{3} \
+    ::: {1..5} ::: {1..5} ::: {1..5}
+@end verbatim
+
+Outputs: 1,2,3 1,2,4 1,2,5 1,3,4 1,3,5 1,4,5 2,3,4 2,3,5 2,4,5 3,4,5
+
+See also: @strong{skip()} @strong{@asis{}-@asis{}-@asis{}no-run-if-empty} @strong{@{choose_k@}}
+
+@item @strong{@asis{}-@asis{}-@asis{}filter-hosts}
+@anchor{@strong{@asis{}-@asis{}-@asis{}filter-hosts}}
+
+Remove down hosts.
+
+For each remote host: check that login through ssh works. If not: do
+not use this host.
+
+For performance reasons, this check is performed only at the start and
+every time @strong{@asis{}-@asis{}-@asis{}sshloginfile} is changed. If an host goes down after
+the first check, it will go undetected until @strong{@asis{}-@asis{}-@asis{}sshloginfile} is
+changed; @strong{@asis{}-@asis{}-@asis{}retries} can be used to mitigate this.
+
+Currently you can @emph{not} put @strong{@asis{}-@asis{}-@asis{}filter-hosts} in a profile,
+$PARALLEL, /etc/parallel/config or similar. This is because GNU
+@strong{parallel} uses GNU @strong{parallel} to compute this, so you will get an
+infinite loop. This will likely be fixed in a later release.
+
+See also: @strong{@asis{}-@asis{}-@asis{}sshloginfile} @strong{@asis{}-@asis{}-@asis{}sshlogin} @strong{@asis{}-@asis{}-@asis{}retries}
+
+@item @strong{@asis{}-@asis{}-@asis{}gnu}
+@anchor{@strong{@asis{}-@asis{}-@asis{}gnu}}
+
+Behave like GNU @strong{parallel}.
+
+This option historically took precedence over @strong{@asis{}-@asis{}-@asis{}tollef}. The
+@strong{@asis{}-@asis{}-@asis{}tollef} option is now retired, and therefore may not be
+used. @strong{@asis{}-@asis{}-@asis{}gnu} is kept for compatibility, but does nothing.
+
+@item @strong{@asis{}-@asis{}-@asis{}group}
+@anchor{@strong{@asis{}-@asis{}-@asis{}group}}
+
+Group output.
+
+Output from each job is grouped together and is only printed when the
+command is finished. Stdout (standard output) first followed by stderr
+(standard error).
+
+This takes in the order of 0.5ms CPU time per job and depends on the
+speed of your disk for larger output.
+
+@strong{@asis{}-@asis{}-@asis{}group} is the default.
+
+See also: @strong{@asis{}-@asis{}-@asis{}line-buffer} @strong{@asis{}-@asis{}-@asis{}ungroup} @strong{@asis{}-@asis{}-@asis{}tag}
+
+@item @strong{@asis{}-@asis{}-@asis{}group-by} @emph{val}
+@anchor{@strong{@asis{}-@asis{}-@asis{}group-by} @emph{val}}
+
+Group input by value.
+
+Combined with @strong{@asis{}-@asis{}-@asis{}pipe}/@strong{@asis{}-@asis{}-@asis{}pipe-part} @strong{@asis{}-@asis{}-@asis{}group-by} groups lines with
+the same value into a record.
+
+The value can be computed from the full line or from a single column.
+
+@emph{val} can be:
+
+@table @asis
+@item column number
+@anchor{column number}
+
+Use the value in the column numbered.
+
+@item column name
+@anchor{column name}
+
+Treat the first line as a header and use the value in the column
+named.
+
+(Not supported with @strong{@asis{}-@asis{}-@asis{}pipe-part}).
+
+@item perl expression
+@anchor{perl expression}
+
+Run the perl expression and use $_ as the value.
+
+@item column number perl expression
+@anchor{column number perl expression}
+
+Put the value of the column put in $_, run the perl expression, and use $_ as the value.
+
+@item column name perl expression
+@anchor{column name perl expression}
+
+Put the value of the column put in $_, run the perl expression, and use $_ as the value.
+
+(Not supported with @strong{@asis{}-@asis{}-@asis{}pipe-part}).
+
+@end table
+
+Example:
+
+@verbatim
+  UserID, Consumption
+  123,    1
+  123,    2
+  12-3,   1
+  221,    3
+  221,    1
+  2/21,   5
+@end verbatim
+
+If you want to group 123, 12-3, 221, and 2/21 into 4 records and pass
+one record at a time to @strong{wc}:
+
+@verbatim
+  tail -n +2 table.csv | \
+    parallel --pipe --colsep , --group-by 1 -kN1 wc
+@end verbatim
+
+Make GNU @strong{parallel} treat the first line as a header:
+
+@verbatim
+  cat table.csv | \
+    parallel --pipe --colsep , --header : --group-by 1 -kN1 wc
+@end verbatim
+
+Address column by column name:
+
+@verbatim
+  cat table.csv | \
+    parallel --pipe --colsep , --header : --group-by UserID -kN1 wc
+@end verbatim
+
+If 12-3 and 123 are really the same UserID, remove non-digits in
+UserID when grouping:
+
+@verbatim
+  cat table.csv | parallel --pipe --colsep , --header : \
+    --group-by 'UserID s/\D//g' -kN1 wc
+@end verbatim
+
+See also: SPREADING BLOCKS OF DATA @strong{@asis{}-@asis{}-@asis{}pipe} @strong{@asis{}-@asis{}-@asis{}pipe-part} @strong{@asis{}-@asis{}-@asis{}bin}
+@strong{@asis{}-@asis{}-@asis{}shard} @strong{@asis{}-@asis{}-@asis{}round-robin}
+
+@item @strong{@asis{}-@asis{}-@asis{}help}
+@anchor{@strong{@asis{}-@asis{}-@asis{}help}}
+
+@item @strong{-h}
+@anchor{@strong{-h}}
+
+Print a summary of the options to GNU @strong{parallel} and exit.
+
+@item @strong{@asis{}-@asis{}-@asis{}halt-on-error} @emph{val}
+@anchor{@strong{@asis{}-@asis{}-@asis{}halt-on-error} @emph{val}}
+
+@item @strong{@asis{}-@asis{}-@asis{}halt} @emph{val}
+@anchor{@strong{@asis{}-@asis{}-@asis{}halt} @emph{val}}
+
+When should GNU @strong{parallel} terminate?
+
+In some situations it makes no sense to run all jobs. GNU
+@strong{parallel} should simply stop as soon as a condition is met.
+
+@emph{val} defaults to @strong{never}, which runs all jobs no matter what.
+
+@emph{val} can also take on the form of @emph{when},@emph{why}.
+
+@emph{when} can be 'now' which means kill all running jobs and halt
+immediately, or it can be 'soon' which means wait for all running jobs
+to complete, but start no new jobs.
+
+@emph{why} can be 'fail=X', 'fail=Y%', 'success=X', 'success=Y%',
+'done=X', or 'done=Y%' where X is the number of jobs that has to fail,
+succeed, or be done before halting, and Y is the percentage of jobs
+that has to fail, succeed, or be done before halting.
+
+Example:
+
+@table @asis
+@item @asis{}-@asis{}-@asis{}halt now,fail=1
+@anchor{@asis{}-@asis{}-@asis{}halt now@comma{}fail=1}
+
+exit when a job has failed. Kill running jobs.
+
+@item @asis{}-@asis{}-@asis{}halt soon,fail=3
+@anchor{@asis{}-@asis{}-@asis{}halt soon@comma{}fail=3}
+
+exit when 3 jobs have failed, but wait for running jobs to complete.
+
+@item @asis{}-@asis{}-@asis{}halt soon,fail=3%
+@anchor{@asis{}-@asis{}-@asis{}halt soon@comma{}fail=3%}
+
+exit when 3% of the jobs have failed, but wait for running jobs to complete.
+
+@item @asis{}-@asis{}-@asis{}halt now,success=1
+@anchor{@asis{}-@asis{}-@asis{}halt now@comma{}success=1}
+
+exit when a job has succeeded. Kill running jobs.
+
+@item @asis{}-@asis{}-@asis{}halt soon,success=3
+@anchor{@asis{}-@asis{}-@asis{}halt soon@comma{}success=3}
+
+exit when 3 jobs have succeeded, but wait for running jobs to complete.
+
+@item @asis{}-@asis{}-@asis{}halt now,success=3%
+@anchor{@asis{}-@asis{}-@asis{}halt now@comma{}success=3%}
+
+exit when 3% of the jobs have succeeded. Kill running jobs.
+
+@item @asis{}-@asis{}-@asis{}halt now,done=1
+@anchor{@asis{}-@asis{}-@asis{}halt now@comma{}done=1}
+
+exit when a job has finished. Kill running jobs.
+
+@item @asis{}-@asis{}-@asis{}halt soon,done=3
+@anchor{@asis{}-@asis{}-@asis{}halt soon@comma{}done=3}
+
+exit when 3 jobs have finished, but wait for running jobs to complete.
+
+@item @asis{}-@asis{}-@asis{}halt now,done=3%
+@anchor{@asis{}-@asis{}-@asis{}halt now@comma{}done=3%}
+
+exit when 3% of the jobs have finished. Kill running jobs.
+
+@end table
+
+For backwards compatibility these also work:
+
+@table @asis
+@item 0
+@anchor{0}
+
+never
+
+@item 1
+@anchor{1}
+
+soon,fail=1
+
+@item 2
+@anchor{2}
+
+now,fail=1
+
+@item -1
+@anchor{-1}
+
+soon,success=1
+
+@item -2
+@anchor{-2}
+
+now,success=1
+
+@item 1-99%
+@anchor{1-99%}
+
+soon,fail=1-99%
+
+@end table
+
+@item @strong{@asis{}-@asis{}-@asis{}header} @emph{regexp}
+@anchor{@strong{@asis{}-@asis{}-@asis{}header} @emph{regexp}}
+
+Use regexp as header.
+
+For normal usage the matched header (typically the first line:
+@strong{@asis{}-@asis{}-@asis{}header '.*\n'}) will be split using @strong{@asis{}-@asis{}-@asis{}colsep} (which will
+default to '\t') and column names can be used as replacement
+variables: @strong{@{column name@}}, @strong{@{column name/@}}, @strong{@{column name//@}},
+@strong{@{column name/.@}}, @strong{@{column name.@}}, @strong{@{=column name perl expression
+=@}}, ..
+
+For @strong{@asis{}-@asis{}-@asis{}pipe} the matched header will be prepended to each output.
+
+@strong{@asis{}-@asis{}-@asis{}header :} is an alias for @strong{@asis{}-@asis{}-@asis{}header '.*\n'}.
+
+If @emph{regexp} is a number, it is a fixed number of lines.
+
+@strong{@asis{}-@asis{}-@asis{}header 0} is special: It will make replacement strings for files
+given with @strong{@asis{}-@asis{}-@asis{}arg-file} or @strong{::::}. It will make @strong{@{foo/bar@}} for the
+file @strong{foo/bar}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}colsep} @strong{@asis{}-@asis{}-@asis{}pipe} @strong{@asis{}-@asis{}-@asis{}pipe-part} @strong{@asis{}-@asis{}-@asis{}arg-file}
+
+@item @strong{@asis{}-@asis{}-@asis{}hostgroups}
+@anchor{@strong{@asis{}-@asis{}-@asis{}hostgroups}}
+
+@item @strong{@asis{}-@asis{}-@asis{}hgrp}
+@anchor{@strong{@asis{}-@asis{}-@asis{}hgrp}}
+
+Enable hostgroups on arguments.
+
+If an argument contains '@@' the string after '@@' will be removed and
+treated as a list of hostgroups on which this job is allowed to
+run. If there is no @strong{@asis{}-@asis{}-@asis{}sshlogin} with a corresponding group, the job
+will run on any hostgroup.
+
+Example:
+
+@verbatim
+  parallel --hostgroups \
+    --sshlogin @grp1/myserver1 -S @grp1+grp2/myserver2 \
+    --sshlogin @grp3/myserver3 \
+    echo ::: my_grp1_arg@grp1 arg_for_grp2@grp2 third@grp1+grp3
+@end verbatim
+
+@strong{my_grp1_arg} may be run on either @strong{myserver1} or @strong{myserver2},
+@strong{third} may be run on either @strong{myserver1} or @strong{myserver3},
+but @strong{arg_for_grp2} will only be run on @strong{myserver2}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}sshlogin} @strong{$PARALLEL_HOSTGROUPS} @strong{$PARALLEL_ARGHOSTGROUPS}
+
+@item @strong{-I} @emph{replace-str}
+@anchor{@strong{-I} @emph{replace-str}}
+
+Use the replacement string @emph{replace-str} instead of @strong{@{@}}.
+
+See also: @strong{@{@}}
+
+@item @strong{@asis{}-@asis{}-@asis{}replace} [@emph{replace-str}]
+@anchor{@strong{@asis{}-@asis{}-@asis{}replace} [@emph{replace-str}]}
+
+@item @strong{-i} [@emph{replace-str}]
+@anchor{@strong{-i} [@emph{replace-str}]}
+
+This option is deprecated; use @strong{-I} instead.
+
+This option is a synonym for @strong{-I}@emph{replace-str} if @emph{replace-str} is
+specified, and for @strong{-I @{@}} otherwise.
+
+See also: @strong{@{@}}
+
+@item @strong{@asis{}-@asis{}-@asis{}joblog} @emph{logfile}
+@anchor{@strong{@asis{}-@asis{}-@asis{}joblog} @emph{logfile}}
+
+@item @strong{@asis{}-@asis{}-@asis{}jl} @emph{logfile}
+@anchor{@strong{@asis{}-@asis{}-@asis{}jl} @emph{logfile}}
+
+Logfile for executed jobs.
+
+Save a list of the executed jobs to @emph{logfile} in the following TAB
+separated format: sequence number, sshlogin, start time as seconds
+since epoch, run time in seconds, bytes in files transferred, bytes in
+files returned, exit status, signal, and command run.
+
+For @strong{@asis{}-@asis{}-@asis{}pipe} bytes transferred and bytes returned are number of input
+and output of bytes.
+
+If @strong{logfile} is prepended with '+' log lines will be appended to the
+logfile.
+
+To convert the times into ISO-8601 strict do:
+
+@verbatim
+  cat logfile | perl -a -F"\t" -ne \
+    'chomp($F[2]=`date -d \@$F[2] +%FT%T`); print join("\t",@F)'
+@end verbatim
+
+If the host is long, you can use @strong{column -t} to pretty print it:
+
+@verbatim
+  cat joblog | column -t
+@end verbatim
+
+See also: @strong{@asis{}-@asis{}-@asis{}resume} @strong{@asis{}-@asis{}-@asis{}resume-failed}
+
+@item @strong{@asis{}-@asis{}-@asis{}jobs} @emph{num}
+@anchor{@strong{@asis{}-@asis{}-@asis{}jobs} @emph{num}}
+
+@item @strong{-j} @emph{num}
+@anchor{@strong{-j} @emph{num}}
+
+@item @strong{@asis{}-@asis{}-@asis{}max-procs} @emph{num}
+@anchor{@strong{@asis{}-@asis{}-@asis{}max-procs} @emph{num}}
+
+@item @strong{-P} @emph{num}
+@anchor{@strong{-P} @emph{num}}
+
+Number of jobslots on each machine.
+
+Run up to @emph{num} jobs in parallel. Default is 100%.
+
+@table @asis
+@item @emph{num}
+@anchor{@emph{num}}
+
+Run up to @emph{num} jobs in parallel.
+
+@item 0
+@anchor{0 1}
+
+Run as many as possible (this can take a while to determine).
+
+Due to a bug @strong{-j 0} will also evaluate replacement strings twice up
+to the number of joblots:
+
+@verbatim
+  # This will not count from 1 but from number-of-jobslots
+  seq 10000 | parallel -j0   echo '{= $_ = $foo++; =}' | head
+  # This will count from 1
+  seq 10000 | parallel -j100 echo '{= $_ = $foo++; =}' | head
+@end verbatim
+
+@item @emph{num}%
+@anchor{@emph{num}%}
+
+Multiply the number of CPU threads by @emph{num} percent. E.g. 100% means
+one job per CPU thread on each machine.
+
+@item +@emph{num}
+@anchor{+@emph{num}}
+
+Add @emph{num} to the number of CPU threads.
+
+@item -@emph{num}
+@anchor{-@emph{num}}
+
+Subtract @emph{num} from the number of CPU threads.
+
+@item @emph{expr}
+@anchor{@emph{expr}}
+
+Evaluate @emph{expr}. E.g. '12/2' to get 6, '+25%' gives the same as
+'125%', or complex expressions like '+3*log(55)%' which means:
+multiply 3 by log(55), multiply that by the number of CPU threads and
+divide by 100, add this to the number of CPU threads.
+
+An expression that evalutates to less that 1 is replaced with 1.
+
+@item @emph{procfile}
+@anchor{@emph{procfile}}
+
+Read parameter from file.
+
+Use the content of @emph{procfile} as parameter for
+@emph{-j}. E.g. @emph{procfile} could contain the string 100% or +2 or 10.
+
+If @emph{procfile} is changed when a job completes, @emph{procfile} is read
+again and the new number of jobs is computed. If the number is lower
+than before, running jobs will be allowed to finish but new jobs will
+not be started until the wanted number of jobs has been reached.  This
+makes it possible to change the number of simultaneous running jobs
+while GNU @strong{parallel} is running.
+
+@item @emph{num}auto (beta testing)
+@anchor{@emph{num}auto (beta testing)}
+
+If @emph{num} ends in auto, GNU @strong{parallel} will use the value as a max
+value. If a job fails, GNU @strong{parallel} will adjust the number of jobs
+down with a factor. If a job succeeds GNU @strong{parallel} will adjust the
+number of jobs up with a small factor.
+
+So if the number of jobs is a bit too high, GNU @strong{parallel} will
+dynamically lower it.
+
+Example:
+
+@verbatim
+  # This fails if there are more than n sleeps running
+  n_sleeps() {
+    nsleeps=$(ps aux | grep sleep | grep 12345 | wc -l)
+    echo $nsleeps sleeps running now
+    [ $nsleeps -lt $1 ]
+  }
+  export -f n_sleeps
+  parallel --jobs 20auto 'sleep 2.${RANDOM}{}12345; n_sleeps 5' ::: {1..100}
+@end verbatim
+
+This will start 20 jobs in parallel. These will fail because more than 5
+sleeps are running. GNU @strong{parallel} will adjust the number of jobs
+until around 5 are running in parallel.
+
+@end table
+
+If the evaluated number is less than 1 then 1 will be used.
+
+If @strong{@asis{}-@asis{}-@asis{}semaphore} is set, the default is 1 thus making a mutex.
+
+See also: @strong{@asis{}-@asis{}-@asis{}use-cores-instead-of-threads}
+@strong{@asis{}-@asis{}-@asis{}use-sockets-instead-of-threads}
+
+@item @strong{@asis{}-@asis{}-@asis{}keep-order}
+@anchor{@strong{@asis{}-@asis{}-@asis{}keep-order}}
+
+@item @strong{-k}
+@anchor{@strong{-k}}
+
+Keep sequence of output same as the order of input.
+
+Normally the output of a job will be printed as soon as the job
+completes. Try this to see the difference:
+
+@verbatim
+  parallel -j4 sleep {}\; echo {} ::: 2 1 4 3
+  parallel -j4 -k sleep {}\; echo {} ::: 2 1 4 3
+@end verbatim
+
+If used with @strong{@asis{}-@asis{}-@asis{}onall} or @strong{@asis{}-@asis{}-@asis{}nonall} the output will grouped by
+sshlogin in sorted order.
+
+@strong{@asis{}-@asis{}-@asis{}keep-order} cannot keep the output order when used with @strong{@asis{}-@asis{}-@asis{}pipe
+@asis{}-@asis{}-@asis{}round-robin}. Here it instead means, that the jobslots will get the
+same blocks as input in the same order in every run if the input is
+kept the same. Run each of these twice and compare:
+
+@verbatim
+  seq 10000000 | parallel --pipe --round-robin 'sleep 0.$RANDOM; wc'
+  seq 10000000 | parallel --pipe -k --round-robin 'sleep 0.$RANDOM; wc'
+@end verbatim
+
+@strong{-k} only affects the order in which the output is printed - not the
+order in which jobs are run.
+
+See also: @strong{@asis{}-@asis{}-@asis{}group} @strong{@asis{}-@asis{}-@asis{}line-buffer}
+
+@item @strong{-L} @emph{recsize}
+@anchor{@strong{-L} @emph{recsize}}
+
+When used with @strong{@asis{}-@asis{}-@asis{}pipe}: Read records of @emph{recsize}.
+
+When used otherwise: Use at most @emph{recsize} nonblank input lines per
+command line.  Trailing blanks cause an input line to be logically
+continued on the next input line.
+
+@strong{-L 0} means read one line, but insert 0 arguments on the command
+line.
+
+@emph{recsize} can be postfixed with K, M, G, T, P, k, m, g, t, or p.
+
+Implies @strong{-X} unless @strong{-m}, @strong{@asis{}-@asis{}-@asis{}xargs}, or @strong{@asis{}-@asis{}-@asis{}pipe} is set.
+
+See also: UNIT PREFIX @strong{-N} @strong{@asis{}-@asis{}-@asis{}max-lines} @strong{@asis{}-@asis{}-@asis{}block} @strong{-X} @strong{-m}
+@strong{@asis{}-@asis{}-@asis{}xargs} @strong{@asis{}-@asis{}-@asis{}pipe}
+
+@item @strong{@asis{}-@asis{}-@asis{}max-lines} [@emph{recsize}]
+@anchor{@strong{@asis{}-@asis{}-@asis{}max-lines} [@emph{recsize}]}
+
+@item @strong{-l}[@emph{recsize}]
+@anchor{@strong{-l}[@emph{recsize}]}
+
+When used with @strong{@asis{}-@asis{}-@asis{}pipe}: Read records of @emph{recsize} lines.
+
+When used otherwise: Synonym for the @strong{-L} option.  Unlike @strong{-L}, the
+@emph{recsize} argument is optional.  If @emph{recsize} is not specified,
+it defaults to one.  The @strong{-l} option is deprecated since the POSIX
+standard specifies @strong{-L} instead.
+
+@strong{-l 0} is an alias for @strong{-l 1}.
+
+Implies @strong{-X} unless @strong{-m}, @strong{@asis{}-@asis{}-@asis{}xargs}, or @strong{@asis{}-@asis{}-@asis{}pipe} is set.
+
+See also: UNIT PREFIX @strong{-N} @strong{@asis{}-@asis{}-@asis{}block} @strong{-X} @strong{-m}
+@strong{@asis{}-@asis{}-@asis{}xargs} @strong{@asis{}-@asis{}-@asis{}pipe}
+
+@item @strong{@asis{}-@asis{}-@asis{}limit} "@emph{command} @emph{args}"
+@anchor{@strong{@asis{}-@asis{}-@asis{}limit} "@emph{command} @emph{args}"}
+
+Dynamic job limit.
+
+Before starting a new job run @emph{command} with @emph{args}. The exit value
+of @emph{command} determines what GNU @strong{parallel} will do:
+
+@table @asis
+@item 0
+@anchor{0 2}
+
+Below limit. Start another job.
+
+@item 1
+@anchor{1 1}
+
+Over limit. Start no jobs.
+
+@item 2
+@anchor{2 1}
+
+Way over limit. Kill the youngest job.
+
+@end table
+
+You can use any shell command. There are 3 predefined commands:
+
+@table @asis
+@item "io @emph{n}"
+@anchor{"io @emph{n}"}
+
+Limit for I/O. The amount of disk I/O will be computed as a value
+0-100, where 0 is no I/O and 100 is at least one disk is 100%
+saturated.
+
+@item "load @emph{n}"
+@anchor{"load @emph{n}"}
+
+Similar to @strong{@asis{}-@asis{}-@asis{}load}.
+
+@item "mem @emph{n}"
+@anchor{"mem @emph{n}"}
+
+Similar to @strong{@asis{}-@asis{}-@asis{}memfree}.
+
+@end table
+
+See also: @strong{@asis{}-@asis{}-@asis{}memfree} @strong{@asis{}-@asis{}-@asis{}load}
+
+@item @strong{@asis{}-@asis{}-@asis{}latest-line}
+@anchor{@strong{@asis{}-@asis{}-@asis{}latest-line}}
+
+@item @strong{@asis{}-@asis{}-@asis{}ll}
+@anchor{@strong{@asis{}-@asis{}-@asis{}ll}}
+
+Print the latest line. Each job gets a single line on the screen that
+is updated with the last full line from currently running jobs.
+
+The screen keeps the oldest running job in view, so younger jobs may
+no be visible. These will, however, be shown when the oldest job
+finishes.
+
+Running this example makes it easer to understand. Note how the screen
+scrolls when the job at the top of the screen finishes:
+
+@verbatim
+  slow_seq() {
+    # Run seq with 33 characters per second
+    seq "$@" |
+      perl -ne '$|=1; for(split//){ print; select($a,$a,$a,0.03);}'
+  }
+  export -f slow_seq
+  parallel --shuf -j99 --ll --tag --bar --color slow_seq {} ::: {1..300}
+@end verbatim
+
+See also: @strong{@asis{}-@asis{}-@asis{}line-buffer}
+
+@item @strong{@asis{}-@asis{}-@asis{}line-buffer}
+@anchor{@strong{@asis{}-@asis{}-@asis{}line-buffer}}
+
+@item @strong{@asis{}-@asis{}-@asis{}lb}
+@anchor{@strong{@asis{}-@asis{}-@asis{}lb}}
+
+Buffer output on line basis.
+
+@strong{@asis{}-@asis{}-@asis{}group} will keep the output together for a whole job. @strong{@asis{}-@asis{}-@asis{}ungroup}
+allows output to mixup with half a line coming from one job and half a
+line coming from another job. @strong{@asis{}-@asis{}-@asis{}line-buffer} fits between these two:
+GNU @strong{parallel} will print a full line, but will allow for mixing
+lines of different jobs.
+
+@strong{@asis{}-@asis{}-@asis{}line-buffer} takes more CPU power than both @strong{@asis{}-@asis{}-@asis{}group} and
+@strong{@asis{}-@asis{}-@asis{}ungroup}, but can be much faster than @strong{@asis{}-@asis{}-@asis{}group} if the CPU is not
+the limiting factor.
+
+Normally @strong{@asis{}-@asis{}-@asis{}line-buffer} does not buffer on disk, and can thus
+process an infinite amount of data, but it will buffer on disk when
+combined with: @strong{@asis{}-@asis{}-@asis{}keep-order}, @strong{@asis{}-@asis{}-@asis{}results}, @strong{@asis{}-@asis{}-@asis{}compress}, and
+@strong{@asis{}-@asis{}-@asis{}files}. This will make it as slow as @strong{@asis{}-@asis{}-@asis{}group} and will limit
+output to the available disk space.
+
+With @strong{@asis{}-@asis{}-@asis{}keep-order} @strong{@asis{}-@asis{}-@asis{}line-buffer} will output lines from the first
+job continuously while it is running, then lines from the second job
+while that is running. It will buffer full lines, but jobs will not
+mix. Compare:
+
+@verbatim
+  parallel -j0 'echo [{};sleep {};echo {}]' ::: 1 3 2 4
+  parallel -j0 --lb 'echo [{};sleep {};echo {}]' ::: 1 3 2 4
+  parallel -j0 -k --lb 'echo [{};sleep {};echo {}]' ::: 1 3 2 4
+@end verbatim
+
+See also: @strong{@asis{}-@asis{}-@asis{}group} @strong{@asis{}-@asis{}-@asis{}ungroup} @strong{@asis{}-@asis{}-@asis{}keep-order} @strong{@asis{}-@asis{}-@asis{}tag}
+
+@item @strong{@asis{}-@asis{}-@asis{}link}
+@anchor{@strong{@asis{}-@asis{}-@asis{}link}}
+
+@item @strong{@asis{}-@asis{}-@asis{}xapply}
+@anchor{@strong{@asis{}-@asis{}-@asis{}xapply}}
+
+Link input sources.
+
+Read multiple input sources like the command @strong{xapply}. If multiple
+input sources are given, one argument will be read from each of the
+input sources. The arguments can be accessed in the command as @strong{@{1@}}
+.. @strong{@{}@emph{n}@strong{@}}, so @strong{@{1@}} will be a line from the first input source,
+and @strong{@{6@}} will refer to the line with the same line number from the
+6th input source.
+
+Compare these two:
+
+@verbatim
+  parallel echo {1} {2} ::: 1 2 3 ::: a b c
+  parallel --link echo {1} {2} ::: 1 2 3 ::: a b c
+@end verbatim
+
+Arguments will be recycled if one input source has more arguments than the others:
+
+@verbatim
+  parallel --link echo {1} {2} {3} \
+    ::: 1 2 ::: I II III ::: a b c d e f g
+@end verbatim
+
+See also: @strong{@asis{}-@asis{}-@asis{}header} @strong{:::+} @strong{::::+}
+
+@item @strong{@asis{}-@asis{}-@asis{}load} @emph{max-load}
+@anchor{@strong{@asis{}-@asis{}-@asis{}load} @emph{max-load}}
+
+Only start jobs if load is less than max-load.
+
+Do not start new jobs on a given computer unless the number of running
+processes on the computer is less than @emph{max-load}. @emph{max-load} uses
+the same syntax as @strong{@asis{}-@asis{}-@asis{}jobs}, so @emph{100%} for one per CPU is a valid
+setting. Only difference is 0 which is interpreted as 0.01.
+
+See also: @strong{@asis{}-@asis{}-@asis{}limit} @strong{@asis{}-@asis{}-@asis{}jobs}
+
+@item @strong{@asis{}-@asis{}-@asis{}controlmaster}
+@anchor{@strong{@asis{}-@asis{}-@asis{}controlmaster}}
+
+@item @strong{-M}
+@anchor{@strong{-M}}
+
+Use ssh's ControlMaster to make ssh connections faster.
+
+Useful if jobs run remote and are very fast to run. This is disabled
+for sshlogins that specify their own ssh command.
+
+See also: @strong{@asis{}-@asis{}-@asis{}ssh} @strong{@asis{}-@asis{}-@asis{}sshlogin}
+
+@item @strong{-m}
+@anchor{@strong{-m}}
+
+Multiple arguments.
+
+Insert as many arguments as the command line length permits. If
+multiple jobs are being run in parallel: distribute the arguments
+evenly among the jobs. Use @strong{-j1} or @strong{@asis{}-@asis{}-@asis{}xargs} to avoid this.
+
+If @strong{@{@}} is not used the arguments will be appended to the
+line.  If @strong{@{@}} is used multiple times each @strong{@{@}} will be replaced
+with all the arguments.
+
+Support for @strong{-m} with @strong{@asis{}-@asis{}-@asis{}sshlogin} is limited and may fail.
+
+If in doubt use @strong{-X} as that will most likely do what is needed.
+
+See also: @strong{-X} @strong{@asis{}-@asis{}-@asis{}xargs}
+
+@item @strong{@asis{}-@asis{}-@asis{}match} @emph{regexp}
+@anchor{@strong{@asis{}-@asis{}-@asis{}match} @emph{regexp}}
+
+Match input source with regexp to set replacement fields.
+
+With @strong{@asis{}-@asis{}-@asis{}match} you can often avoid pre-processing your input with
+@strong{awk} or similar to extract the relevant fields.
+
+You can access each capture group i.e. the parenthesis in regexp
+'(...)' with a replacement field. The replacement fields are named
+@strong{@{m.n@}} where m is the input source and n is the capture group
+number:
+
+@verbatim
+  parallel --match '(.*),(.*)_(.*)' echo {1.2} {1.3} {1.1} \
+    ::: Gold,Heart_of
+  parallel --match '(.*),' --match '([a-z]+)' echo {1.1}{2.1} \
+    ::: Milli,bar ::: 10ways
+@end verbatim
+
+To reuse a @strong{@asis{}-@asis{}-@asis{}match} simply use @strong{+n} where n is the input
+source. E.g. @strong{+2} for the second:
+
+@verbatim
+  parallel --match +2 --match '([A-Za-z]+)' echo {1.1} {2.1} \
+    ::: /Improbability/ ::: 10drive
+@end verbatim
+
+To only set @strong{@asis{}-@asis{}-@asis{}match} for input source 2, make a dummy @strong{@asis{}-@asis{}-@asis{}match} for
+input source 1:
+
+@verbatim
+  parallel --match '' --match '([a-z]+)' echo {1} {2.1} \
+    ::: Telephone ::: 10sanitizer
+@end verbatim
+
+See also: @strong{@{}@emph{n}@strong{@}} @strong{@asis{}-@asis{}-@asis{}colsep}
+
+@item @strong{@asis{}-@asis{}-@asis{}memfree} @emph{size}
+@anchor{@strong{@asis{}-@asis{}-@asis{}memfree} @emph{size}}
+
+Minimum memory free when starting another job.
+
+The @emph{size} can be postfixed with K, M, G, T, P, k, m, g, t, or p.
+
+If the jobs take up very different amount of RAM, GNU @strong{parallel} will
+only start as many as there is memory for. If less than @emph{size} bytes
+are free, no more jobs will be started. If less than 50% @emph{size} bytes
+are free, the youngest job will be killed (as per @strong{@asis{}-@asis{}-@asis{}term-seq}), and
+put back on the queue to be run later.
+
+See also: UNIT PREFIX @strong{@asis{}-@asis{}-@asis{}term-seq} @strong{@asis{}-@asis{}-@asis{}memsuspend}
+
+@item @strong{@asis{}-@asis{}-@asis{}memsuspend} @emph{size}
+@anchor{@strong{@asis{}-@asis{}-@asis{}memsuspend} @emph{size}}
+
+Suspend jobs when there is less memory available.
+
+If the available memory falls below 2 * @emph{size}, GNU @strong{parallel} will
+suspend some of the running jobs. If the available memory falls below
+@emph{size}, only one job will be running.
+
+If a single job fits in the given size, all jobs will complete without
+running out of memory. If you have swap available, you can usually
+lower @emph{size} to around half the size of a single job - with the slight
+risk of swapping a little.
+
+Jobs will be resumed when more RAM is available - typically when the
+oldest job completes.
+
+@strong{@asis{}-@asis{}-@asis{}memsuspend} only works on local jobs because there is no obvious
+way to suspend remote jobs.
+
+@emph{size} can be postfixed with K, M, G, T, P, k, m, g, t, or p.
+
+See also: UNIT PREFIX @strong{@asis{}-@asis{}-@asis{}memfree}
+
+@item @strong{@asis{}-@asis{}-@asis{}milestone} @emph{str} (beta testing)
+@anchor{@strong{@asis{}-@asis{}-@asis{}milestone} @emph{str} (beta testing)}
+
+Set milestones where all previous jobs must have finished.
+
+Example:
+
+@verbatim
+  doit() {
+      start=$(date +%H:%M:%S)
+      # Sleep up to 5 sec
+      sleep $((RANDOM % 5000))e-3
+      end=$(date +%H:%M:%S)
+      echo Start: $start End: $end
+  }
+  export -f doit
+  parallel --tag --milestone // doit ::: a b c // 1 2 // A B // I II II
+@end verbatim
+
+This will run (a, b, c), (1, 2), (A, B), (I, II, III). The jobs in a
+batch will be run in parallel, but the batches will be run in serial.
+
+Note how the start time for each batch is later than the end time of
+the previous batch.
+
+Cartesian product example:
+
+@verbatim
+  parallel --tag --milestone // doit ::: Frist_run // Second_run ::: file{1..10}
+@end verbatim
+
+This will complete First_run with all files before starting Second_run
+on all files.
+
+Advanced cartesian example (buggy):
+
+@verbatim
+  parallel --tag --milestone // doit ::: a b // 1 2 3 ::: A B C // I II
+@end verbatim
+
+This runs: [a] x [A B C], [a] x [I II], [b] x [A B C], [b] x [I II],
+[1] x [A B C], [1] x [I II], [2] x [A B C], [2] x [I II], [3] x [A B
+C], [3] x [I II] = (a A, a B, a C), (a I, a II), (b A, b B, b C), (b
+I, b II), (1 A, 1 B, 1 C), (1 I, 1 II), (2 A, 2 B, 2 C), (2 I, 2 II),
+(3 A, 3 B, 3 C), (3 I, 3 II).
+
+The jobs in a batch will be run in parallel, but the batches will be
+run in serial.
+
+When the bug is fixed, it will run: [a b] x [A B C], [a b] x [I II],
+[1 2 3] x [A B C], [1 2 3] x [I II] = (a A, a B, a C, b A, b B, b C),
+(a I, a II, b I, b II), (1 A, 1 B, 1 C, 2 A, 2 B, 2 C, 3 A, 3 B, 3 C),
+(1 I, 1 II, 2 I, 2 II, 3 I, 3 II).
+
+@item @strong{@asis{}-@asis{}-@asis{}minversion} @emph{version}
+@anchor{@strong{@asis{}-@asis{}-@asis{}minversion} @emph{version}}
+
+Print the version GNU @strong{parallel} and exit.
+
+If the current version of GNU @strong{parallel} is less than @emph{version} the
+exit code is 255. Otherwise it is 0.
+
+This is useful for scripts that depend on features only available from
+a certain version of GNU @strong{parallel}:
+
+@verbatim
+   parallel --minversion 20170422 &&
+     echo halt done=50% supported from version 20170422 &&
+     parallel --halt now,done=50% echo ::: {1..100}
+@end verbatim
+
+See also: @strong{@asis{}-@asis{}-@asis{}version}
+
+@item @strong{@asis{}-@asis{}-@asis{}max-args} @emph{max-args}
+@anchor{@strong{@asis{}-@asis{}-@asis{}max-args} @emph{max-args}}
+
+@item @strong{-n} @emph{max-args}
+@anchor{@strong{-n} @emph{max-args}}
+
+Use at most @emph{max-args} arguments per command line.
+
+Fewer than @emph{max-args} arguments will be used if the size (see the
+@strong{-s} option) is exceeded, unless the @strong{-x} option is given, in which
+case GNU @strong{parallel} will exit.
+
+@strong{-n 0} means read one argument, but insert 0 arguments on the command
+line.
+
+@emph{max-args} can be postfixed with K, M, G, T, P, k, m, g, t, or p (see
+UNIT PREFIX).
+
+Implies @strong{-X} unless @strong{-m} is set.
+
+See also: @strong{-X} @strong{-m} @strong{@asis{}-@asis{}-@asis{}xargs} @strong{@asis{}-@asis{}-@asis{}max-replace-args}
+
+@item @strong{@asis{}-@asis{}-@asis{}max-replace-args} @emph{max-args}
+@anchor{@strong{@asis{}-@asis{}-@asis{}max-replace-args} @emph{max-args}}
+
+@item @strong{-N} @emph{max-args}
+@anchor{@strong{-N} @emph{max-args}}
+
+Use at most @emph{max-args} arguments per command line.
+
+Like @strong{-n} but also makes replacement strings @strong{@{1@}}
+.. @strong{@{}@emph{max-args}@strong{@}} that represents argument 1 .. @emph{max-args}. If
+too few args the @strong{@{}@emph{n}@strong{@}} will be empty.
+
+@strong{-N 0} means read one argument, but insert 0 arguments on the command
+line.
+
+This will set the owner of the homedir to the user:
+
+@verbatim
+  tr ':' '\n' < /etc/passwd | parallel -N7 chown {1} {6}
+@end verbatim
+
+Implies @strong{-X} unless @strong{-m} or @strong{@asis{}-@asis{}-@asis{}pipe} is set.
+
+@emph{max-args} can be postfixed with K, M, G, T, P, k, m, g, t, or p.
+
+When used with @strong{@asis{}-@asis{}-@asis{}pipe} @strong{-N} is the number of records to read. This
+is somewhat slower than @strong{@asis{}-@asis{}-@asis{}block}.
+
+See also: UNIT PREFIX @strong{@asis{}-@asis{}-@asis{}pipe} @strong{@asis{}-@asis{}-@asis{}block} @strong{-m} @strong{-X} @strong{@asis{}-@asis{}-@asis{}max-args}
+
+@item @strong{@asis{}-@asis{}-@asis{}nonall}
+@anchor{@strong{@asis{}-@asis{}-@asis{}nonall}}
+
+@strong{@asis{}-@asis{}-@asis{}onall} with no arguments.
+
+Run the command on all computers given with @strong{@asis{}-@asis{}-@asis{}sshlogin} but take no
+arguments. GNU @strong{parallel} will log into @strong{@asis{}-@asis{}-@asis{}jobs} number of computers
+in parallel and run the job on the computer. @strong{-j} adjusts how many
+computers to log into in parallel.
+
+This is useful for running the same command (e.g. uptime) on a list of
+servers.
+
+See also: @strong{@asis{}-@asis{}-@asis{}onall} @strong{@asis{}-@asis{}-@asis{}sshlogin}
+
+@item @strong{@asis{}-@asis{}-@asis{}onall}
+@anchor{@strong{@asis{}-@asis{}-@asis{}onall}}
+
+Run all the jobs on all computers given with @strong{@asis{}-@asis{}-@asis{}sshlogin}.
+
+GNU @strong{parallel} will log into @strong{@asis{}-@asis{}-@asis{}jobs} number of computers in
+parallel and run one job at a time on the computer. The order of the
+jobs will not be changed, but some computers may finish before others.
+
+When using @strong{@asis{}-@asis{}-@asis{}group} the output will be grouped by each server, so
+all the output from one server will be grouped together.
+
+@strong{@asis{}-@asis{}-@asis{}joblog} will contain an entry for each job on each server, so
+there will be several job sequence 1.
+
+See also: @strong{@asis{}-@asis{}-@asis{}nonall} @strong{@asis{}-@asis{}-@asis{}sshlogin}
+
+@item @strong{@asis{}-@asis{}-@asis{}open-tty}
+@anchor{@strong{@asis{}-@asis{}-@asis{}open-tty}}
+
+@item @strong{-o}
+@anchor{@strong{-o}}
+
+Open terminal tty.
+
+Similar to @strong{@asis{}-@asis{}-@asis{}tty} but does not set @strong{@asis{}-@asis{}-@asis{}jobs} or @strong{@asis{}-@asis{}-@asis{}ungroup}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}tty}
+
+@item @strong{@asis{}-@asis{}-@asis{}output-as-files}
+@anchor{@strong{@asis{}-@asis{}-@asis{}output-as-files}}
+
+@item @strong{@asis{}-@asis{}-@asis{}outputasfiles}
+@anchor{@strong{@asis{}-@asis{}-@asis{}outputasfiles}}
+
+@item @strong{@asis{}-@asis{}-@asis{}files}
+@anchor{@strong{@asis{}-@asis{}-@asis{}files}}
+
+@item @strong{@asis{}-@asis{}-@asis{}files0}
+@anchor{@strong{@asis{}-@asis{}-@asis{}files0}}
+
+Save output to files.
+
+Instead of printing the output to stdout (standard output) the output
+of each job is saved in a file and the filename is then printed.
+
+@strong{@asis{}-@asis{}-@asis{}files0} uses NUL (\0) instead of newline (\n) as separator.
+
+See also: @strong{@asis{}-@asis{}-@asis{}results}
+
+@item @strong{@asis{}-@asis{}-@asis{}pipe}
+@anchor{@strong{@asis{}-@asis{}-@asis{}pipe}}
+
+@item @strong{@asis{}-@asis{}-@asis{}spreadstdin}
+@anchor{@strong{@asis{}-@asis{}-@asis{}spreadstdin}}
+
+Spread input to jobs on stdin (standard input).
+
+Read a block of data from stdin (standard input) and give one block of
+data as input to one job.
+
+The block size is determined by @strong{@asis{}-@asis{}-@asis{}block} (default: 1M).
+
+Except for the first and last record GNU @strong{parallel} only passes full
+records to the job. The strings @strong{@asis{}-@asis{}-@asis{}recstart} and @strong{@asis{}-@asis{}-@asis{}recend}
+determine where a record starts and ends: The border between two
+records is defined as @strong{@asis{}-@asis{}-@asis{}recend} immediately followed by
+@strong{@asis{}-@asis{}-@asis{}recstart}. GNU @strong{parallel} splits exactly after @strong{@asis{}-@asis{}-@asis{}recend} and
+before @strong{@asis{}-@asis{}-@asis{}recstart}. The block will have the last partial record
+removed before the block is passed on to the job. The partial record
+will be prepended to next block.
+
+You can limit the number of records to be passed with @strong{-N}, and set
+the record size with @strong{-L}.
+
+@strong{@asis{}-@asis{}-@asis{}pipe} maxes out at around 1 GB/s input, and 100 MB/s output. If
+performance is important use @strong{@asis{}-@asis{}-@asis{}pipe-part}.
+
+@strong{@asis{}-@asis{}-@asis{}fifo} and @strong{@asis{}-@asis{}-@asis{}cat} will give stdin (standard input) on a fifo or a
+temporary file.
+
+If data is arriving slowly, you can use @strong{@asis{}-@asis{}-@asis{}block-timeout} to finish
+reading a block early.
+
+The data can be spread between the jobs in specific ways using
+@strong{@asis{}-@asis{}-@asis{}round-robin}, @strong{@asis{}-@asis{}-@asis{}bin}, @strong{@asis{}-@asis{}-@asis{}shard}, @strong{@asis{}-@asis{}-@asis{}group-by}. See the
+section: SPREADING BLOCKS OF DATA
+
+See also: @strong{@asis{}-@asis{}-@asis{}block} @strong{@asis{}-@asis{}-@asis{}block-timeout} @strong{@asis{}-@asis{}-@asis{}recstart} @strong{@asis{}-@asis{}-@asis{}recend}
+@strong{@asis{}-@asis{}-@asis{}fifo} @strong{@asis{}-@asis{}-@asis{}cat} @strong{@asis{}-@asis{}-@asis{}pipe-part} @strong{-N} @strong{-L} @strong{@asis{}-@asis{}-@asis{}round-robin}
+
+@item @strong{@asis{}-@asis{}-@asis{}pipe-part}
+@anchor{@strong{@asis{}-@asis{}-@asis{}pipe-part}}
+
+Pipe parts of a physical file.
+
+@strong{@asis{}-@asis{}-@asis{}pipe-part} works similar to @strong{@asis{}-@asis{}-@asis{}pipe}, but is much faster. 5 GB/s
+can easily be delivered.
+
+@strong{@asis{}-@asis{}-@asis{}pipe-part} has a few limitations:
+
+@itemize
+@item The file must be a normal file or a block device (technically it must
+be seekable) and must be given using @strong{@asis{}-@asis{}-@asis{}arg-file} or @strong{::::}. The file cannot
+be a pipe, a fifo, or a stream as they are not seekable.
+
+If using a block device with lot of NUL bytes, remember to set
+@strong{@asis{}-@asis{}-@asis{}recend ''}.
+
+@item Record counting (@strong{-N}) and line counting (@strong{-L}/@strong{-l}) do not
+work. Instead use @strong{@asis{}-@asis{}-@asis{}recstart} and @strong{@asis{}-@asis{}-@asis{}recend} to determine
+where records end.
+
+@end itemize
+
+See also: @strong{@asis{}-@asis{}-@asis{}pipe} @strong{@asis{}-@asis{}-@asis{}recstart} @strong{@asis{}-@asis{}-@asis{}recend} @strong{@asis{}-@asis{}-@asis{}arg-file} @strong{::::}
+
+@item @strong{@asis{}-@asis{}-@asis{}plain}
+@anchor{@strong{@asis{}-@asis{}-@asis{}plain}}
+
+Ignore @strong{@asis{}-@asis{}-@asis{}profile}, $PARALLEL, and ~/.parallel/config.
+
+Ignore any @strong{@asis{}-@asis{}-@asis{}profile}, $PARALLEL, and ~/.parallel/config to get full
+control on the command line (used by GNU @strong{parallel} internally when
+called with @strong{@asis{}-@asis{}-@asis{}sshlogin}).
+
+See also: @strong{@asis{}-@asis{}-@asis{}profile}
+
+@item @strong{@asis{}-@asis{}-@asis{}plus}
+@anchor{@strong{@asis{}-@asis{}-@asis{}plus}}
+
+Add more replacement strings.
+
+Activate additional replacement strings: @{+/@} @{+.@} @{+..@} @{+...@} @{..@}
+@{...@} @{/..@} @{/...@} @{##@}. The idea being that '@{+foo@}' matches the
+opposite of '@{foo@}' so that:
+
+@{@} = @{+/@}/@{/@} = @{.@}.@{+.@} = @{+/@}/@{/.@}.@{+.@}  = @{..@}.@{+..@} =
+@{+/@}/@{/..@}.@{+..@} = @{...@}.@{+...@} = @{+/@}/@{/...@}.@{+...@}
+
+@strong{@{##@}} is the total number of jobs to be run. It is incompatible with
+@strong{-X}/@strong{-m}/@strong{@asis{}-@asis{}-@asis{}xargs}.
+
+@strong{@{0%@}} zero-padded jobslot.
+
+@strong{@{0#@}} zero-padded sequence number.
+
+@strong{@{slot-1@}} jobslot - 1 (i.e. counting from 0).
+
+@strong{@{seq-1@}} sequence number - 1 (i.e. counting from 0).
+
+@strong{@{choose_k@}} is inspired by n choose k: Given a list of n elements,
+choose k. k is the number of input sources and n is the number of
+arguments in an input source.  The content of the input sources must
+be the same and the arguments must be unique.
+
+@strong{@{uniq@}} skips jobs where values from two input sources are the same.
+
+Shorthands for variables:
+
+@verbatim
+  {slot}         $PARALLEL_JOBSLOT (see {%})
+  {sshlogin}     $PARALLEL_SSHLOGIN
+  {host}         $PARALLEL_SSHHOST
+  {agrp}         $PARALLEL_ARGHOSTGROUPS
+  {hgrp}         $PARALLEL_HOSTGROUPS
+@end verbatim
+
+The following dynamic replacement strings are also activated. They are
+inspired by bash's parameter expansion:
+
+@verbatim
+  {:-str}        str if the value is empty
+  {:num}         remove the first num characters
+  {:pos:len}     substring from position pos length len
+  {#regexp}      remove prefix regexp (non-greedy)
+  {##regexp}     remove prefix regexp (greedy)
+  {%regexp}      remove postfix regexp (non-greedy)
+  {%%regexp}     remove postfix regexp (greedy)
+  {/regexp/str}  replace one regexp with str
+  {//regexp/str} replace every regexp with str
+  {^str}         uppercase str if found at the start
+  {^^str}        uppercase str
+  {,str}         lowercase str if found at the start
+  {,,str}        lowercase str
+@end verbatim
+
+See also: @strong{@asis{}-@asis{}-@asis{}rpl} @strong{@{@}}
+
+@item @strong{@asis{}-@asis{}-@asis{}process-slot-var} @emph{varname}
+@anchor{@strong{@asis{}-@asis{}-@asis{}process-slot-var} @emph{varname}}
+
+Set the environment variable @emph{varname} to the jobslot number-1.
+
+@verbatim
+  seq 10 | parallel --process-slot-var=name echo '$name' {}
+@end verbatim
+
+@item @strong{@asis{}-@asis{}-@asis{}progress}
+@anchor{@strong{@asis{}-@asis{}-@asis{}progress}}
+
+Show progress of computations.
+
+List the computers involved in the task with number of CPUs detected
+and the max number of jobs to run. After that show progress for each
+computer: number of running jobs, number of completed jobs, and
+percentage of all jobs done by this computer. The percentage will only
+be available after all jobs have been scheduled as GNU @strong{parallel}
+only read the next job when ready to schedule it - this is to avoid
+wasting time and memory by reading everything at startup.
+
+By sending GNU @strong{parallel} SIGUSR2 you can toggle turning on/off
+@strong{@asis{}-@asis{}-@asis{}progress} on a running GNU @strong{parallel} process.
+
+See also: @strong{@asis{}-@asis{}-@asis{}eta} @strong{@asis{}-@asis{}-@asis{}bar}
+
+@item @strong{@asis{}-@asis{}-@asis{}max-line-length-allowed}
+@anchor{@strong{@asis{}-@asis{}-@asis{}max-line-length-allowed}}
+
+Print maximal command line length.
+
+Print the maximal number of characters allowed on the command line and
+exit (used by GNU @strong{parallel} itself to determine the line length
+on remote computers).
+
+See also: @strong{@asis{}-@asis{}-@asis{}show-limits}
+
+@item @strong{@asis{}-@asis{}-@asis{}number-of-cpus} (obsolete)
+@anchor{@strong{@asis{}-@asis{}-@asis{}number-of-cpus} (obsolete)}
+
+Print the number of physical CPU cores and exit.
+
+@item @strong{@asis{}-@asis{}-@asis{}number-of-cores}
+@anchor{@strong{@asis{}-@asis{}-@asis{}number-of-cores}}
+
+Print the number of physical CPU cores and exit (used by GNU @strong{parallel} itself
+to determine the number of physical CPU cores on remote computers).
+
+See also: @strong{@asis{}-@asis{}-@asis{}number-of-sockets} @strong{@asis{}-@asis{}-@asis{}number-of-threads}
+@strong{@asis{}-@asis{}-@asis{}use-cores-instead-of-threads} @strong{@asis{}-@asis{}-@asis{}jobs}
+
+@item @strong{@asis{}-@asis{}-@asis{}number-of-sockets}
+@anchor{@strong{@asis{}-@asis{}-@asis{}number-of-sockets}}
+
+Print the number of filled CPU sockets and exit (used by GNU
+@strong{parallel} itself to determine the number of filled CPU sockets on
+remote computers).
+
+See also: @strong{@asis{}-@asis{}-@asis{}number-of-cores} @strong{@asis{}-@asis{}-@asis{}number-of-threads}
+@strong{@asis{}-@asis{}-@asis{}use-sockets-instead-of-threads} @strong{@asis{}-@asis{}-@asis{}jobs}
+
+@item @strong{@asis{}-@asis{}-@asis{}number-of-threads}
+@anchor{@strong{@asis{}-@asis{}-@asis{}number-of-threads}}
+
+Print the number of hyperthreaded CPU cores and exit (used by GNU
+@strong{parallel} itself to determine the number of hyperthreaded CPU cores
+on remote computers).
+
+See also: @strong{@asis{}-@asis{}-@asis{}number-of-cores} @strong{@asis{}-@asis{}-@asis{}number-of-sockets} @strong{@asis{}-@asis{}-@asis{}jobs}
+
+@item @strong{@asis{}-@asis{}-@asis{}no-keep-order}
+@anchor{@strong{@asis{}-@asis{}-@asis{}no-keep-order}}
+
+Overrides an earlier @strong{@asis{}-@asis{}-@asis{}keep-order} (e.g. if set in
+@strong{~/.parallel/config}).
+
+@item @strong{@asis{}-@asis{}-@asis{}nice} @emph{niceness}
+@anchor{@strong{@asis{}-@asis{}-@asis{}nice} @emph{niceness}}
+
+Run the command at this niceness.
+
+By default GNU @strong{parallel} will run jobs at the same nice level as GNU
+@strong{parallel} is started - both on the local machine and remote servers,
+so you are unlikely to ever use this option.
+
+Setting @strong{@asis{}-@asis{}-@asis{}nice} will override this nice level. If the nice level is
+smaller than the current nice level, it will only affect remote jobs
+(e.g. if current level is 10 then @strong{@asis{}-@asis{}-@asis{}nice 5} will cause local jobs to
+be run at level 10, but remote jobs run at nice level 5).
+
+@item @strong{@asis{}-@asis{}-@asis{}interactive}
+@anchor{@strong{@asis{}-@asis{}-@asis{}interactive}}
+
+@item @strong{-p}
+@anchor{@strong{-p}}
+
+Ask user before running a job.
+
+Prompt the user about whether to run each command line and read a line
+from the terminal.  Only run the command line if the response starts
+with 'y' or 'Y'.  Implies @strong{-t}.
+
+@item @strong{@asis{}-@asis{}-@asis{}_parset} @emph{type},@emph{varname}
+@anchor{@strong{@asis{}-@asis{}-@asis{}_parset} @emph{type}@comma{}@emph{varname}}
+
+Used internally by @strong{parset}.
+
+Generate shell code to be eval'ed which will set the variable(s)
+@emph{varname}. @emph{type} can be 'assoc' for associative array or 'var' for
+normal variables.
+
+The only supported use is as part of @strong{parset}.
+
+@item @strong{@asis{}-@asis{}-@asis{}parens} @emph{parensstring}
+@anchor{@strong{@asis{}-@asis{}-@asis{}parens} @emph{parensstring}}
+
+Use @emph{parensstring} instead of @strong{@{==@}}.
+
+Define start and end parenthesis for @strong{@{=perl expression=@}}. The
+left and the right parenthesis can be multiple characters and are
+assumed to be the same length. The default is @strong{@{==@}} giving @strong{@{=} as
+the start parenthesis and @strong{=@}} as the end parenthesis.
+
+Another useful setting is @strong{,,,,} which would make both parenthesis
+@strong{,,}:
+
+@verbatim
+  parallel --parens ,,,, echo foo is ,,s/I/O/g,, ::: FII
+@end verbatim
+
+See also: @strong{@asis{}-@asis{}-@asis{}rpl} @strong{@{=}@emph{perl expression}@strong{=@}}
+
+@item @strong{@asis{}-@asis{}-@asis{}profile} @emph{profilename}
+@anchor{@strong{@asis{}-@asis{}-@asis{}profile} @emph{profilename}}
+
+@item @strong{-J} @emph{profilename}
+@anchor{@strong{-J} @emph{profilename}}
+
+Use profile @emph{profilename} for options.
+
+This is useful if you want to have multiple profiles. You could have
+one profile for running jobs in parallel on the local computer and a
+different profile for running jobs on remote computers.
+
+@emph{profilename} corresponds to the file ~/.parallel/@emph{profilename}.
+
+You can give multiple profiles by repeating @strong{@asis{}-@asis{}-@asis{}profile}. If parts of
+the profiles conflict, the later ones will be used.
+
+Default: ~/.parallel/config
+
+See also: PROFILE FILES
+
+@item @strong{@asis{}-@asis{}-@asis{}quote}
+@anchor{@strong{@asis{}-@asis{}-@asis{}quote}}
+
+@item @strong{-q}
+@anchor{@strong{-q}}
+
+Quote @emph{command}.
+
+If your command contains special characters that should not be
+interpreted by the shell (e.g. ; \ | *), use @strong{@asis{}-@asis{}-@asis{}quote} to escape
+these. The command must be a simple command (see @strong{man bash}) without
+redirections and without variable assignments.
+
+Most people will not need this. Quoting is disabled by default.
+
+See also: QUOTING @emph{command} @strong{@asis{}-@asis{}-@asis{}shell-quote} @strong{uq()} @strong{Q()}
+
+@item @strong{@asis{}-@asis{}-@asis{}no-run-if-empty}
+@anchor{@strong{@asis{}-@asis{}-@asis{}no-run-if-empty}}
+
+@item @strong{-r}
+@anchor{@strong{-r}}
+
+Do not run empty input.
+
+If the stdin (standard input) only contains whitespace, do not run the
+command.
+
+If used with @strong{@asis{}-@asis{}-@asis{}pipe} this is slow.
+
+See also: @emph{command} @strong{@asis{}-@asis{}-@asis{}pipe} @strong{@asis{}-@asis{}-@asis{}interactive}
+
+@item @strong{@asis{}-@asis{}-@asis{}noswap}
+@anchor{@strong{@asis{}-@asis{}-@asis{}noswap}}
+
+Do not start job is computer is swapping.
+
+Do not start new jobs on a given computer if there is both swap-in and
+swap-out activity.
+
+The swap activity is only sampled every 10 seconds as the sampling
+takes 1 second to do.
+
+Swap activity is computed as (swap-in)*(swap-out) which in practice is
+a good value: swapping out is not a problem, swapping in is not a
+problem, but both swapping in and out usually indicates a problem.
+
+@strong{@asis{}-@asis{}-@asis{}memfree} and @strong{@asis{}-@asis{}-@asis{}memsuspend} may give better results, so try using
+those first.
+
+See also: @strong{@asis{}-@asis{}-@asis{}memfree} @strong{@asis{}-@asis{}-@asis{}memsuspend}
+
+@item @strong{@asis{}-@asis{}-@asis{}record-env}
+@anchor{@strong{@asis{}-@asis{}-@asis{}record-env}}
+
+Record exported environment.
+
+Record current exported environment variables in
+@strong{~/.parallel/ignored_vars}.  This will ignore variables currently set
+when using @strong{@asis{}-@asis{}-@asis{}env _}. So you should set the variables/fuctions, you
+want to use @emph{after} running @strong{@asis{}-@asis{}-@asis{}record-env}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}env} @strong{@asis{}-@asis{}-@asis{}session} @strong{env_parallel}
+
+@item @strong{@asis{}-@asis{}-@asis{}recstart} @emph{startstring}
+@anchor{@strong{@asis{}-@asis{}-@asis{}recstart} @emph{startstring}}
+
+@item @strong{@asis{}-@asis{}-@asis{}recend} @emph{endstring}
+@anchor{@strong{@asis{}-@asis{}-@asis{}recend} @emph{endstring}}
+
+Split record between @emph{endstring} and @emph{startstring}.
+
+If @strong{@asis{}-@asis{}-@asis{}recstart} is given @emph{startstring} will be used to split at record start.
+
+If @strong{@asis{}-@asis{}-@asis{}recend} is given @emph{endstring} will be used to split at record end.
+
+If both @strong{@asis{}-@asis{}-@asis{}recstart} and @strong{@asis{}-@asis{}-@asis{}recend} are given the combined string
+@emph{endstring}@emph{startstring} will have to match to find a split
+position. This is useful if either @emph{startstring} or @emph{endstring}
+match in the middle of a record.
+
+If neither @strong{@asis{}-@asis{}-@asis{}recstart} nor @strong{@asis{}-@asis{}-@asis{}recend} are given, then @strong{@asis{}-@asis{}-@asis{}recend}
+defaults to '\n'. To have no record separator (e.g. for binary files)
+use @strong{@asis{}-@asis{}-@asis{}recend ""}.
+
+@strong{@asis{}-@asis{}-@asis{}recstart} and @strong{@asis{}-@asis{}-@asis{}recend} are used with @strong{@asis{}-@asis{}-@asis{}pipe}.
+
+Use @strong{@asis{}-@asis{}-@asis{}regexp} to interpret @strong{@asis{}-@asis{}-@asis{}recstart} and @strong{@asis{}-@asis{}-@asis{}recend} as regular
+expressions. This is slow, however.
+
+Use @strong{@asis{}-@asis{}-@asis{}remove-rec-sep} to remove @strong{@asis{}-@asis{}-@asis{}recstart} and @strong{@asis{}-@asis{}-@asis{}recend} before
+passing the block to the job.
+
+See also: @strong{@asis{}-@asis{}-@asis{}pipe} @strong{@asis{}-@asis{}-@asis{}regexp} @strong{@asis{}-@asis{}-@asis{}remove-rec-sep}
+
+@item @strong{@asis{}-@asis{}-@asis{}regexp}
+@anchor{@strong{@asis{}-@asis{}-@asis{}regexp}}
+
+Use @strong{@asis{}-@asis{}-@asis{}regexp} to interpret @strong{@asis{}-@asis{}-@asis{}recstart} and @strong{@asis{}-@asis{}-@asis{}recend} as regular
+expressions. This is slow, however.
+
+See also: @strong{@asis{}-@asis{}-@asis{}pipe} @strong{@asis{}-@asis{}-@asis{}regexp} @strong{@asis{}-@asis{}-@asis{}remove-rec-sep} @strong{@asis{}-@asis{}-@asis{}recstart}
+@strong{@asis{}-@asis{}-@asis{}recend}
+
+@item @strong{@asis{}-@asis{}-@asis{}remove-rec-sep}
+@anchor{@strong{@asis{}-@asis{}-@asis{}remove-rec-sep}}
+
+@item @strong{@asis{}-@asis{}-@asis{}removerecsep}
+@anchor{@strong{@asis{}-@asis{}-@asis{}removerecsep}}
+
+@item @strong{@asis{}-@asis{}-@asis{}rrs}
+@anchor{@strong{@asis{}-@asis{}-@asis{}rrs}}
+
+Remove record separator.
+
+Remove the text matched by @strong{@asis{}-@asis{}-@asis{}recstart} and @strong{@asis{}-@asis{}-@asis{}recend} before piping
+it to the command.
+
+Only used with @strong{@asis{}-@asis{}-@asis{}pipe}/@strong{@asis{}-@asis{}-@asis{}pipe-part}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}pipe} @strong{@asis{}-@asis{}-@asis{}regexp} @strong{@asis{}-@asis{}-@asis{}pipe-part} @strong{@asis{}-@asis{}-@asis{}recstart}
+@strong{@asis{}-@asis{}-@asis{}recend}
+
+@item @strong{@asis{}-@asis{}-@asis{}results} @emph{name}
+@anchor{@strong{@asis{}-@asis{}-@asis{}results} @emph{name}}
+
+@item @strong{@asis{}-@asis{}-@asis{}res} @emph{name}
+@anchor{@strong{@asis{}-@asis{}-@asis{}res} @emph{name}}
+
+Save the output into files.
+
+@strong{Simple string output dir}
+
+If @emph{name} does not contain replacement strings and does not end in
+@strong{.csv/.tsv}, the output will be stored in a directory tree rooted at
+@emph{name}.  Within this directory tree, each command will result in
+three files: @emph{name}/<ARGS>/stdout and @emph{name}/<ARGS>/stderr,
+@emph{name}/<ARGS>/seq, where <ARGS> is a sequence of directories
+representing the header of the input source (if using @strong{@asis{}-@asis{}-@asis{}header :})
+or the number of the input source and corresponding values.
+
+E.g:
+
+@verbatim
+  parallel --header : --results foo echo {a} {b} \
+    ::: a I II ::: b III IIII
+@end verbatim
+
+will generate the files:
+
+@verbatim
+  foo/a/II/b/III/seq
+  foo/a/II/b/III/stderr
+  foo/a/II/b/III/stdout
+  foo/a/II/b/IIII/seq
+  foo/a/II/b/IIII/stderr
+  foo/a/II/b/IIII/stdout
+  foo/a/I/b/III/seq
+  foo/a/I/b/III/stderr
+  foo/a/I/b/III/stdout
+  foo/a/I/b/IIII/seq
+  foo/a/I/b/IIII/stderr
+  foo/a/I/b/IIII/stdout
+@end verbatim
+
+and
+
+@verbatim
+  parallel --results foo echo {1} {2} ::: I II ::: III IIII
+@end verbatim
+
+will generate the files:
+
+@verbatim
+  foo/1/II/2/III/seq
+  foo/1/II/2/III/stderr
+  foo/1/II/2/III/stdout
+  foo/1/II/2/IIII/seq
+  foo/1/II/2/IIII/stderr
+  foo/1/II/2/IIII/stdout
+  foo/1/I/2/III/seq
+  foo/1/I/2/III/stderr
+  foo/1/I/2/III/stdout
+  foo/1/I/2/IIII/seq
+  foo/1/I/2/IIII/stderr
+  foo/1/I/2/IIII/stdout
+@end verbatim
+
+@strong{CSV file output}
+
+If @emph{name} ends in @strong{.csv}/@strong{.tsv} the output will be a CSV-file
+named @emph{name}.
+
+@strong{.csv} gives a comma separated value file. @strong{.tsv} gives a TAB
+separated value file.
+
+@strong{-.csv}/@strong{-.tsv} are special: It will give the file on stdout
+(standard output).
+
+@strong{JSON file output}
+
+If @emph{name} ends in @strong{.json} the output will be a JSON-file
+named @emph{name}.
+
+@strong{-.json} is special: It will give the file on stdout (standard
+output).
+
+@strong{Replacement string output file}
+
+If @emph{name} contains a replacement string and the replaced result does
+not end in /, then the standard output will be stored in a file named
+by this result. Standard error will be stored in the same file name
+with '.err' added, and the sequence number will be stored in the same
+file name with '.seq' added.
+
+E.g.
+
+@verbatim
+  parallel --results my_{} echo ::: foo bar baz
+@end verbatim
+
+will generate the files:
+
+@verbatim
+  my_bar
+  my_bar.err
+  my_bar.seq
+  my_baz
+  my_baz.err
+  my_baz.seq
+  my_foo
+  my_foo.err
+  my_foo.seq
+@end verbatim
+
+@strong{Replacement string output dir}
+
+If @emph{name} contains a replacement string and the replaced result ends
+in /, then output files will be stored in the resulting dir.
+
+E.g.
+
+@verbatim
+  parallel --results my_{}/ echo ::: foo bar baz
+@end verbatim
+
+will generate the files:
+
+@verbatim
+  my_bar/seq
+  my_bar/stderr
+  my_bar/stdout
+  my_baz/seq
+  my_baz/stderr
+  my_baz/stdout
+  my_foo/seq
+  my_foo/stderr
+  my_foo/stdout
+@end verbatim
+
+See also: @strong{@asis{}-@asis{}-@asis{}output-as-files} @strong{@asis{}-@asis{}-@asis{}tag} @strong{@asis{}-@asis{}-@asis{}header} @strong{@asis{}-@asis{}-@asis{}joblog}
+
+@item @strong{@asis{}-@asis{}-@asis{}resume}
+@anchor{@strong{@asis{}-@asis{}-@asis{}resume}}
+
+Resumes from the last unfinished job.
+
+By reading @strong{@asis{}-@asis{}-@asis{}joblog} or the
+@strong{@asis{}-@asis{}-@asis{}results} dir GNU @strong{parallel} will figure out the last unfinished
+job and continue from there. As GNU @strong{parallel} only looks at the
+sequence numbers in @strong{@asis{}-@asis{}-@asis{}joblog} then the input, the command, and
+@strong{@asis{}-@asis{}-@asis{}joblog} all have to remain unchanged; otherwise GNU @strong{parallel}
+may run wrong commands.
+
+See also: @strong{@asis{}-@asis{}-@asis{}joblog} @strong{@asis{}-@asis{}-@asis{}results} @strong{@asis{}-@asis{}-@asis{}resume-failed} @strong{@asis{}-@asis{}-@asis{}retries}
+
+@item @strong{@asis{}-@asis{}-@asis{}resume-failed}
+@anchor{@strong{@asis{}-@asis{}-@asis{}resume-failed}}
+
+Retry all failed and resume from the last unfinished job.
+
+By reading
+@strong{@asis{}-@asis{}-@asis{}joblog} GNU @strong{parallel} will figure out the failed jobs and run
+those again. After that it will resume last unfinished job and
+continue from there. As GNU @strong{parallel} only looks at the sequence
+numbers in @strong{@asis{}-@asis{}-@asis{}joblog} then the input, the command, and @strong{@asis{}-@asis{}-@asis{}joblog}
+all have to remain unchanged; otherwise GNU @strong{parallel} may run wrong
+commands.
+
+See also: @strong{@asis{}-@asis{}-@asis{}joblog} @strong{@asis{}-@asis{}-@asis{}resume} @strong{@asis{}-@asis{}-@asis{}retry-failed} @strong{@asis{}-@asis{}-@asis{}retries}
+
+@item @strong{@asis{}-@asis{}-@asis{}retry-failed}
+@anchor{@strong{@asis{}-@asis{}-@asis{}retry-failed}}
+
+Retry all failed jobs in joblog.
+
+By reading @strong{@asis{}-@asis{}-@asis{}joblog} GNU
+@strong{parallel} will figure out the failed jobs and run those again.
+
+@strong{@asis{}-@asis{}-@asis{}retry-failed} ignores the command and arguments on the command
+line: It only looks at the joblog.
+
+@strong{Differences between @asis{}-@asis{}-@asis{}resume, @asis{}-@asis{}-@asis{}resume-failed, @asis{}-@asis{}-@asis{}retry-failed}
+
+In this example @strong{exit @{= $_%=2 =@}} will cause every other job to fail.
+
+@verbatim
+  timeout -k 1 4 parallel --joblog log -j10 \
+    'sleep {}; exit {= $_%=2 =}' ::: {10..1}
+@end verbatim
+
+4 jobs completed. 2 failed:
+
+@verbatim
+  Seq   [...]   Exitval Signal  Command
+  10    [...]   1       0       sleep 1; exit 1
+  9     [...]   0       0       sleep 2; exit 0
+  8     [...]   1       0       sleep 3; exit 1
+  7     [...]   0       0       sleep 4; exit 0
+@end verbatim
+
+@strong{@asis{}-@asis{}-@asis{}resume} does not care about the Exitval, but only looks at Seq. If
+the Seq is run, it will not be run again. So if needed, you can change
+the command for the seqs not run yet:
+
+@verbatim
+  parallel --resume --joblog log -j10 \
+    'sleep .{}; exit {= $_%=2 =}' ::: {10..1}
+
+  Seq   [...]   Exitval Signal  Command
+  [... as above ...]
+  1     [...]   0       0       sleep .10; exit 0
+  6     [...]   1       0       sleep .5; exit 1
+  5     [...]   0       0       sleep .6; exit 0
+  4     [...]   1       0       sleep .7; exit 1
+  3     [...]   0       0       sleep .8; exit 0
+  2     [...]   1       0       sleep .9; exit 1
+@end verbatim
+
+@strong{@asis{}-@asis{}-@asis{}resume-failed} cares about the Exitval, but also only looks at Seq
+to figure out which commands to run. Again this means you can change
+the command, but not the arguments. It will run the failed seqs and
+the seqs not yet run:
+
+@verbatim
+  parallel --resume-failed --joblog log -j10 \
+    'echo {};sleep .{}; exit {= $_%=3 =}' ::: {10..1}
+
+  Seq   [...]   Exitval Signal  Command
+  [... as above ...]
+  10    [...]   1       0       echo 1;sleep .1; exit 1
+  8     [...]   0       0       echo 3;sleep .3; exit 0
+  6     [...]   2       0       echo 5;sleep .5; exit 2
+  4     [...]   1       0       echo 7;sleep .7; exit 1
+  2     [...]   0       0       echo 9;sleep .9; exit 0
+@end verbatim
+
+@strong{@asis{}-@asis{}-@asis{}retry-failed} cares about the Exitval, but takes the command from
+the joblog. It ignores any arguments or commands given on the command
+line:
+
+@verbatim
+  parallel --retry-failed --joblog log -j10 this part is ignored
+
+  Seq   [...]   Exitval Signal  Command
+  [... as above ...]
+  10    [...]   1       0       echo 1;sleep .1; exit 1
+  6     [...]   2       0       echo 5;sleep .5; exit 2
+  4     [...]   1       0       echo 7;sleep .7; exit 1
+@end verbatim
+
+See also: @strong{@asis{}-@asis{}-@asis{}joblog} @strong{@asis{}-@asis{}-@asis{}resume} @strong{@asis{}-@asis{}-@asis{}resume-failed} @strong{@asis{}-@asis{}-@asis{}retries}
+
+@item @strong{@asis{}-@asis{}-@asis{}retries} @emph{n}
+@anchor{@strong{@asis{}-@asis{}-@asis{}retries} @emph{n}}
+
+Try failing jobs @emph{n} times.
+
+If a job fails, retry it on another computer on which it has not
+failed. Do this @emph{n} times. If there are fewer than @emph{n} computers in
+@strong{@asis{}-@asis{}-@asis{}sshlogin} GNU @strong{parallel} will re-use all the computers. This is
+useful if some jobs fail for no apparent reason (such as network
+failure).
+
+@emph{n}=0 means infinite.
+
+See also: @strong{@asis{}-@asis{}-@asis{}term-seq} @strong{@asis{}-@asis{}-@asis{}sshlogin}
+
+@item @strong{@asis{}-@asis{}-@asis{}return} @emph{filename}
+@anchor{@strong{@asis{}-@asis{}-@asis{}return} @emph{filename}}
+
+Transfer files from remote computers.
+
+@strong{@asis{}-@asis{}-@asis{}return} is used with
+@strong{@asis{}-@asis{}-@asis{}sshlogin} when the arguments are files on the remote computers. When
+processing is done the file @emph{filename} will be transferred
+from the remote computer using @strong{rsync} and will be put relative to
+the default login dir. E.g.
+
+@verbatim
+  echo foo/bar.txt | parallel --return {.}.out \
+    --sshlogin server.example.com touch {.}.out
+@end verbatim
+
+This will transfer the file @emph{$HOME/foo/bar.out} from the computer
+@emph{server.example.com} to the file @emph{foo/bar.out} after running
+@strong{touch foo/bar.out} on @emph{server.example.com}.
+
+@verbatim
+  parallel -S server --trc out/./{}.out touch {}.out ::: in/file
+@end verbatim
+
+This will transfer the file @emph{in/file.out} from the computer
+@emph{server.example.com} to the files @emph{out/in/file.out} after running
+@strong{touch in/file.out} on @emph{server}.
+
+@verbatim
+  echo /tmp/foo/bar.txt | parallel --return {.}.out \
+    --sshlogin server.example.com touch {.}.out
+@end verbatim
+
+This will transfer the file @emph{/tmp/foo/bar.out} from the computer
+@emph{server.example.com} to the file @emph{/tmp/foo/bar.out} after running
+@strong{touch /tmp/foo/bar.out} on @emph{server.example.com}.
+
+Multiple files can be transferred by repeating the option multiple
+times:
+
+@verbatim
+  echo /tmp/foo/bar.txt | parallel \
+    --sshlogin server.example.com \
+    --return {.}.out --return {.}.out2 touch {.}.out {.}.out2
+@end verbatim
+
+@strong{@asis{}-@asis{}-@asis{}return} is ignored when used with @strong{@asis{}-@asis{}-@asis{}sshlogin :} or when not used
+with @strong{@asis{}-@asis{}-@asis{}sshlogin}.
+
+For details on transferring see @strong{@asis{}-@asis{}-@asis{}transferfile}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}transfer} @strong{@asis{}-@asis{}-@asis{}transferfile} @strong{@asis{}-@asis{}-@asis{}sshlogin} @strong{@asis{}-@asis{}-@asis{}cleanup}
+@strong{@asis{}-@asis{}-@asis{}workdir}
+
+@item @strong{@asis{}-@asis{}-@asis{}round-robin}
+@anchor{@strong{@asis{}-@asis{}-@asis{}round-robin}}
+
+@item @strong{@asis{}-@asis{}-@asis{}round}
+@anchor{@strong{@asis{}-@asis{}-@asis{}round}}
+
+Distribute chunks of standard input in a round robin fashion.
+
+Normally @strong{@asis{}-@asis{}-@asis{}pipe} will give a single block to each instance of the
+command. With @strong{@asis{}-@asis{}-@asis{}round-robin} all blocks will at random be written to
+commands already running. This is useful if the command takes a long
+time to initialize.
+
+With @strong{@asis{}-@asis{}-@asis{}keep-order} and @strong{@asis{}-@asis{}-@asis{}round-robin} the jobslots will get the
+same blocks as input in the same order in every run if the input is
+kept the same. See details under @strong{@asis{}-@asis{}-@asis{}keep-order}.
+
+@strong{@asis{}-@asis{}-@asis{}round-robin} implies @strong{@asis{}-@asis{}-@asis{}pipe}, except if @strong{@asis{}-@asis{}-@asis{}pipe-part} is given.
+
+See the section: SPREADING BLOCKS OF DATA.
+
+See also: @strong{@asis{}-@asis{}-@asis{}bin} @strong{@asis{}-@asis{}-@asis{}group-by} @strong{@asis{}-@asis{}-@asis{}shard}
+
+@item @strong{@asis{}-@asis{}-@asis{}rpl} '@emph{tag} @emph{perl expression}'
+@anchor{@strong{@asis{}-@asis{}-@asis{}rpl} '@emph{tag} @emph{perl expression}'}
+
+Define replacement string.
+
+Use @emph{tag} as a replacement string for @emph{perl expression}. This makes
+it possible to define your own replacement strings. GNU @strong{parallel}'s
+7 replacement strings are implemented as:
+
+@verbatim
+  --rpl '{} '
+  --rpl '{#} 1 $_=$job->seq()'
+  --rpl '{%} 1 $_=$job->slot()'
+  --rpl '{/} s:.*/::'
+  --rpl '{//} $Global::use{"File::Basename"} ||=
+              eval "use File::Basename; 1;"; $_ = dirname($_);'
+  --rpl '{/.} s:.*/::; s:\.[^/.]+$::;'
+  --rpl '{.} s:\.[^/.]+$::'
+@end verbatim
+
+The @strong{@asis{}-@asis{}-@asis{}plus} replacement strings are implemented as:
+
+@verbatim
+  --rpl '{+/} s:/[^/]*$:: || s:.*$::'
+  --rpl '{+.} s:.*\.:: || s:.*$::'
+  --rpl '{+..} s:.*\.([^/.]+\.[^/.]+)$:$1: || s:.*$::'
+  --rpl '{+...} s:.*\.([^/.]+\.[^/.]+\.[^/.]+)$:$1: || s:.*$::'
+  --rpl '{..} s:\.[^/.]+\.[^/.]+$::'
+  --rpl '{...} s:\.[^/.]+\.[^/.]+\.[^/.]+$::'
+  --rpl '{/..} s:.*/::; s:\.[^/.]+\.[^/.]+$::'
+  --rpl '{/...} s:.*/::; s:\.[^/.]+\.[^/.]+\.[^/.]+$::'
+  --rpl '{choose_k}
+         for $t (2..$#arg){ if($arg[$t-1] ge $arg[$t]) { skip() } }'
+  --rpl '{##} 1 $_=total_jobs()'
+  --rpl '{0%} 1 $f=1+int((log($Global::max_jobs_running||1)/
+                          log(10))); $_=sprintf("%0${f}d",slot())'
+  --rpl '{0#} 1 $f=1+int((log(total_jobs())/log(10)));
+              $_=sprintf("%0${f}d",seq())'
+  --rpl '{seq(.*?)} $_=eval q{$job->seq()}.qq{$$1}'
+  --rpl '{slot(.*?)} $_=eval q{$job->slot()}.qq{$$1}'
+
+  --rpl '{:-([^}]+?)} $_ ||= $$1'
+  --rpl '{:(\d+?)} substr($_,0,$$1) = ""'
+  --rpl '{:(\d+?):(\d+?)} $_ = substr($_,$$1,$$2);'
+  --rpl '{#([^#}][^}]*?)} $nongreedy=::make_regexp_ungreedy($$1);
+                          s/^$nongreedy(.*)/$1/;'
+  --rpl '{##([^#}][^}]*?)} s/^$$1//;'
+  --rpl '{%([^}]+?)} $nongreedy=::make_regexp_ungreedy($$1);
+                     s/(.*)$nongreedy$/$1/;'
+  --rpl '{%%([^}]+?)} s/$$1$//;'
+  --rpl '{/([^}]+?)/([^}]*?)} s/$$1/$$2/;'
+  --rpl '{^([^}]+?)} s/^($$1)/uc($1)/e;'
+  --rpl '{^^([^}]+?)} s/($$1)/uc($1)/eg;'
+  --rpl '{,([^}]+?)} s/^($$1)/lc($1)/e;'
+  --rpl '{,,([^}]+?)} s/($$1)/lc($1)/eg;'
+
+  --rpl '{slot} 1 $_="\${PARALLEL_JOBSLOT}";uq()'
+  --rpl '{host} 1 $_="\${PARALLEL_SSHHOST}";uq()'
+  --rpl '{sshlogin} 1 $_="\${PARALLEL_SSHLOGIN}";uq()'
+  --rpl '{hgrp} 1 $_="\${PARALLEL_HOSTGROUPS}";uq()'
+  --rpl '{agrp} 1 $_="\${PARALLEL_ARGHOSTGROUPS}";uq()'
+@end verbatim
+
+If the user defined replacement string starts with '@{' it can also be
+used as a positional replacement string (like @strong{@{2.@}}).
+
+It is recommended to only change $_ but you have full access to all
+of GNU @strong{parallel}'s internal functions and data structures.
+
+Here are a few examples:
+
+@verbatim
+  Is the job sequence even or odd?
+  --rpl '{odd} $_ = seq() % 2 ? "odd" : "even"'
+  Pad job sequence with leading zeros to get equal width
+  --rpl '{0#} $f=1+int("".(log(total_jobs())/log(10)));
+    $_=sprintf("%0${f}d",seq())'
+  Job sequence counting from 0
+  --rpl '{#0} $_ = seq() - 1'
+  Job slot counting from 2
+  --rpl '{%1} $_ = slot() + 1'
+  Remove all extensions
+  --rpl '{:} s:(\.[^/]+)*$::'
+@end verbatim
+
+You can have dynamic replacement strings by including parenthesis in
+the replacement string and adding a regular expression between the
+parenthesis. The matching string will be inserted as $$1:
+
+@verbatim
+  parallel --rpl '{%(.*?)} s/$$1//' echo {%.tar.gz} ::: my.tar.gz
+  parallel --rpl '{:+(.+?)} s:$$1(\.[^/]+)*$::' \
+    echo {:+_file} ::: my_file.tar.gz
+  parallel -n3 --rpl '{/:+(.*?)} s:.*/(.*)$$1(\.[^/]+)*$:$1:' \
+    echo job {#}: {2} {2.} {3/:+_1} ::: a/b.c c/d.e f/g_1.h.i
+@end verbatim
+
+You can even use multiple matches:
+
+@verbatim
+  parallel --rpl '{/(.+?)/(.*?)} s/$$1/$$2/;'
+    echo {/replacethis/withthis} {/b/C} ::: a_replacethis_b
+
+  parallel --rpl '{(.*?)/(.*?)} $_="$$2$_$$1"' \
+    echo {swap/these} ::: -middle-
+@end verbatim
+
+See also: @strong{@{=}@emph{perl expression}@strong{=@}} @strong{@asis{}-@asis{}-@asis{}parens}
+
+@item @strong{@asis{}-@asis{}-@asis{}rsync-opts} @emph{options}
+@anchor{@strong{@asis{}-@asis{}-@asis{}rsync-opts} @emph{options}}
+
+Options to pass on to @strong{rsync}.
+
+Setting @strong{@asis{}-@asis{}-@asis{}rsync-opts} takes precedence over setting the environment
+variable $PARALLEL_RSYNC_OPTS.
+
+@item @strong{@asis{}-@asis{}-@asis{}max-chars} @emph{max-chars}
+@anchor{@strong{@asis{}-@asis{}-@asis{}max-chars} @emph{max-chars}}
+
+@item @strong{-s} @emph{max-chars}
+@anchor{@strong{-s} @emph{max-chars}}
+
+Limit length of command.
+
+Use at most @emph{max-chars} characters per command line, including the
+command and initial-arguments and the terminating nulls at the ends of
+the argument strings.  The largest allowed value is system-dependent,
+and is calculated as the argument length limit for exec, less the size
+of your environment.  The default value is the maximum.
+
+@emph{max-chars} can be postfixed with K, M, G, T, P, k, m, g, t, or p
+(see UNIT PREFIX).
+
+Implies @strong{-X} unless @strong{-m} or @strong{@asis{}-@asis{}-@asis{}xargs} is set.
+
+See also: @strong{-X} @strong{-m} @strong{@asis{}-@asis{}-@asis{}xargs} @strong{@asis{}-@asis{}-@asis{}max-line-length-allowed}
+@strong{@asis{}-@asis{}-@asis{}show-limits}
+
+@item @strong{@asis{}-@asis{}-@asis{}show-limits}
+@anchor{@strong{@asis{}-@asis{}-@asis{}show-limits}}
+
+Display limits given by the operating system.
+
+Display the limits on the command-line length which are imposed by the
+operating system and the @strong{-s} option.  Pipe the input from /dev/null
+(and perhaps specify @asis{}-@asis{}-@asis{}no-run-if-empty) if you don't want GNU @strong{parallel}
+to do anything.
+
+See also: @strong{@asis{}-@asis{}-@asis{}max-chars} @strong{@asis{}-@asis{}-@asis{}max-line-length-allowed} @strong{@asis{}-@asis{}-@asis{}version}
+
+@item @strong{@asis{}-@asis{}-@asis{}semaphore}
+@anchor{@strong{@asis{}-@asis{}-@asis{}semaphore}}
+
+Work as a counting semaphore.
+
+@strong{@asis{}-@asis{}-@asis{}semaphore} will cause GNU @strong{parallel} to start @emph{command} in the
+background. When the number of jobs given by @strong{@asis{}-@asis{}-@asis{}jobs} is reached, GNU
+@strong{parallel} will wait for one of these to complete before starting
+another command.
+
+@strong{@asis{}-@asis{}-@asis{}semaphore} implies @strong{@asis{}-@asis{}-@asis{}bg} unless @strong{@asis{}-@asis{}-@asis{}fg} is specified.
+
+The command @strong{sem} is an alias for @strong{parallel @asis{}-@asis{}-@asis{}semaphore}.
+
+See also: @strong{man sem} @strong{@asis{}-@asis{}-@asis{}bg} @strong{@asis{}-@asis{}-@asis{}fg} @strong{@asis{}-@asis{}-@asis{}semaphore-name}
+@strong{@asis{}-@asis{}-@asis{}semaphore-timeout} @strong{@asis{}-@asis{}-@asis{}wait}
+
+@item @strong{@asis{}-@asis{}-@asis{}semaphore-name} @emph{name}
+@anchor{@strong{@asis{}-@asis{}-@asis{}semaphore-name} @emph{name}}
+
+@item @strong{@asis{}-@asis{}-@asis{}id} @emph{name}
+@anchor{@strong{@asis{}-@asis{}-@asis{}id} @emph{name}}
+
+Use @strong{name} as the name of the semaphore.
+
+The default is the name of the controlling tty (output from @strong{tty}).
+
+The default normally works as expected when used interactively, but
+when used in a script @emph{name} should be set. @emph{$$} or @emph{my_task_name}
+are often a good value.
+
+The semaphore is stored in ~/.parallel/semaphores/
+
+Implies @strong{@asis{}-@asis{}-@asis{}semaphore}.
+
+See also: @strong{man sem} @strong{@asis{}-@asis{}-@asis{}semaphore}
+
+@item @strong{@asis{}-@asis{}-@asis{}semaphore-timeout} @emph{secs}
+@anchor{@strong{@asis{}-@asis{}-@asis{}semaphore-timeout} @emph{secs}}
+
+@item @strong{@asis{}-@asis{}-@asis{}st} @emph{secs}
+@anchor{@strong{@asis{}-@asis{}-@asis{}st} @emph{secs}}
+
+If @emph{secs} > 0: If the semaphore is not released within @emph{secs}
+seconds, take it anyway.
+
+If @emph{secs} < 0: If the semaphore is not released within @emph{secs}
+seconds, exit.
+
+@emph{secs} is in seconds, but can be postfixed with s, m, h, or d (see
+the section TIME POSTFIXES).
+
+Implies @strong{@asis{}-@asis{}-@asis{}semaphore}.
+
+See also: @strong{man sem}
+
+@item @strong{@asis{}-@asis{}-@asis{}seqreplace} @emph{replace-str}
+@anchor{@strong{@asis{}-@asis{}-@asis{}seqreplace} @emph{replace-str}}
+
+Use the replacement string @emph{replace-str} instead of @strong{@{#@}} for
+job sequence number.
+
+See also: @strong{@{#@}}
+
+@item @strong{@asis{}-@asis{}-@asis{}session}
+@anchor{@strong{@asis{}-@asis{}-@asis{}session}}
+
+Record names in current environment in @strong{$PARALLEL_IGNORED_NAMES} and
+exit.
+
+Only used with @strong{env_parallel}. Aliases, functions, and variables with
+names in @strong{$PARALLEL_IGNORED_NAMES} will not be copied.  So you should
+set variables/function you want copied @emph{after} running @strong{@asis{}-@asis{}-@asis{}session}.
+
+It is similar to @strong{@asis{}-@asis{}-@asis{}record-env}, but only for this session.
+
+Only supported in @strong{Ash, Bash, Dash, Ksh, Sh, and Zsh}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}env} @strong{@asis{}-@asis{}-@asis{}record-env} @strong{env_parallel}
+
+@item @strong{@asis{}-@asis{}-@asis{}shard} @emph{shardexpr}
+@anchor{@strong{@asis{}-@asis{}-@asis{}shard} @emph{shardexpr}}
+
+Use @emph{shardexpr} as shard key and shard input to the jobs.
+
+@emph{shardexpr} is [column number|column name] [perlexpression] e.g.:
+
+@verbatim
+  3
+  Address
+  3 $_%=100
+  Address s/\d//g
+@end verbatim
+
+Each input line is split using @strong{@asis{}-@asis{}-@asis{}colsep}. The string of the column
+is put into $_, the perl expression is executed, the resulting string
+is hashed so that all lines of a given value is given to the same job
+slot.
+
+This is similar to sharding in databases.
+
+The performance is in the order of 100K rows per second. Faster if the
+@emph{shardcol} is small (<10), slower if it is big (>100).
+
+@strong{@asis{}-@asis{}-@asis{}shard} requires @strong{@asis{}-@asis{}-@asis{}pipe} and a fixed numeric value for @strong{@asis{}-@asis{}-@asis{}jobs}.
+
+See the section: SPREADING BLOCKS OF DATA.
+
+See also: @strong{@asis{}-@asis{}-@asis{}bin} @strong{@asis{}-@asis{}-@asis{}group-by} @strong{@asis{}-@asis{}-@asis{}round-robin}
+
+@item @strong{@asis{}-@asis{}-@asis{}shebang}
+@anchor{@strong{@asis{}-@asis{}-@asis{}shebang}}
+
+@item @strong{@asis{}-@asis{}-@asis{}hashbang}
+@anchor{@strong{@asis{}-@asis{}-@asis{}hashbang}}
+
+GNU @strong{parallel} can be called as a shebang (#!) command as the first
+line of a script. The content of the file will be treated as
+inputsource.
+
+Like this:
+
+@verbatim
+  #!/usr/bin/parallel --shebang -r wget
+
+  https://ftpmirror.gnu.org/parallel/parallel-20120822.tar.bz2
+  https://ftpmirror.gnu.org/parallel/parallel-20130822.tar.bz2
+  https://ftpmirror.gnu.org/parallel/parallel-20140822.tar.bz2
+@end verbatim
+
+@strong{@asis{}-@asis{}-@asis{}shebang} must be set as the first option.
+
+On FreeBSD @strong{env} is needed:
+
+@verbatim
+  #!/usr/bin/env -S parallel --shebang -r wget
+
+  https://ftpmirror.gnu.org/parallel/parallel-20120822.tar.bz2
+  https://ftpmirror.gnu.org/parallel/parallel-20130822.tar.bz2
+  https://ftpmirror.gnu.org/parallel/parallel-20140822.tar.bz2
+@end verbatim
+
+There are many limitations of shebang (#!) depending on your operating
+system. See details on https://www.in-ulm.de/~mascheck/various/shebang/
+
+See also: @strong{@asis{}-@asis{}-@asis{}shebang-wrap}
+
+@item @strong{@asis{}-@asis{}-@asis{}shebang-wrap}
+@anchor{@strong{@asis{}-@asis{}-@asis{}shebang-wrap}}
+
+GNU @strong{parallel} can parallelize scripts by wrapping the shebang
+line. If the program can be run like this:
+
+@verbatim
+  cat arguments | parallel the_program
+@end verbatim
+
+then the script can be changed to:
+
+@verbatim
+  #!/usr/bin/parallel --shebang-wrap /original/parser --options
+@end verbatim
+
+E.g.
+
+@verbatim
+  #!/usr/bin/parallel --shebang-wrap /usr/bin/python
+@end verbatim
+
+If the program can be run like this:
+
+@verbatim
+  cat data | parallel --pipe the_program
+@end verbatim
+
+then the script can be changed to:
+
+@verbatim
+  #!/usr/bin/parallel --shebang-wrap --pipe /orig/parser --opts
+@end verbatim
+
+E.g.
+
+@verbatim
+  #!/usr/bin/parallel --shebang-wrap --pipe /usr/bin/perl -w
+@end verbatim
+
+@strong{@asis{}-@asis{}-@asis{}shebang-wrap} must be set as the first option.
+
+See also: @strong{@asis{}-@asis{}-@asis{}shebang}
+
+@item @strong{@asis{}-@asis{}-@asis{}shell-completion} @emph{shell}
+@anchor{@strong{@asis{}-@asis{}-@asis{}shell-completion} @emph{shell}}
+
+Generate shell completion code for interactive shells.
+
+Supported shells: bash zsh.
+
+Use @emph{auto} as @emph{shell} to automatically detect running shell.
+
+Activate the completion code with:
+
+@verbatim
+  zsh% eval "$(parallel --shell-completion auto)"
+  bash$ eval "$(parallel --shell-completion auto)"
+@end verbatim
+
+Or put this `/usr/share/zsh/site-functions/_parallel`, then `compinit`
+to generate `~/.zcompdump`:
+
+@verbatim
+  #compdef parallel
+  
+  (( $+functions[_comp_parallel] )) ||
+    eval "$(parallel --shell-completion auto)" &&
+    _comp_parallel
+@end verbatim
+
+@item @strong{@asis{}-@asis{}-@asis{}shell-quote}
+@anchor{@strong{@asis{}-@asis{}-@asis{}shell-quote}}
+
+Does not run the command but quotes it. Useful for making quoted
+composed commands for GNU @strong{parallel}.
+
+Multiple @strong{@asis{}-@asis{}-@asis{}shell-quote} with quote the string multiple times, so
+@strong{parallel @asis{}-@asis{}-@asis{}shell-quote | parallel @asis{}-@asis{}-@asis{}shell-quote} can be written as
+@strong{parallel @asis{}-@asis{}-@asis{}shell-quote @asis{}-@asis{}-@asis{}shell-quote}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}quote}
+
+@item @strong{@asis{}-@asis{}-@asis{}shuf}
+@anchor{@strong{@asis{}-@asis{}-@asis{}shuf}}
+
+Shuffle jobs.
+
+When having multiple input sources it is hard to randomize
+jobs. @strong{@asis{}-@asis{}-@asis{}shuf} will generate all jobs, and shuffle them before
+running them. This is useful to get a quick preview of the results
+before running the full batch.
+
+Combined with @strong{@asis{}-@asis{}-@asis{}halt soon,done=1%} you can run a random 1% sample of
+all jobs:
+
+@verbatim
+  parallel --shuf --halt soon,done=1% echo ::: {1..100} ::: {1..100}
+@end verbatim
+
+See also: @strong{@asis{}-@asis{}-@asis{}halt}
+
+@item @strong{@asis{}-@asis{}-@asis{}skip-first-line}
+@anchor{@strong{@asis{}-@asis{}-@asis{}skip-first-line}}
+
+Do not use the first line of input (used by GNU @strong{parallel} itself
+when called with @strong{@asis{}-@asis{}-@asis{}shebang}).
+
+@item @strong{@asis{}-@asis{}-@asis{}sql} @emph{DBURL} (obsolete)
+@anchor{@strong{@asis{}-@asis{}-@asis{}sql} @emph{DBURL} (obsolete)}
+
+Use @strong{@asis{}-@asis{}-@asis{}sql-master} instead.
+
+@item @strong{@asis{}-@asis{}-@asis{}sql-master} @emph{DBURL}
+@anchor{@strong{@asis{}-@asis{}-@asis{}sql-master} @emph{DBURL}}
+
+Submit jobs via SQL server. @emph{DBURL} must point to a table, which will
+contain the same information as @strong{@asis{}-@asis{}-@asis{}joblog}, the values from the input
+sources (stored in columns V1 .. Vn), and the output (stored in
+columns Stdout and Stderr).
+
+If @emph{DBURL} is prepended with '+' GNU @strong{parallel} assumes the table is
+already made with the correct columns and appends the jobs to it.
+
+If @emph{DBURL} is not prepended with '+' the table will be dropped and
+created with the correct amount of V-columns unless
+
+@strong{@asis{}-@asis{}-@asis{}sqlmaster} does not run any jobs, but it creates the values for
+the jobs to be run. One or more @strong{@asis{}-@asis{}-@asis{}sqlworker} must be run to actually
+execute the jobs.
+
+If @strong{@asis{}-@asis{}-@asis{}wait} is set, GNU @strong{parallel} will wait for the jobs to
+complete.
+
+The format of a DBURL is:
+
+@verbatim
+  [sql:]vendor://[[user][:pwd]@][host][:port]/[db]/[table]
+@end verbatim
+
+E.g.
+
+@verbatim
+  sql:mysql://hr:hr@localhost:3306/hrdb/jobs
+  mysql://scott:tiger@my.example.com/pardb/paralleljobs
+  sql:oracle://scott:tiger@ora.example.com/xe/parjob
+  postgresql://scott:tiger@pg.example.com/pgdb/parjob
+  pg:///parjob
+  sqlite3:///%2Ftmp%2Fpardb.sqlite/parjob
+  sqlite:///file_in_current_dir.sqlite/my_table
+  csv:///%2Ftmp%2Fpardb/parjob
+  csv:///./file_in_current_dir
+  pg:////
+@end verbatim
+
+Notice how / in the path of sqlite and CSV must be encoded as
+%2F. Except the last / in CSV which must be a /.
+
+@emph{db} and @emph{table} defaults to $USER: pg://// = pg:///$USER/$USER
+
+It can also be an alias from ~/.sql/aliases:
+
+@verbatim
+  :myalias mysql:///mydb/paralleljobs
+@end verbatim
+
+See also: @strong{@asis{}-@asis{}-@asis{}sql-and-worker} @strong{@asis{}-@asis{}-@asis{}sql-worker} @strong{@asis{}-@asis{}-@asis{}joblog}
+
+@item @strong{@asis{}-@asis{}-@asis{}sql-and-worker} @emph{DBURL}
+@anchor{@strong{@asis{}-@asis{}-@asis{}sql-and-worker} @emph{DBURL}}
+
+Shorthand for: @strong{@asis{}-@asis{}-@asis{}sql-master} @emph{DBURL} @strong{@asis{}-@asis{}-@asis{}sql-worker} @emph{DBURL}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}sql-master} @strong{@asis{}-@asis{}-@asis{}sql-worker}
+
+@item @strong{@asis{}-@asis{}-@asis{}sql-worker} @emph{DBURL}
+@anchor{@strong{@asis{}-@asis{}-@asis{}sql-worker} @emph{DBURL}}
+
+Execute jobs via SQL server. Read the input sources variables from the
+table pointed to by @emph{DBURL}. The @emph{command} on the command line
+should be the same as given by @strong{@asis{}-@asis{}-@asis{}sqlmaster}.
+
+If you have more than one @strong{@asis{}-@asis{}-@asis{}sqlworker} jobs may be run more than
+once.
+
+If @strong{@asis{}-@asis{}-@asis{}sqlworker} runs on the local machine, the hostname in the SQL
+table will not be ':' but instead the hostname of the machine.
+
+See also: @strong{@asis{}-@asis{}-@asis{}sql-master} @strong{@asis{}-@asis{}-@asis{}sql-and-worker}
+
+@item @strong{@asis{}-@asis{}-@asis{}ssh} @emph{sshcommand}
+@anchor{@strong{@asis{}-@asis{}-@asis{}ssh} @emph{sshcommand}}
+
+GNU @strong{parallel} defaults to using @strong{ssh} for remote access. This can
+be overridden with @strong{@asis{}-@asis{}-@asis{}ssh}. It can also be set on a per server
+basis with @strong{@asis{}-@asis{}-@asis{}sshlogin}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}sshlogin}
+
+@item @strong{@asis{}-@asis{}-@asis{}ssh-delay} @emph{duration}
+@anchor{@strong{@asis{}-@asis{}-@asis{}ssh-delay} @emph{duration}}
+
+Delay starting next ssh by @emph{duration}.
+
+GNU @strong{parallel} will not start another ssh for the next @emph{duration}.
+
+@emph{duration} is in seconds, but can be postfixed with s, m, h, or d.
+
+See also: TIME POSTFIXES @strong{@asis{}-@asis{}-@asis{}sshlogin} @strong{@asis{}-@asis{}-@asis{}delay}
+
+@item @strong{@asis{}-@asis{}-@asis{}sshlogin} @emph{[@@hostgroups/][ncpus/][[user][:[password]]@@]host[:port][,...]}
+@anchor{@strong{@asis{}-@asis{}-@asis{}sshlogin} @emph{[@@hostgroups/][ncpus/][[user][@asis{:}[password]]@@]host[@asis{:}port][@comma{}...]}}
+
+@item @strong{@asis{}-@asis{}-@asis{}sshlogin} @emph{@@hostgroup}/
+@anchor{@strong{@asis{}-@asis{}-@asis{}sshlogin} @emph{@@hostgroup}/}
+
+@item @strong{-S} @emph{[@@hostgroups/][ncpus/][ssh command][[user][:[password]]@@]host[:port][,...]}
+@anchor{@strong{-S} @emph{[@@hostgroups/][ncpus/][ssh command][[user][@asis{:}[password]]@@]host[@asis{:}port][@comma{}...]}}
+
+@item @strong{-S} @emph{@@hostgroup}/
+@anchor{@strong{-S} @emph{@@hostgroup}/}
+
+Distribute jobs to remote computers.
+
+The jobs will be run on a list of remote computers.
+
+@table @asis
+@item @@@emph{hostgroups}/
+@anchor{@@@emph{hostgroups}/}
+
+One or more groups this sshlogin belongs to. Multiple groups are
+separated by '+'. The @emph{sshlogin} will always be added to a hostgroup
+named the same as @emph{sshlogin}.
+
+If only the @emph{@@hostgroup} is given, only the sshlogins in that
+hostgroup will be used. Multiple @emph{@@hostgroup} can be given.
+
+See @strong{@asis{}-@asis{}-@asis{}hostgroup}.
+
+Examples: @strong{@@prod/}, @strong{@@dev+remote/}
+
+@item @emph{ncpus}/
+@anchor{@emph{ncpus}/}
+
+Force number of CPU threads.
+
+GNU @strong{parallel} will determine the number of CPUs on the remote
+computers and run the number of jobs as specified by @strong{-j}.  If the
+number @emph{ncpus} is given GNU @strong{parallel} will use this number for
+number of CPU threads on the host. Normally @emph{ncpus} will not be
+needed.
+
+Examples: @strong{4/}, @strong{12/}
+
+@item @emph{ssh command}
+@anchor{@emph{ssh command}}
+
+The @emph{ssh command} to use. The @emph{ssh command} must be followed by a space.
+
+Example: @strong{/usr/bin/lsh -z} , @strong{autossh -C} 
+
+@item @emph{user}
+@anchor{@emph{user}}
+
+User name to log in as. Defaults to the current user name.
+
+Examples: @strong{alice}, @strong{bob}
+
+@item :@emph{password}
+@anchor{@asis{:}@emph{password}}
+
+Use @emph{password} for authentication (using @strong{sshpass}). @strong{password}
+cannot contain space. If @emph{password} is omitted, GNU @strong{parallel} will
+use @strong{$SSHPASS}. If @strong{:} is omitted use @strong{ssh}'s default
+authentication. In this case login must not require a password
+(@strong{ssh-agent} and @strong{ssh-copy-id} may help with that).
+
+Examples: @strong{:mypassword}, @strong{:}
+
+@item @emph{host}
+@anchor{@emph{host}}
+
+Hostname or IP address of server. (This is what you will use the
+most).
+
+Examples: @strong{server01}, @strong{10.1.2.3}, @strong{[2001:470:142:4::a]},
+@strong{2001:470:142:5::116}.
+
+Ranges of hostnames can be given in [] like this: @strong{server[1,3,8-10]}
+(for @strong{server1, server3, server8, server9, server10}) or
+@strong{server[001,003,008-010]} (for @strong{server001, server003, server008,
+server009, server010}). With Bash's brace expansion you can do:
+@strong{-S@{dev,prod@}[001-100]} to get @strong{-Sdev[001-100] -Sprod[001-100]} More
+[]'s are allowed: @strong{server[01-10].cluster[1-5].example.net}
+
+@item :@emph{port}
+@anchor{@asis{:}@emph{port}}
+
+Port number to connect to.
+
+Examples: @strong{:22}, @strong{:2222}.
+
+For IPv6 you can use @strong{p} or @strong{#} instead of @strong{:}.
+
+Examples: @strong{[2001:470:142:4::a]:2222}, @strong{2001:470:142:5::116p2222},
+@strong{2001:470:142:5::116#22222}
+
+@end table
+
+There are 3 names with special meaning:
+
+@table @asis
+@item @emph{:}
+@anchor{@emph{@asis{:}}}
+
+Means 'no ssh' and will therefore run on the local computer.
+
+@item @emph{..}
+@anchor{@emph{..}}
+
+Read sshlogins from @strong{~/.parallel/sshloginfile} or
+@strong{$XDG_CONFIG_HOME/parallel/sshloginfile}
+
+@item @emph{-}
+@anchor{@emph{-}}
+
+Read sshlogins from stdin (standard input).
+
+@end table
+
+To specify more sshlogins separate the sshlogins by comma, newline (in
+the same string), or repeat the options multiple times.
+
+GNU @strong{parallel} splits on , (comma) so if your sshlogin contains ,
+(comma) you need to replace it with \, or ,,
+
+See @strong{@asis{}-@asis{}-@asis{}sshloginfile} for complete examples.
+
+The remote host must have GNU @strong{parallel} installed.
+
+@strong{@asis{}-@asis{}-@asis{}sshlogin} is known to cause problems with @strong{-m} and @strong{-X}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}basefile} @strong{@asis{}-@asis{}-@asis{}transferfile} @strong{@asis{}-@asis{}-@asis{}return} @strong{@asis{}-@asis{}-@asis{}cleanup}
+@strong{@asis{}-@asis{}-@asis{}trc} @strong{@asis{}-@asis{}-@asis{}sshloginfile} @strong{@asis{}-@asis{}-@asis{}workdir} @strong{@asis{}-@asis{}-@asis{}filter-hosts}
+@strong{@asis{}-@asis{}-@asis{}ssh}
+
+@item @strong{@asis{}-@asis{}-@asis{}sshloginfile} @emph{filename}
+@anchor{@strong{@asis{}-@asis{}-@asis{}sshloginfile} @emph{filename}}
+
+@item @strong{@asis{}-@asis{}-@asis{}slf} @emph{filename}
+@anchor{@strong{@asis{}-@asis{}-@asis{}slf} @emph{filename}}
+
+File with sshlogins. The file consists of sshlogins on separate
+lines. Empty lines and lines starting with '#' are ignored. Example:
+
+@verbatim
+  server.example.com
+  username@server2.example.com
+  8/my-8-cpu-server.example.com
+  2/my_other_username@my-dualcore.example.net
+  # These servers have SSH running on port 2222
+  ssh -p 2222 server.example.net
+  server01.example.net:2222
+  4/ssh -p 2222 quadserver.example.net
+  # Use a different ssh program
+  myssh -p 2222 -l myusername hexacpu.example.net
+  # Use a different ssh program with default number of CPUs
+  //usr/local/bin/myssh -p 2222 -l myusername hexacpu
+  # Use a different ssh program with 6 CPUs
+  6//usr/local/bin/myssh -p 2222 -l myusername hexacpu
+  # Assume 16 CPUs on the local computer
+  16/:
+  # Use password for authentication
+  user:password@host
+  # Use $SSHPASS for authentication
+  user:@host
+  # Use $SSHPASS for authentication and current username
+  :@host
+  # Use password for authentication and current username
+  :password@host
+  # Login in as bob with :p@ss:w0rd@ as password
+  bob::p@ss:w0rd@@host
+  # Put server1 in hostgroup1
+  @hostgroup1/server1
+  # Put myusername@server2 in hostgroup1+hostgroup2
+  @hostgroup1+hostgroup2/myusername@server2
+  # Force 4 CPUs and put 'ssh -p 2222 server3' in hostgroup1
+  @hostgroup1/4/ssh -p 2222 server3
+  # TODO example with ,,
+@end verbatim
+
+When using a different ssh program the last argument must be the hostname.
+
+Multiple @strong{@asis{}-@asis{}-@asis{}sshloginfile} are allowed.
+
+GNU @strong{parallel} will first look for the file in current dir; if that
+fails it look for the file in ~/.parallel.
+
+There are 3 names with special meaning:
+
+@table @asis
+@item @emph{..}
+@anchor{@emph{..} 1}
+
+Read sshlogins from @strong{~/.parallel/sshloginfile}
+
+@item @emph{.}
+@anchor{@emph{.}}
+
+Read sshlogins from @strong{/etc/parallel/sshloginfile}
+
+@item @emph{-}
+@anchor{@emph{-} 1}
+
+Read sshlogins from stdin (standard input).
+
+@end table
+
+If the sshloginfile is changed it will be re-read when a job finishes
+though at most once per second. This makes it possible to add and
+remove hosts while running.
+
+This can be used to have a daemon that updates the sshloginfile to
+only contain servers that are up:
+
+@verbatim
+    cp original.slf tmp2.slf
+    while [ 1 ] ; do
+      nice parallel --nonall -j0 -k --slf original.slf \
+        --tag echo | perl 's/\t$//' > tmp.slf
+      if diff tmp.slf tmp2.slf; then
+        mv tmp.slf tmp2.slf
+      fi
+      sleep 10
+    done &
+    parallel --slf tmp2.slf ...
+@end verbatim
+
+See also: @strong{@asis{}-@asis{}-@asis{}filter-hosts}
+
+@item @strong{@asis{}-@asis{}-@asis{}slotreplace} @emph{replace-str}
+@anchor{@strong{@asis{}-@asis{}-@asis{}slotreplace} @emph{replace-str}}
+
+Use the replacement string @emph{replace-str} instead of @strong{@{%@}} for
+job slot number.
+
+See also: @strong{@{%@}}
+
+@item @strong{@asis{}-@asis{}-@asis{}silent}
+@anchor{@strong{@asis{}-@asis{}-@asis{}silent}}
+
+Silent.
+
+The job to be run will not be printed. This is the default.  Can be
+reversed with @strong{-v}.
+
+See also: @strong{-v}
+
+@item @strong{@asis{}-@asis{}-@asis{}template} @emph{file}=@emph{repl}
+@anchor{@strong{@asis{}-@asis{}-@asis{}template} @emph{file}=@emph{repl}}
+
+@item @strong{@asis{}-@asis{}-@asis{}tmpl} @emph{file}=@emph{repl}
+@anchor{@strong{@asis{}-@asis{}-@asis{}tmpl} @emph{file}=@emph{repl}}
+
+Replace replacement strings in @emph{file} and save it in @emph{repl}.
+
+All replacement strings in the contents of @emph{file} will be
+replaced. All replacement strings in the name @emph{repl} will be
+replaced.
+
+With @strong{@asis{}-@asis{}-@asis{}cleanup} the new file will be removed when the job is done.
+
+If @emph{my.tmpl} contains this:
+
+@verbatim
+  Xval: {x}
+  Yval: {y}
+  FixedValue: 9
+  # x with 2 decimals
+  DecimalX: {=x $_=sprintf("%.2f",$_) =}
+  TenX: {=x $_=$_*10 =}
+  RandomVal: {=1 $_=rand() =}
+@end verbatim
+
+it can be used like this:
+
+@verbatim
+  myprog() { echo Using "$@"; cat "$@"; }
+  export -f myprog
+  parallel --cleanup --header : --tmpl my.tmpl={#}.t myprog {#}.t \
+    ::: x 1.234 2.345 3.45678 ::: y 1 2 3
+@end verbatim
+
+See also: @strong{@{@}} @strong{@asis{}-@asis{}-@asis{}cleanup}
+
+@item @strong{@asis{}-@asis{}-@asis{}tty}
+@anchor{@strong{@asis{}-@asis{}-@asis{}tty}}
+
+Open terminal tty.
+
+If GNU @strong{parallel} is used for starting a program that accesses the
+tty (such as an interactive program) then this option may be
+needed. It will default to starting only one job at a time
+(i.e. @strong{-j1}), not buffer the output (i.e. @strong{-u}), and it will open a
+tty for the job.
+
+You can of course override @strong{-j1} and @strong{-u}.
+
+Using @strong{@asis{}-@asis{}-@asis{}tty} unfortunately means that GNU @strong{parallel} cannot kill
+the jobs (with @strong{@asis{}-@asis{}-@asis{}timeout}, @strong{@asis{}-@asis{}-@asis{}memfree}, or @strong{@asis{}-@asis{}-@asis{}halt}). This is due
+to GNU @strong{parallel} giving each child its own process group, which is
+then killed. Process groups are dependant on the tty.
+
+See also: @strong{@asis{}-@asis{}-@asis{}ungroup} @strong{@asis{}-@asis{}-@asis{}open-tty}
+
+@item @strong{@asis{}-@asis{}-@asis{}tag}
+@anchor{@strong{@asis{}-@asis{}-@asis{}tag}}
+
+Tag lines with arguments.
+
+Each output line will be prepended with the arguments and TAB
+(\t). When combined with @strong{@asis{}-@asis{}-@asis{}onall} or @strong{@asis{}-@asis{}-@asis{}nonall} the lines will be
+prepended with the sshlogin instead.
+
+@strong{@asis{}-@asis{}-@asis{}tag} is ignored when using @strong{-u}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}tagstring} @strong{@asis{}-@asis{}-@asis{}ctag}
+
+@item @strong{@asis{}-@asis{}-@asis{}tagstring} @emph{str}
+@anchor{@strong{@asis{}-@asis{}-@asis{}tagstring} @emph{str}}
+
+Tag lines with a string.
+
+Each output line will be prepended with @emph{str} and TAB (\t). @emph{str}
+can contain replacement strings such as @strong{@{@}}.
+
+@strong{@asis{}-@asis{}-@asis{}tagstring} is ignored when using @strong{-u}, @strong{@asis{}-@asis{}-@asis{}onall}, and @strong{@asis{}-@asis{}-@asis{}nonall}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}tag} @strong{@asis{}-@asis{}-@asis{}ctagstring}
+
+@item @strong{@asis{}-@asis{}-@asis{}tee}
+@anchor{@strong{@asis{}-@asis{}-@asis{}tee}}
+
+Pipe all data to all jobs.
+
+Used with @strong{@asis{}-@asis{}-@asis{}pipe}/@strong{@asis{}-@asis{}-@asis{}pipe-part} and @strong{:::}.
+
+@verbatim
+  seq 1000 | parallel --pipe --tee -v wc {} ::: -w -l -c
+@end verbatim
+
+How many numbers in 1..1000 contain 0..9, and how many bytes do they
+fill:
+
+@verbatim
+  seq 1000 | parallel --pipe --tee --tag \
+    'grep {1} | wc {2}' ::: {0..9} ::: -l -c
+@end verbatim
+
+How many words contain a..z and how many bytes do they fill?
+
+@verbatim
+  parallel -a /usr/share/dict/words --pipe-part --tee --tag \
+    'grep {1} | wc {2}' ::: {a..z} ::: -l -c
+@end verbatim
+
+See also: @strong{:::} @strong{@asis{}-@asis{}-@asis{}pipe} @strong{@asis{}-@asis{}-@asis{}pipe-part}
+
+@item @strong{@asis{}-@asis{}-@asis{}term-seq} @emph{sequence}
+@anchor{@strong{@asis{}-@asis{}-@asis{}term-seq} @emph{sequence}}
+
+Termination sequence.
+
+When a job is killed due to @strong{@asis{}-@asis{}-@asis{}timeout}, @strong{@asis{}-@asis{}-@asis{}memfree}, @strong{@asis{}-@asis{}-@asis{}halt}, or
+abnormal termination of GNU @strong{parallel}, @emph{sequence} determines how
+the job is killed. The default is:
+
+@verbatim
+    TERM,200,TERM,100,TERM,50,KILL,25
+@end verbatim
+
+which sends a TERM signal, waits 200 ms, sends another TERM signal,
+waits 100 ms, sends another TERM signal, waits 50 ms, sends a KILL
+signal, waits 25 ms, and exits. GNU @strong{parallel} detects if a process
+dies before the waiting time is up.
+
+See also: @strong{@asis{}-@asis{}-@asis{}halt} @strong{@asis{}-@asis{}-@asis{}timeout} @strong{@asis{}-@asis{}-@asis{}memfree}
+
+@item @strong{@asis{}-@asis{}-@asis{}total-jobs} @emph{jobs}
+@anchor{@strong{@asis{}-@asis{}-@asis{}total-jobs} @emph{jobs}}
+
+@item @strong{@asis{}-@asis{}-@asis{}total} @emph{jobs}
+@anchor{@strong{@asis{}-@asis{}-@asis{}total} @emph{jobs}}
+
+Provide the total number of jobs for computing ETA which is also used
+for @strong{@asis{}-@asis{}-@asis{}bar}.
+
+Without @strong{@asis{}-@asis{}-@asis{}total-jobs} GNU Parallel will read all jobs before
+starting a job. @strong{@asis{}-@asis{}-@asis{}total-jobs} is useful if the input is generated
+slowly.
+
+See also: @strong{@asis{}-@asis{}-@asis{}bar} @strong{@asis{}-@asis{}-@asis{}eta}
+
+@item @strong{@asis{}-@asis{}-@asis{}tmpdir} @emph{dirname}
+@anchor{@strong{@asis{}-@asis{}-@asis{}tmpdir} @emph{dirname}}
+
+Directory for temporary files.
+
+GNU @strong{parallel} normally buffers output into temporary files in
+/tmp. By setting @strong{@asis{}-@asis{}-@asis{}tmpdir} you can use a different dir for the
+files. Setting @strong{@asis{}-@asis{}-@asis{}tmpdir} is equivalent to setting $TMPDIR.
+
+See also: @strong{@asis{}-@asis{}-@asis{}compress} @strong{$TMPDIR} @strong{$PARALLEL_REMOTE_TMPDIR}
+
+@item @strong{@asis{}-@asis{}-@asis{}tmux} (Long beta testing)
+@anchor{@strong{@asis{}-@asis{}-@asis{}tmux} (Long beta testing)}
+
+Use @strong{tmux} for output. Start a @strong{tmux} session and run each job in a
+window in that session. No other output will be produced.
+
+See also: @strong{@asis{}-@asis{}-@asis{}tmuxpane}
+
+@item @strong{@asis{}-@asis{}-@asis{}tmuxpane} (Long beta testing)
+@anchor{@strong{@asis{}-@asis{}-@asis{}tmuxpane} (Long beta testing)}
+
+Use @strong{tmux} for output but put output into panes in the first window.
+Useful if you want to monitor the progress of less than 100 concurrent
+jobs.
+
+See also: @strong{@asis{}-@asis{}-@asis{}tmux}
+
+@item @strong{@asis{}-@asis{}-@asis{}timeout} @emph{duration}
+@anchor{@strong{@asis{}-@asis{}-@asis{}timeout} @emph{duration}}
+
+Time out for command. If the command runs for longer than @emph{duration}
+seconds it will get killed as per @strong{@asis{}-@asis{}-@asis{}term-seq}.
+
+If @emph{duration} is followed by a % then the timeout will dynamically be
+computed as a percentage of the median average runtime of successful
+jobs. Only values > 100% will make sense.
+
+@emph{duration} is in seconds, but can be postfixed with s, m, h, or d.
+
+See also: TIME POSTFIXES @strong{@asis{}-@asis{}-@asis{}term-seq} @strong{@asis{}-@asis{}-@asis{}retries}
+
+@item @strong{@asis{}-@asis{}-@asis{}verbose}
+@anchor{@strong{@asis{}-@asis{}-@asis{}verbose}}
+
+@item @strong{-t}
+@anchor{@strong{-t}}
+
+Print the job to be run on stderr (standard error).
+
+See also: @strong{-v} @strong{@asis{}-@asis{}-@asis{}interactive}
+
+@item @strong{@asis{}-@asis{}-@asis{}transfer}
+@anchor{@strong{@asis{}-@asis{}-@asis{}transfer}}
+
+Transfer files to remote computers.
+
+Shorthand for: @strong{@asis{}-@asis{}-@asis{}transferfile @{@}}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}transferfile}.
+
+@item @strong{@asis{}-@asis{}-@asis{}transferfile} @emph{filename}
+@anchor{@strong{@asis{}-@asis{}-@asis{}transferfile} @emph{filename}}
+
+@item @strong{@asis{}-@asis{}-@asis{}tf} @emph{filename}
+@anchor{@strong{@asis{}-@asis{}-@asis{}tf} @emph{filename}}
+
+Transfer @emph{filename} to remote computers.
+
+@strong{@asis{}-@asis{}-@asis{}transferfile} is used with @strong{@asis{}-@asis{}-@asis{}sshlogin} to transfer files to the
+remote computers. The files will be transferred using @strong{rsync} and
+will be put relative to the work dir.
+
+The @emph{filename} will normally contain a replacement string.
+
+If the path contains /./ the remaining path will be relative to the
+work dir (for details: see @strong{rsync}). If the work dir is
+@strong{/home/user}, the transferring will be as follows:
+
+@verbatim
+  /tmp/foo/bar   => /tmp/foo/bar
+  tmp/foo/bar    => /home/user/tmp/foo/bar
+  /tmp/./foo/bar => /home/user/foo/bar
+  tmp/./foo/bar  => /home/user/foo/bar
+@end verbatim
+
+@emph{Examples}
+
+This will transfer the file @emph{foo/bar.txt} to the computer
+@emph{server.example.com} to the file @emph{$HOME/foo/bar.txt} before running
+@strong{wc foo/bar.txt} on @emph{server.example.com}:
+
+@verbatim
+  echo foo/bar.txt | parallel --transferfile {} \
+    --sshlogin server.example.com wc
+@end verbatim
+
+This will transfer the file @emph{/tmp/foo/bar.txt} to the computer
+@emph{server.example.com} to the file @emph{/tmp/foo/bar.txt} before running
+@strong{wc /tmp/foo/bar.txt} on @emph{server.example.com}:
+
+@verbatim
+  echo /tmp/foo/bar.txt | parallel --transferfile {} \
+    --sshlogin server.example.com wc
+@end verbatim
+
+This will transfer the file @emph{/tmp/foo/bar.txt} to the computer
+@emph{server.example.com} to the file @emph{foo/bar.txt} before running
+@strong{wc ./foo/bar.txt} on @emph{server.example.com}:
+
+@verbatim
+  echo /tmp/./foo/bar.txt | parallel --transferfile {} \
+    --sshlogin server.example.com wc {= s:.*/\./:./: =}
+@end verbatim
+
+@strong{@asis{}-@asis{}-@asis{}transferfile} is often used with @strong{@asis{}-@asis{}-@asis{}return} and @strong{@asis{}-@asis{}-@asis{}cleanup}. A
+shorthand for @strong{@asis{}-@asis{}-@asis{}transferfile @{@}} is @strong{@asis{}-@asis{}-@asis{}transfer}.
+
+@strong{@asis{}-@asis{}-@asis{}transferfile} is ignored when used with @strong{@asis{}-@asis{}-@asis{}sshlogin :} or when
+not used with @strong{@asis{}-@asis{}-@asis{}sshlogin}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}workdir} @strong{@asis{}-@asis{}-@asis{}sshlogin} @strong{@asis{}-@asis{}-@asis{}basefile} @strong{@asis{}-@asis{}-@asis{}return}
+@strong{@asis{}-@asis{}-@asis{}cleanup}
+
+@item @strong{@asis{}-@asis{}-@asis{}trc} @emph{filename}
+@anchor{@strong{@asis{}-@asis{}-@asis{}trc} @emph{filename}}
+
+Transfer, Return, Cleanup. Shorthand for: @strong{@asis{}-@asis{}-@asis{}transfer} @strong{@asis{}-@asis{}-@asis{}return}
+@emph{filename} @strong{@asis{}-@asis{}-@asis{}cleanup}
+
+See also: @strong{@asis{}-@asis{}-@asis{}transfer} @strong{@asis{}-@asis{}-@asis{}return} @strong{@asis{}-@asis{}-@asis{}cleanup}
+
+@item @strong{@asis{}-@asis{}-@asis{}trim} <n|l|r|lr|rl>
+@anchor{@strong{@asis{}-@asis{}-@asis{}trim} <n|l|r|lr|rl>}
+
+Trim white space in input.
+
+@table @asis
+@item n
+@anchor{n}
+
+No trim. Input is not modified. This is the default.
+
+@item l
+@anchor{l}
+
+Left trim. Remove white space from start of input. E.g. " a bc " -> "a bc ".
+
+@item r
+@anchor{r}
+
+Right trim. Remove white space from end of input. E.g. " a bc " -> " a bc".
+
+@item lr
+@anchor{lr}
+
+@item rl
+@anchor{rl}
+
+Both trim. Remove white space from both start and end of input. E.g. "
+a bc " -> "a bc". This is the default if @strong{@asis{}-@asis{}-@asis{}colsep} is used.
+
+@end table
+
+See also: @strong{@asis{}-@asis{}-@asis{}no-run-if-empty} @strong{@{@}} @strong{@asis{}-@asis{}-@asis{}colsep}
+
+@item @strong{@asis{}-@asis{}-@asis{}ungroup}
+@anchor{@strong{@asis{}-@asis{}-@asis{}ungroup}}
+
+@item @strong{-u}
+@anchor{@strong{-u}}
+
+Ungroup output.
+
+Output is printed as soon as possible and bypasses GNU @strong{parallel}
+internal processing. This may cause output from different commands to
+be mixed thus should only be used if you do not care about the
+output. Compare these:
+
+@verbatim
+  seq 4 | parallel -j0 \
+    'sleep {};echo -n start{};sleep {};echo {}end'
+  seq 4 | parallel -u -j0 \
+    'sleep {};echo -n start{};sleep {};echo {}end'
+@end verbatim
+
+It also disables @strong{@asis{}-@asis{}-@asis{}tag}. GNU @strong{parallel} outputs faster with
+@strong{-u}. Compare the speeds of these:
+
+@verbatim
+  parallel seq ::: 300000000 >/dev/null
+  parallel -u seq ::: 300000000 >/dev/null
+  parallel --line-buffer seq ::: 300000000 >/dev/null
+@end verbatim
+
+Can be reversed with @strong{@asis{}-@asis{}-@asis{}group}.
+
+See also: @strong{@asis{}-@asis{}-@asis{}line-buffer} @strong{@asis{}-@asis{}-@asis{}group}
+
+@item @strong{@asis{}-@asis{}-@asis{}unsafe}
+@anchor{@strong{@asis{}-@asis{}-@asis{}unsafe}}
+
+GNU @strong{parallel} tries to be conservative to avoid surprising
+results. @strong{@asis{}-@asis{}-@asis{}unsafe} will allow GNU @strong{parallel} to run in environments
+and on input that are untested and thus may cause surprising results
+and even security issues, where an evil attacker can influence the
+results. Think attacks similar to Shellshock:
+https://en.wikipedia.org/wiki/Shellshock_(software_bug)
+
+If you are forced to use @strong{@asis{}-@asis{}-@asis{}unsafe} all the time for something that
+is safe, it is time to file a bug report and have a discussion how to
+make your situation well tested.
+
+@item @strong{@asis{}-@asis{}-@asis{}use-sockets-instead-of-threads}
+@anchor{@strong{@asis{}-@asis{}-@asis{}use-sockets-instead-of-threads}}
+
+See also: @strong{@asis{}-@asis{}-@asis{}use-cores-instead-of-threads}
+
+@item @strong{@asis{}-@asis{}-@asis{}use-cores-instead-of-threads}
+@anchor{@strong{@asis{}-@asis{}-@asis{}use-cores-instead-of-threads}}
+
+@item @strong{@asis{}-@asis{}-@asis{}use-cpus-instead-of-cores} (obsolete)
+@anchor{@strong{@asis{}-@asis{}-@asis{}use-cpus-instead-of-cores} (obsolete)}
+
+Determine how GNU @strong{parallel} counts the number of CPUs.
+
+GNU @strong{parallel} uses this number when the number of jobslots
+(@strong{@asis{}-@asis{}-@asis{}jobs}) is computed relative to the number of CPUs (e.g. 100% or
++1).
+
+CPUs can be counted in three different ways:
+
+@table @asis
+@item sockets
+@anchor{sockets}
+
+The number of filled CPU sockets (i.e. the number of physical chips).
+
+@item cores
+@anchor{cores}
+
+The number of physical cores (i.e. the number of physical compute
+cores).
+
+@item threads
+@anchor{threads}
+
+The number of hyperthreaded cores (i.e. the number of virtual
+cores - with some of them possibly being hyperthreaded)
+
+@end table
+
+Normally the number of CPUs is computed as the number of CPU
+threads. With @strong{@asis{}-@asis{}-@asis{}use-sockets-instead-of-threads} or
+@strong{@asis{}-@asis{}-@asis{}use-cores-instead-of-threads} you can force it to be computed as
+the number of filled sockets or number of cores instead.
+
+Most users will not need these options.
+
+@strong{@asis{}-@asis{}-@asis{}use-cpus-instead-of-cores} is a (misleading) alias for
+@strong{@asis{}-@asis{}-@asis{}use-sockets-instead-of-threads} and is kept for backwards
+compatibility.
+
+See also: @strong{@asis{}-@asis{}-@asis{}number-of-threads} @strong{@asis{}-@asis{}-@asis{}number-of-cores}
+@strong{@asis{}-@asis{}-@asis{}number-of-sockets}
+
+@item @strong{-v}
+@anchor{@strong{-v}}
+
+Verbose.
+
+Print the job to be run on stdout (standard output). Can be reversed
+with @strong{@asis{}-@asis{}-@asis{}silent}.
+
+Use @strong{-v} @strong{-v} to print the wrapping ssh command when running remotely.
+
+See also: @strong{-t}
+
+@item @strong{@asis{}-@asis{}-@asis{}version}
+@anchor{@strong{@asis{}-@asis{}-@asis{}version}}
+
+@item @strong{-V}
+@anchor{@strong{-V}}
+
+Print the version GNU @strong{parallel} and exit.
+
+@item @strong{@asis{}-@asis{}-@asis{}workdir} @emph{mydir}
+@anchor{@strong{@asis{}-@asis{}-@asis{}workdir} @emph{mydir}}
+
+@item @strong{@asis{}-@asis{}-@asis{}wd} @emph{mydir}
+@anchor{@strong{@asis{}-@asis{}-@asis{}wd} @emph{mydir}}
+
+Jobs will be run in the dir @emph{mydir}. The default is the current dir
+for the local machine, and the login dir for remote computers.
+
+Files transferred using @strong{@asis{}-@asis{}-@asis{}transferfile} and @strong{@asis{}-@asis{}-@asis{}return} will be
+relative to @emph{mydir} on remote computers.
+
+The special @emph{mydir} value @strong{...} will create working dirs under
+@strong{~/.parallel/tmp/}. If @strong{@asis{}-@asis{}-@asis{}cleanup} is given these dirs will be
+removed.
+
+The special @emph{mydir} value @strong{.} uses the current working dir.  If the
+current working dir is beneath your home dir, the value @strong{.} is
+treated as the relative path to your home dir. This means that if your
+home dir is different on remote computers (e.g. if your login is
+different) the relative path will still be relative to your home dir.
+
+To see the difference try:
+
+@verbatim
+  parallel -S server pwd ::: ""
+  parallel --wd . -S server pwd ::: ""
+  parallel --wd ... -S server pwd ::: ""
+@end verbatim
+
+@emph{mydir} can contain GNU @strong{parallel}'s replacement strings.
+
+@item @strong{@asis{}-@asis{}-@asis{}wait}
+@anchor{@strong{@asis{}-@asis{}-@asis{}wait}}
+
+Wait for all commands to complete.
+
+Used with @strong{@asis{}-@asis{}-@asis{}semaphore} or @strong{@asis{}-@asis{}-@asis{}sqlmaster}.
+
+See also: @strong{man sem}
+
+@item @strong{-X}
+@anchor{@strong{-X}}
+
+Multiple arguments with context replace. Insert as many arguments as
+the command line length permits. If multiple jobs are being run in
+parallel: distribute the arguments evenly among the jobs. Use @strong{-j1}
+to avoid this.
+
+If @strong{@{@}} is not used the arguments will be appended to the line.  If
+@strong{@{@}} is used as part of a word (like @emph{pic@{@}.jpg}) then the whole
+word will be repeated. If @strong{@{@}} is used multiple times each @strong{@{@}} will
+be replaced with the arguments.
+
+Normally @strong{-X} will do the right thing, whereas @strong{-m} can give
+unexpected results if @strong{@{@}} is used as part of a word.
+
+Support for @strong{-X} with @strong{@asis{}-@asis{}-@asis{}sshlogin} is limited and may fail.
+
+See also: @strong{-m}
+
+@item @strong{@asis{}-@asis{}-@asis{}exit}
+@anchor{@strong{@asis{}-@asis{}-@asis{}exit}}
+
+@item @strong{-x}
+@anchor{@strong{-x}}
+
+Exit if the size (see the @strong{-s} option) is exceeded.
+
+@item @strong{@asis{}-@asis{}-@asis{}xargs}
+@anchor{@strong{@asis{}-@asis{}-@asis{}xargs}}
+
+Multiple arguments. Insert as many arguments as the command line
+length permits.
+
+If @strong{@{@}} is not used the arguments will be appended to the
+line.  If @strong{@{@}} is used multiple times each @strong{@{@}} will be replaced
+with all the arguments.
+
+Support for @strong{@asis{}-@asis{}-@asis{}xargs} with @strong{@asis{}-@asis{}-@asis{}sshlogin} is limited and may fail.
+
+See also: @strong{-X}
+
+@end table
+
+@node EXAMPLES
+@chapter EXAMPLES
+
+See: @strong{man parallel_examples}
+
+@node SPREADING BLOCKS OF DATA
+@chapter SPREADING BLOCKS OF DATA
+
+@strong{@asis{}-@asis{}-@asis{}round-robin}, @strong{@asis{}-@asis{}-@asis{}pipe-part}, @strong{@asis{}-@asis{}-@asis{}shard}, @strong{@asis{}-@asis{}-@asis{}bin} and
+@strong{@asis{}-@asis{}-@asis{}group-by} are all specialized versions of @strong{@asis{}-@asis{}-@asis{}pipe}.
+
+In the following @emph{n} is the number of jobslots given by @strong{@asis{}-@asis{}-@asis{}jobs}. A
+record starts with @strong{@asis{}-@asis{}-@asis{}recstart} and ends with @strong{@asis{}-@asis{}-@asis{}recend}. It is
+typically a full line. A chunk is a number of full records that is
+approximately the size of a block. A block can contain half records, a
+chunk cannot.
+
+@strong{@asis{}-@asis{}-@asis{}pipe} starts one job per chunk. It reads blocks from stdin
+(standard input). It finds a record end near a block border and passes
+a chunk to the program.
+
+@strong{@asis{}-@asis{}-@asis{}pipe-part} starts one job per chunk - just like normal
+@strong{@asis{}-@asis{}-@asis{}pipe}. It first finds record endings near all block borders in the
+file and then starts the jobs. By using @strong{@asis{}-@asis{}-@asis{}block -1} it will set the
+block size to size-of-file/@emph{n}. Used this way it will start @emph{n}
+jobs in total.
+
+@strong{@asis{}-@asis{}-@asis{}round-robin} starts @emph{n} jobs in total. It reads a block and
+passes a chunk to whichever job is ready to read. It does not parse
+the content except for identifying where a record ends to make sure it
+only passes full records.
+
+@strong{@asis{}-@asis{}-@asis{}shard} starts @emph{n} jobs in total. It parses each line to read the
+string in the given column. Based on this string the line is passed to
+one of the @emph{n} jobs. All lines having this string will be given to the
+same jobslot.
+
+@strong{@asis{}-@asis{}-@asis{}bin} works like @strong{@asis{}-@asis{}-@asis{}shard} but the value of the column must be
+numeric and is the jobslot number it will be passed to. If the value
+is bigger than @emph{n}, then @emph{n} will be subtracted from the value until
+the value is smaller than or equal to @emph{n}.
+
+@strong{@asis{}-@asis{}-@asis{}group-by} starts one job per chunk. Record borders are not given
+by @strong{@asis{}-@asis{}-@asis{}recend}/@strong{@asis{}-@asis{}-@asis{}recstart}. Instead a record is defined by a group
+of lines having the same string in a given column. So the string of a
+given column changes at a chunk border. With @strong{@asis{}-@asis{}-@asis{}pipe} every line is
+parsed, with @strong{@asis{}-@asis{}-@asis{}pipe-part} only a few lines are parsed to find the
+chunk border.
+
+@strong{@asis{}-@asis{}-@asis{}group-by} can be combined with @strong{@asis{}-@asis{}-@asis{}round-robin} or @strong{@asis{}-@asis{}-@asis{}pipe-part}.
+
+@node TIME POSTFIXES
+@chapter TIME POSTFIXES
+
+Arguments that give a duration are given in seconds, but can be
+expressed as floats postfixed with @strong{s}, @strong{m}, @strong{h}, or @strong{d} which
+would multiply the float by 1, 60, 60*60, or 60*60*24. Thus these are
+equivalent: 100000 and 1d3.5h16.6m4s.
+
+@node UNIT PREFIX
+@chapter UNIT PREFIX
+
+Many numerical arguments in GNU @strong{parallel} can be postfixed with K,
+M, G, T, P, k, m, g, t, or p which would multiply the number with
+1024, 1048576, 1073741824, 1099511627776, 1125899906842624, 1000,
+1000000, 1000000000, 1000000000000, or 1000000000000000, respectively.
+
+You can even give it as a math expression. E.g. 1000000 can be written
+as 1M-12*2.024*2k.
+
+@node QUOTING
+@chapter QUOTING
+
+GNU @strong{parallel} is very liberal in quoting. You only need to quote
+characters that have special meaning in shell:
+
+@verbatim
+  ( ) $ ` ' " < > ; | \
+@end verbatim
+
+and depending on context these needs to be quoted, too:
+
+@verbatim
+  ~ & ! ? space * { #
+@end verbatim
+
+Therefore most people will never need more quoting than putting '\'
+in front of the special characters.
+
+Often you can simply put \' around every ':
+
+@verbatim
+  perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"' file
+@end verbatim
+
+can be quoted:
+
+@verbatim
+  parallel perl -ne \''/^\S+\s+\S+$/ and print $ARGV,"\n"'\' ::: file
+@end verbatim
+
+However, when you want to use a shell variable you need to quote the
+$-sign. Here is an example using $PARALLEL_SEQ. This variable is set
+by GNU @strong{parallel} itself, so the evaluation of the $ must be done by
+the sub shell started by GNU @strong{parallel}:
+
+@verbatim
+  seq 10 | parallel -N2 echo seq:\$PARALLEL_SEQ arg1:{1} arg2:{2}
+@end verbatim
+
+If the variable is set before GNU @strong{parallel} starts you can do this:
+
+@verbatim
+  VAR=this_is_set_before_starting
+  echo test | parallel echo {} $VAR
+@end verbatim
+
+Prints: @strong{test this_is_set_before_starting}
+
+It is a little more tricky if the variable contains more than one space in a row:
+
+@verbatim
+  VAR="two  spaces  between  each  word"
+  echo test | parallel echo {} \'"$VAR"\'
+@end verbatim
+
+Prints: @strong{test two  spaces  between  each  word}
+
+If the variable should not be evaluated by the shell starting GNU
+@strong{parallel} but be evaluated by the sub shell started by GNU
+@strong{parallel}, then you need to quote it:
+
+@verbatim
+  echo test | parallel VAR=this_is_set_after_starting \; echo {} \$VAR
+@end verbatim
+
+Prints: @strong{test this_is_set_after_starting}
+
+It is a little more tricky if the variable contains space:
+
+@verbatim
+  echo test |\
+    parallel VAR='"two  spaces  between  each  word"' echo {} \'"$VAR"\'
+@end verbatim
+
+Prints: @strong{test two  spaces  between  each  word}
+
+$$ is the shell variable containing the process id of the shell. This
+will print the process id of the shell running GNU @strong{parallel}:
+
+@verbatim
+  seq 10 | parallel echo $$
+@end verbatim
+
+And this will print the process ids of the sub shells started by GNU
+@strong{parallel}.
+
+@verbatim
+  seq 10 | parallel echo \$\$
+@end verbatim
+
+If the special characters should not be evaluated by the sub shell
+then you need to protect it against evaluation from both the shell
+starting GNU @strong{parallel} and the sub shell:
+
+@verbatim
+  echo test | parallel echo {} \\\$VAR
+@end verbatim
+
+Prints: @strong{test $VAR}
+
+GNU @strong{parallel} can protect against evaluation by the sub shell by
+using -q:
+
+@verbatim
+  echo test | parallel -q echo {} \$VAR
+@end verbatim
+
+Prints: @strong{test $VAR}
+
+This is particularly useful if you have lots of quoting. If you want
+to run a perl script like this:
+
+@verbatim
+  perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"' file
+@end verbatim
+
+It needs to be quoted like one of these:
+
+@verbatim
+  ls | parallel perl -ne '/^\\S+\\s+\\S+\$/\ and\ print\ \$ARGV,\"\\n\"'
+  ls | parallel perl -ne \''/^\S+\s+\S+$/ and print $ARGV,"\n"'\'
+@end verbatim
+
+Notice how spaces, \'s, "'s, and $'s need to be quoted. GNU
+@strong{parallel} can do the quoting by using option -q:
+
+@verbatim
+  ls | parallel -q  perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"'
+@end verbatim
+
+However, this means you cannot make the sub shell interpret special
+characters. For example because of @strong{-q} this WILL NOT WORK:
+
+@verbatim
+  ls *.gz | parallel -q "zcat {} >{.}"
+  ls *.gz | parallel -q "zcat {} | bzip2 >{.}.bz2"
+@end verbatim
+
+because > and | need to be interpreted by the sub shell.
+
+If you get errors like:
+
+@verbatim
+  sh: -c: line 0: syntax error near unexpected token
+  sh: Syntax error: Unterminated quoted string
+  sh: -c: line 0: unexpected EOF while looking for matching `''
+  sh: -c: line 1: syntax error: unexpected end of file
+  zsh:1: no matches found:
+@end verbatim
+
+then you might try using @strong{-q}.
+
+If you are using @strong{bash} process substitution like @strong{<(cat foo)} then
+you may try @strong{-q} and prepending @emph{command} with @strong{bash -c}:
+
+@verbatim
+  ls | parallel -q bash -c 'wc -c <(echo {})'
+@end verbatim
+
+Or for substituting output:
+
+@verbatim
+  ls | parallel -q bash -c \
+    'tar c {} | tee >(gzip >{}.tar.gz) | bzip2 >{}.tar.bz2'
+@end verbatim
+
+@strong{Conclusion}: If this is confusing consider avoiding having to deal
+with quoting by writing a small script or a function (remember to
+@strong{export -f} the function) and have GNU @strong{parallel} call that.
+
+@node LIST RUNNING JOBS
+@chapter LIST RUNNING JOBS
+
+If you want a list of the jobs currently running you can run:
+
+@verbatim
+  killall -USR1 parallel
+@end verbatim
+
+GNU @strong{parallel} will then print the currently running jobs on stderr
+(standard error).
+
+@node COMPLETE RUNNING JOBS BUT DO NOT START NEW JOBS
+@chapter COMPLETE RUNNING JOBS BUT DO NOT START NEW JOBS
+
+If you regret starting a lot of jobs you can simply break GNU @strong{parallel},
+but if you want to make sure you do not have half-completed jobs you
+should send the signal @strong{SIGHUP} to GNU @strong{parallel}:
+
+@verbatim
+  killall -HUP parallel
+@end verbatim
+
+This will tell GNU @strong{parallel} to not start any new jobs, but wait until
+the currently running jobs are finished before exiting.
+
+@node ENVIRONMENT VARIABLES
+@chapter ENVIRONMENT VARIABLES
+
+@table @asis
+@item $PARALLEL_HOME
+@anchor{$PARALLEL_HOME}
+
+Dir where GNU @strong{parallel} stores config files, semaphores, and caches
+information between invocations. If set to a non-existent dir, the dir
+will be created.
+
+Default: $HOME/.parallel.
+
+@item $PARALLEL_ARGHOSTGROUPS
+@anchor{$PARALLEL_ARGHOSTGROUPS}
+
+When using @strong{@asis{}-@asis{}-@asis{}hostgroups} GNU @strong{parallel} sets this to the hostgroups
+of the job.
+
+Remember to quote the $, so it gets evaluated by the correct shell. Or
+use @strong{@asis{}-@asis{}-@asis{}plus} and @{agrp@}.
+
+@item $PARALLEL_HOSTGROUPS
+@anchor{$PARALLEL_HOSTGROUPS}
+
+When using @strong{@asis{}-@asis{}-@asis{}hostgroups} GNU @strong{parallel} sets this to the hostgroups
+of the sshlogin that the job is run on.
+
+Remember to quote the $, so it gets evaluated by the correct shell. Or
+use @strong{@asis{}-@asis{}-@asis{}plus} and @{hgrp@}.
+
+@item $PARALLEL_JOBSLOT
+@anchor{$PARALLEL_JOBSLOT}
+
+Set by GNU @strong{parallel} and can be used in jobs run by GNU @strong{parallel}.
+Remember to quote the $, so it gets evaluated by the correct shell. Or
+use @strong{@asis{}-@asis{}-@asis{}plus} and @{slot@}.
+
+$PARALLEL_JOBSLOT is the jobslot of the job. It is equal to @{%@} unless
+the job is being retried. See @{%@} for details.
+
+@item $PARALLEL_PID
+@anchor{$PARALLEL_PID}
+
+Set by GNU @strong{parallel} and can be used in jobs run by GNU @strong{parallel}.
+Remember to quote the $, so it gets evaluated by the correct shell.
+
+This makes it possible for the jobs to communicate directly to GNU
+@strong{parallel}.
+
+@strong{Example:} If each of the jobs tests a solution and one of jobs finds
+the solution the job can tell GNU @strong{parallel} not to start more jobs
+by: @strong{kill -HUP $PARALLEL_PID}. This only works on the local
+computer.
+
+@item $PARALLEL_RSYNC_OPTS
+@anchor{$PARALLEL_RSYNC_OPTS}
+
+Options to pass on to @strong{rsync}. Defaults to: -rlDzR.
+
+@item $PARALLEL_SHELL
+@anchor{$PARALLEL_SHELL}
+
+Use this shell for the commands run by GNU @strong{parallel}:
+
+@itemize
+@item $PARALLEL_SHELL. If undefined use:
+
+@item The shell that started GNU @strong{parallel}. If that cannot be determined:
+
+@item $SHELL. If undefined use:
+
+@item /bin/sh
+
+@end itemize
+
+@item $PARALLEL_SSH
+@anchor{$PARALLEL_SSH}
+
+GNU @strong{parallel} defaults to using the @strong{ssh} command for remote
+access. This can be overridden with $PARALLEL_SSH, which again can be
+overridden with @strong{@asis{}-@asis{}-@asis{}ssh}. It can also be set on a per server basis
+(see @strong{@asis{}-@asis{}-@asis{}sshlogin}).
+
+@item $PARALLEL_SSHHOST
+@anchor{$PARALLEL_SSHHOST}
+
+Set by GNU @strong{parallel} and can be used in jobs run by GNU @strong{parallel}.
+Remember to quote the $, so it gets evaluated by the correct shell. Or
+use @strong{@asis{}-@asis{}-@asis{}plus} and @{host@}.
+
+$PARALLEL_SSHHOST is the host part of an sshlogin line. E.g.
+
+@verbatim
+  4//usr/bin/specialssh user@host
+@end verbatim
+
+becomes:
+
+@verbatim
+  host
+@end verbatim
+
+@item $PARALLEL_SSHLOGIN
+@anchor{$PARALLEL_SSHLOGIN}
+
+Set by GNU @strong{parallel} and can be used in jobs run by GNU @strong{parallel}.
+Remember to quote the $, so it gets evaluated by the correct shell. Or
+use @strong{@asis{}-@asis{}-@asis{}plus} and @{sshlogin@}.
+
+The value is the sshlogin line with number of threads removed. E.g.
+
+@verbatim
+  4//usr/bin/specialssh user@host
+@end verbatim
+
+becomes:
+
+@verbatim
+  /usr/bin/specialssh user@host
+@end verbatim
+
+@item $PARALLEL_SEQ
+@anchor{$PARALLEL_SEQ}
+
+Set by GNU @strong{parallel} and can be used in jobs run by GNU @strong{parallel}.
+Remember to quote the $, so it gets evaluated by the correct shell.
+
+$PARALLEL_SEQ is the sequence number of the job running.
+
+@strong{Example:}
+
+@verbatim
+  seq 10 | parallel -N2 \
+    echo seq:'$'PARALLEL_SEQ arg1:{1} arg2:{2}
+@end verbatim
+
+@{#@} is a shorthand for $PARALLEL_SEQ.
+
+@item $PARALLEL_TMUX
+@anchor{$PARALLEL_TMUX}
+
+Path to @strong{tmux}. If unset the @strong{tmux} in $PATH is used.
+
+@item $TMPDIR
+@anchor{$TMPDIR}
+
+Directory for temporary files.
+
+See also: @strong{@asis{}-@asis{}-@asis{}tmpdir}
+
+@item $PARALLEL_REMOTE_TMPDIR
+@anchor{$PARALLEL_REMOTE_TMPDIR}
+
+Directory for temporary files on remote servers.
+
+See also: @strong{@asis{}-@asis{}-@asis{}tmpdir}
+
+@item $PARALLEL
+@anchor{$PARALLEL}
+
+The environment variable $PARALLEL will be used as default options for
+GNU @strong{parallel}. If the variable contains special shell characters
+(e.g. $, *, or space) then these need to be to be escaped with \.
+
+@strong{Example:}
+
+@verbatim
+  cat list | parallel -j1 -k -v ls
+  cat list | parallel -j1 -k -v -S"myssh user@server" ls
+@end verbatim
+
+can be written as:
+
+@verbatim
+  cat list | PARALLEL="-kvj1" parallel ls
+  cat list | PARALLEL='-kvj1 -S myssh\ user@server' \
+    parallel echo
+@end verbatim
+
+Notice the \ after 'myssh' is needed because 'myssh' and 'user@@server'
+must be one argument.
+
+See also: @strong{@asis{}-@asis{}-@asis{}profile}
+
+@end table
+
+@node DEFAULT PROFILE (CONFIG FILE)
+@chapter DEFAULT PROFILE (CONFIG FILE)
+
+The global configuration file /etc/parallel/config, followed by user
+configuration file ~/.parallel/config (formerly known as .parallelrc)
+will be read in turn if they exist.  Lines starting with '#' will be
+ignored. The format can follow that of the environment variable
+$PARALLEL, but it is often easier to simply put each option on its own
+line.
+
+Options on the command line take precedence, followed by the
+environment variable $PARALLEL, user configuration file
+~/.parallel/config, and finally the global configuration file
+/etc/parallel/config.
+
+Note that no file that is read for options, nor the environment
+variable $PARALLEL, may contain retired options such as @strong{@asis{}-@asis{}-@asis{}tollef}.
+
+@node PROFILE FILES
+@chapter PROFILE FILES
+
+If @strong{@asis{}-@asis{}-@asis{}profile} set, GNU @strong{parallel} will read the profile from that
+file rather than the global or user configuration files. You can have
+multiple @strong{@asis{}-@asis{}-@asis{}profiles}.
+
+Profiles are searched for in @strong{~/.parallel}. If the name starts with
+@strong{/} it is seen as an absolute path. If the name starts with @strong{./} it
+is seen as a relative path from current dir.
+
+Example: Profile for running a command on every sshlogin in
+~/.ssh/sshlogins and prepend the output with the sshlogin:
+
+@verbatim
+  echo --tag -S .. --nonall > ~/.parallel/nonall_profile
+  parallel -J nonall_profile uptime
+@end verbatim
+
+Example: Profile for running every command with @strong{-j-1} and @strong{nice}
+
+@verbatim
+  echo -j-1 nice > ~/.parallel/nice_profile
+  parallel -J nice_profile bzip2 -9 ::: *
+@end verbatim
+
+Example: Profile for running a perl script before every command:
+
+@verbatim
+  echo "perl -e '\$a=\$\$; print \$a,\" \",'\$PARALLEL_SEQ',\" \";';" \
+    > ~/.parallel/pre_perl
+  parallel -J pre_perl echo ::: *
+@end verbatim
+
+Note how the $ and " need to be quoted using \.
+
+Example: Profile for running distributed jobs with @strong{nice} on the
+remote computers:
+
+@verbatim
+  echo -S .. nice > ~/.parallel/dist
+  parallel -J dist --trc {.}.bz2 bzip2 -9 ::: *
+@end verbatim
+
+@node EXIT STATUS
+@chapter EXIT STATUS
+
+Exit status depends on @strong{@asis{}-@asis{}-@asis{}halt-on-error} if one of these is used:
+success=X, success=Y%, fail=Y%.
+
+@table @asis
+@item 0
+@anchor{0 3}
+
+All jobs ran without error. If success=X is used: X jobs ran without
+error. If success=Y% is used: Y% of the jobs ran without error.
+
+@item 1-100
+@anchor{1-100}
+
+Some of the jobs failed. The exit status gives the number of failed
+jobs. If Y% is used the exit status is the percentage of jobs that
+failed.
+
+@item 101
+@anchor{101}
+
+More than 100 jobs failed.
+
+@item 255
+@anchor{255}
+
+Other error.
+
+@item -1 (In joblog and SQL table)
+@anchor{-1 (In joblog and SQL table)}
+
+Killed by Ctrl-C, timeout, not enough memory or similar.
+
+@item -2 (In joblog and SQL table)
+@anchor{-2 (In joblog and SQL table)}
+
+skip() was called in @strong{@{= =@}}.
+
+@item -1000 (In SQL table)
+@anchor{-1000 (In SQL table)}
+
+Job is ready to run (set by @asis{}-@asis{}-@asis{}sqlmaster).
+
+@item -1220 (In SQL table)
+@anchor{-1220 (In SQL table)}
+
+Job is taken by worker (set by @asis{}-@asis{}-@asis{}sqlworker).
+
+@end table
+
+If fail=1 is used, the exit status will be the exit status of the
+failing job.
+
+@node DIFFERENCES BETWEEN GNU Parallel AND ALTERNATIVES
+@chapter DIFFERENCES BETWEEN GNU Parallel AND ALTERNATIVES
+
+See: @strong{man parallel_alternatives}
+
+@node BUGS
+@chapter BUGS
+
+@node Quoting of newline
+@section Quoting of newline
+
+Because of the way newline is quoted this will not work:
+
+@verbatim
+  echo 1,2,3 | parallel -vkd, "echo 'a{}b'"
+@end verbatim
+
+However, these will all work:
+
+@verbatim
+  echo 1,2,3 | parallel -vkd, echo a{}b
+  echo 1,2,3 | parallel -vkd, "echo 'a'{}'b'"
+  echo 1,2,3 | parallel -vkd, "echo 'a'"{}"'b'"
+@end verbatim
+
+@node Speed
+@section Speed
+
+@node Startup
+@subsection Startup
+
+GNU @strong{parallel} is slow at starting up - around 250 ms the first time
+and 150 ms after that.
+
+@node Job startup
+@subsection Job startup
+
+Starting a job on the local machine takes around 3-10 ms. This can be
+a big overhead if the job takes very few ms to run. Often you can
+group small jobs together using @strong{-X} which will make the overhead
+less significant. Or you can run multiple GNU @strong{parallel}s as
+described in @strong{EXAMPLE: Speeding up fast jobs}.
+
+@node SSH
+@subsection SSH
+
+When using multiple computers GNU @strong{parallel} opens @strong{ssh} connections
+to them to figure out how many connections can be used reliably
+simultaneously (Namely SSHD's MaxStartups). This test is done for each
+host in serial, so if your @strong{@asis{}-@asis{}-@asis{}sshloginfile} contains many hosts it may
+be slow.
+
+If your jobs are short you may see that there are fewer jobs running
+on the remote systems than expected. This is due to time spent logging
+in and out. @strong{-M} may help here.
+
+@node Disk access
+@subsection Disk access
+
+A single disk can normally read data faster if it reads one file at a
+time instead of reading a lot of files in parallel, as this will avoid
+disk seeks. However, newer disk systems with multiple drives can read
+faster if reading from multiple files in parallel.
+
+If the jobs are of the form read-all-compute-all-write-all, so
+everything is read before anything is written, it may be faster to
+force only one disk access at the time:
+
+@verbatim
+  sem --id diskio cat file | compute | sem --id diskio cat > file
+@end verbatim
+
+If the jobs are of the form read-compute-write, so writing starts
+before all reading is done, it may be faster to force only one reader
+and writer at the time:
+
+@verbatim
+  sem --id read cat file | compute | sem --id write cat > file
+@end verbatim
+
+If the jobs are of the form read-compute-read-compute, it may be
+faster to run more jobs in parallel than the system has CPUs, as some
+of the jobs will be stuck waiting for disk access.
+
+@node @asis{}-@asis{}-@asis{}nice limits command length
+@section @asis{}-@asis{}-@asis{}nice limits command length
+
+The current implementation of @strong{@asis{}-@asis{}-@asis{}nice} is too pessimistic in the max
+allowed command length. It only uses a little more than half of what
+it could. This affects @strong{-X} and @strong{-m}. If this becomes a real problem for
+you, file a bug-report.
+
+@node Aliases and functions do not work
+@section Aliases and functions do not work
+
+If you get:
+
+@verbatim
+  Can't exec "command": No such file or directory
+@end verbatim
+
+or:
+
+@verbatim
+  open3: exec of by command failed
+@end verbatim
+
+or:
+
+@verbatim
+  /bin/bash: command: command not found
+@end verbatim
+
+it may be because @emph{command} is not known, but it could also be
+because @emph{command} is an alias or a function. If it is a function you
+need to @strong{export -f} the function first or use @strong{env_parallel}. An
+alias will only work if you use @strong{env_parallel}.
+
+@node Database with MySQL fails randomly
+@section Database with MySQL fails randomly
+
+The @strong{@asis{}-@asis{}-@asis{}sql*} options may fail randomly with MySQL. This problem does
+not exist with PostgreSQL.
+
+@node REPORTING BUGS
+@chapter REPORTING BUGS
+
+Report bugs to <parallel@@gnu.org> or
+https://savannah.gnu.org/bugs/?func=additem&group=parallel
+
+When you write your report, please keep in mind, that you must give
+the reader enough information to be able to run exactly what you
+run. So you need to include all data and programs that you use to
+show the problem.
+
+See a perfect bug report on
+https://lists.gnu.org/archive/html/bug-parallel/2015-01/msg00000.html
+
+Your bug report should always include:
+
+@itemize
+@item The error message you get (if any). If the error message is not from
+GNU @strong{parallel} you need to show why you think GNU @strong{parallel} caused
+this.
+
+@item The complete output of @strong{parallel @asis{}-@asis{}-@asis{}version}. If you are not running
+the latest released version (see https://ftp.gnu.org/gnu/parallel/) you
+should specify why you believe the problem is not fixed in that
+version.
+
+@item A minimal, complete, and verifiable example (See description on
+https://stackoverflow.com/help/mcve).
+
+It should be a complete example that others can run which shows the
+problem including all files needed to run the example. This should
+preferably be small and simple, so try to remove as many options as
+possible.
+
+A combination of @strong{yes}, @strong{seq}, @strong{cat}, @strong{echo}, @strong{wc}, and @strong{sleep}
+can reproduce most errors.
+
+If your example requires large files, see if you can make them with
+something like @strong{seq 100000000} > @strong{bigfile} or @strong{yes | head -n
+1000000000} > @strong{file}. If you need multiple columns: @strong{paste <(seq
+1000) <(seq 1000 1999)}
+
+If your example requires remote execution, see if you can use
+@strong{localhost} - maybe using another login.
+
+If you have access to a different system (maybe a VirtualBox on your
+own machine), test if your MCVE shows the problem on that system. If
+it does not, read below.
+
+@item The output of your example. If your problem is not easily reproduced
+by others, the output might help them figure out the problem.
+
+@item Whether you have watched the intro videos
+(https://www.youtube.com/playlist?list=PL284C9FF2488BC6D1), walked
+through the tutorial (man parallel_tutorial), and read the examples
+(man parallel_examples).
+
+@end itemize
+
+@node Bug dependent on environment
+@section Bug dependent on environment
+
+If you suspect the error is dependent on your environment or
+distribution, please see if you can reproduce the error on one of
+these VirtualBox images:
+https://sourceforge.net/projects/virtualboximage/files/
+https://www.osboxes.org/virtualbox-images/
+
+Specifying the name of your distribution is not enough as you may have
+installed software that is not in the VirtualBox images.
+
+If you cannot reproduce the error on any of the VirtualBox images
+above, see if you can build a VirtualBox image on which you can
+reproduce the error. If not you should assume the debugging will be
+done through you. That will put a lot more burden on you and it is
+extra important you give any information that help. In general the
+problem will be fixed faster and with much less work for you if you
+can reproduce the error on a VirtualBox - even if you have to build a
+VirtualBox image.
+
+@node In summary
+@section In summary
+
+Your report must include:
+
+@itemize
+@item @strong{parallel @asis{}-@asis{}-@asis{}version}
+
+@item output + error message
+
+@item full example including all files
+
+@item VirtualBox image, if you cannot reproduce it on other systems
+
+@end itemize
+
+@node AUTHOR
+@chapter AUTHOR
+
+When using GNU @strong{parallel} for a publication please cite:
+
+O. Tange (2011): GNU Parallel - The Command-Line Power Tool, ;login:
+The USENIX Magazine, February 2011:42-47.
+
+This helps funding further development; and it won't cost you a cent.
+If you pay 10000 EUR you should feel free to use GNU Parallel without citing.
+
+Copyright (C) 2007-10-18 Ole Tange, http://ole.tange.dk
+
+Copyright (C) 2008-2010 Ole Tange, http://ole.tange.dk
+
+Copyright (C) 2010-2025 Ole Tange, http://ole.tange.dk and Free
+Software Foundation, Inc.
+
+Parts of the manual concerning @strong{xargs} compatibility is inspired by
+the manual of @strong{xargs} from GNU findutils 4.4.2.
+
+@node LICENSE
+@chapter LICENSE
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+at your option any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+@node Documentation license I
+@section Documentation license I
+
+Permission is granted to copy, distribute and/or modify this
+documentation under the terms of the GNU Free Documentation License,
+Version 1.3 or any later version published by the Free Software
+Foundation; with no Invariant Sections, with no Front-Cover Texts, and
+with no Back-Cover Texts.  A copy of the license is included in the
+file LICENSES/GFDL-1.3-or-later.txt.
+
+@node Documentation license II
+@section Documentation license II
+
+You are free:
+
+@table @asis
+@item @strong{to Share}
+@anchor{@strong{to Share}}
+
+to copy, distribute and transmit the work
+
+@item @strong{to Remix}
+@anchor{@strong{to Remix}}
+
+to adapt the work
+
+@end table
+
+Under the following conditions:
+
+@table @asis
+@item @strong{Attribution}
+@anchor{@strong{Attribution}}
+
+You must attribute the work in the manner specified by the author or
+licensor (but not in any way that suggests that they endorse you or
+your use of the work).
+
+@item @strong{Share Alike}
+@anchor{@strong{Share Alike}}
+
+If you alter, transform, or build upon this work, you may distribute
+the resulting work only under the same, similar or a compatible
+license.
+
+@end table
+
+With the understanding that:
+
+@table @asis
+@item @strong{Waiver}
+@anchor{@strong{Waiver}}
+
+Any of the above conditions can be waived if you get permission from
+the copyright holder.
+
+@item @strong{Public Domain}
+@anchor{@strong{Public Domain}}
+
+Where the work or any of its elements is in the public domain under
+applicable law, that status is in no way affected by the license.
+
+@item @strong{Other Rights}
+@anchor{@strong{Other Rights}}
+
+In no way are any of the following rights affected by the license:
+
+@itemize
+@item Your fair dealing or fair use rights, or other applicable
+copyright exceptions and limitations;
+
+@item The author's moral rights;
+
+@item Rights other persons may have either in the work itself or in
+how the work is used, such as publicity or privacy rights.
+
+@end itemize
+
+@end table
+
+@table @asis
+@item @strong{Notice}
+@anchor{@strong{Notice}}
+
+For any reuse or distribution, you must make clear to others the
+license terms of this work.
+
+@end table
+
+A copy of the full license is included in the file as
+LICENCES/CC-BY-SA-4.0.txt
+
+@node DEPENDENCIES
+@chapter DEPENDENCIES
+
+GNU @strong{parallel} uses Perl, and the Perl modules Getopt::Long,
+IPC::Open3, Symbol, IO::File, POSIX, and File::Temp.
+
+For @strong{@asis{}-@asis{}-@asis{}csv} it uses the Perl module Text::CSV.
+
+For remote usage it uses @strong{rsync} with @strong{ssh}.
+
+@node SEE ALSO
+@chapter SEE ALSO
+
+@strong{parallel_tutorial}(1), @strong{env_parallel}(1), @strong{parset}(1),
+@strong{parsort}(1), @strong{parallel_alternatives}(1), @strong{parallel_design}(7),
+@strong{niceload}(1), @strong{sql}(1), @strong{ssh}(1), @strong{ssh-agent}(1), @strong{sshpass}(1),
+@strong{ssh-copy-id}(1), @strong{rsync}(1)
+
+@bye

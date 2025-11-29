@@ -1,0 +1,1959 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>GNU Parallel examples</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body>
+
+
+
+<ul id="index">
+  <li><a href="#GNU-PARALLEL-EXAMPLES">GNU PARALLEL EXAMPLES</a>
+    <ul>
+      <li><a href="#EXAMPLE%3A-Working-as-xargs--n1.-Argument-appending">EXAMPLE: Working as xargs -n1. Argument appending</a></li>
+      <li><a href="#EXAMPLE%3A-Reading-arguments-from-command-line">EXAMPLE: Reading arguments from command line</a></li>
+      <li><a href="#EXAMPLE%3A-Running-full-commands-in-parallel">EXAMPLE: Running full commands in parallel</a></li>
+      <li><a href="#EXAMPLE%3A-Inserting-multiple-arguments">EXAMPLE: Inserting multiple arguments</a></li>
+      <li><a href="#EXAMPLE%3A-Context-replace">EXAMPLE: Context replace</a></li>
+      <li><a href="#EXAMPLE%3A-Compute-intensive-jobs-and-substitution">EXAMPLE: Compute intensive jobs and substitution</a></li>
+      <li><a href="#EXAMPLE%3A-Substitution-and-redirection">EXAMPLE: Substitution and redirection</a></li>
+      <li><a href="#EXAMPLE%3A-Composed-commands">EXAMPLE: Composed commands</a></li>
+      <li><a href="#EXAMPLE%3A-Composed-command-with-perl-replacement-string">EXAMPLE: Composed command with perl replacement string</a></li>
+      <li><a href="#EXAMPLE%3A-Composed-command-with-multiple-input-sources">EXAMPLE: Composed command with multiple input sources</a></li>
+      <li><a href="#EXAMPLE%3A-Match-parts-of-input-source">EXAMPLE: Match parts of input source</a></li>
+      <li><a href="#EXAMPLE%3A-Replacement-fields-from-CSV-file-with-headers">EXAMPLE: Replacement fields from CSV file with headers</a></li>
+      <li><a href="#EXAMPLE%3A-Calling-Bash-functions">EXAMPLE: Calling Bash functions</a></li>
+      <li><a href="#EXAMPLE%3A-Function-tester">EXAMPLE: Function tester</a></li>
+      <li><a href="#EXAMPLE%3A-Identify-few-failing-jobs">EXAMPLE: Identify few failing jobs</a></li>
+      <li><a href="#EXAMPLE%3A-Continously-show-the-latest-line-of-output">EXAMPLE: Continously show the latest line of output</a></li>
+      <li><a href="#EXAMPLE%3A-Log-rotate">EXAMPLE: Log rotate</a></li>
+      <li><a href="#EXAMPLE%3A-Simple-network-scanner">EXAMPLE: Simple network scanner</a></li>
+      <li><a href="#EXAMPLE%3A-Removing-file-extension-when-processing-files">EXAMPLE: Removing file extension when processing files</a></li>
+      <li><a href="#EXAMPLE%3A-Replacing-parts-of-file-names">EXAMPLE: Replacing parts of file names</a></li>
+      <li><a href="#EXAMPLE%3A-Removing-strings-from-the-argument">EXAMPLE: Removing strings from the argument</a></li>
+      <li><a href="#EXAMPLE%3A-Download-24-images-for-each-of-the-past-30-days">EXAMPLE: Download 24 images for each of the past 30 days</a></li>
+      <li><a href="#EXAMPLE%3A-Download-world-map-from-NASA">EXAMPLE: Download world map from NASA</a></li>
+      <li><a href="#EXAMPLE%3A-Download-Apollo-11-images-from-NASA-using-jq">EXAMPLE: Download Apollo-11 images from NASA using jq</a></li>
+      <li><a href="#EXAMPLE%3A-Download-video-playlist-in-parallel">EXAMPLE: Download video playlist in parallel</a></li>
+      <li><a href="#EXAMPLE%3A-Prepend-last-modified-date-ISO8601-to-file-name">EXAMPLE: Prepend last modified date (ISO8601) to file name</a></li>
+      <li><a href="#EXAMPLE%3A-Save-output-in-ISO8601-dirs">EXAMPLE: Save output in ISO8601 dirs</a></li>
+      <li><a href="#EXAMPLE%3A-Digital-clock-with-blinking">EXAMPLE: Digital clock with &quot;blinking&quot; :</a></li>
+      <li><a href="#EXAMPLE%3A-Aggregating-content-of-files">EXAMPLE: Aggregating content of files</a></li>
+      <li><a href="#EXAMPLE%3A-Breadth-first-parallel-dir-crawler">EXAMPLE: Breadth first parallel dir crawler</a></li>
+      <li><a href="#EXAMPLE%3A-Breadth-first-parallel-web-crawler-mirrorer">EXAMPLE: Breadth first parallel web crawler/mirrorer</a></li>
+      <li><a href="#EXAMPLE%3A-Process-files-from-a-tar-file-while-unpacking">EXAMPLE: Process files from a tar file while unpacking</a></li>
+      <li><a href="#EXAMPLE%3A-Rewriting-a-for-loop-and-a-while-read-loop">EXAMPLE: Rewriting a for-loop and a while-read-loop</a></li>
+      <li><a href="#EXAMPLE%3A-Rewriting-nested-for-loops">EXAMPLE: Rewriting nested for-loops</a></li>
+      <li><a href="#EXAMPLE%3A-Finding-the-lowest-difference-between-files">EXAMPLE: Finding the lowest difference between files</a></li>
+      <li><a href="#EXAMPLE%3A-for-loops-with-column-names">EXAMPLE: for-loops with column names</a></li>
+      <li><a href="#EXAMPLE%3A-All-combinations-in-a-list">EXAMPLE: All combinations in a list</a></li>
+      <li><a href="#EXAMPLE%3A-From-a-to-b-and-b-to-c">EXAMPLE: From a to b and b to c</a></li>
+      <li><a href="#EXAMPLE%3A-Count-the-differences-between-all-files-in-a-dir">EXAMPLE: Count the differences between all files in a dir</a></li>
+      <li><a href="#EXAMPLE%3A-Speeding-up-fast-jobs">EXAMPLE: Speeding up fast jobs</a></li>
+      <li><a href="#EXAMPLE%3A-Using-shell-variables">EXAMPLE: Using shell variables</a></li>
+      <li><a href="#EXAMPLE%3A-Group-output-lines">EXAMPLE: Group output lines</a></li>
+      <li><a href="#EXAMPLE%3A-Tag-output-lines">EXAMPLE: Tag output lines</a></li>
+      <li><a href="#EXAMPLE%3A-Colorize-output">EXAMPLE: Colorize output</a></li>
+      <li><a href="#EXAMPLE%3A-Keep-order-of-output-same-as-order-of-input">EXAMPLE: Keep order of output same as order of input</a></li>
+      <li><a href="#EXAMPLE%3A-Keep-order-but-make-job-1-output-fast">EXAMPLE: Keep order, but make job 1 output fast</a></li>
+      <li><a href="#EXAMPLE%3A-Parallel-grep">EXAMPLE: Parallel grep</a></li>
+      <li><a href="#EXAMPLE%3A-Grepping-n-lines-for-m-regular-expressions">EXAMPLE: Grepping n lines for m regular expressions.</a>
+        <ul>
+          <li><a href="#Limiting-factor%3A-RAM">Limiting factor: RAM</a></li>
+          <li><a href="#Limiting-factor%3A-CPU">Limiting factor: CPU</a></li>
+          <li><a href="#Bigger-problem">Bigger problem</a></li>
+        </ul>
+      </li>
+      <li><a href="#EXAMPLE%3A-Using-remote-computers">EXAMPLE: Using remote computers</a></li>
+      <li><a href="#EXAMPLE%3A-Transferring-of-files">EXAMPLE: Transferring of files</a></li>
+      <li><a href="#EXAMPLE%3A-Advanced-file-transfer">EXAMPLE: Advanced file transfer</a></li>
+      <li><a href="#EXAMPLE%3A-Distributing-work-to-local-and-remote-computers">EXAMPLE: Distributing work to local and remote computers</a></li>
+      <li><a href="#EXAMPLE%3A-Running-the-same-command-on-remote-computers">EXAMPLE: Running the same command on remote computers</a></li>
+      <li><a href="#EXAMPLE%3A-Running-sudo-on-remote-computers">EXAMPLE: Running &#39;sudo&#39; on remote computers</a></li>
+      <li><a href="#EXAMPLE%3A-Using-remote-computers-behind-NAT-wall">EXAMPLE: Using remote computers behind NAT wall</a>
+        <ul>
+          <li><a href="#No-jumphost-but-port-forwards">No jumphost, but port forwards</a></li>
+          <li><a href="#No-jumphost-no-port-forwards">No jumphost, no port forwards</a></li>
+        </ul>
+      </li>
+      <li><a href="#EXAMPLE%3A-Use-sshpass-with-ssh">EXAMPLE: Use sshpass with ssh</a></li>
+      <li><a href="#EXAMPLE%3A-Use-outrun-instead-of-ssh">EXAMPLE: Use outrun instead of ssh</a></li>
+      <li><a href="#EXAMPLE%3A-Slurm-cluster">EXAMPLE: Slurm cluster</a></li>
+      <li><a href="#EXAMPLE%3A-Parallelizing-rsync">EXAMPLE: Parallelizing rsync</a></li>
+      <li><a href="#EXAMPLE%3A-Use-multiple-inputs-in-one-command">EXAMPLE: Use multiple inputs in one command</a></li>
+      <li><a href="#EXAMPLE%3A-Use-a-table-as-input">EXAMPLE: Use a table as input</a></li>
+      <li><a href="#EXAMPLE%3A-Output-to-database">EXAMPLE: Output to database</a></li>
+      <li><a href="#EXAMPLE%3A-Output-to-CSV-file-for-R">EXAMPLE: Output to CSV-file for R</a></li>
+      <li><a href="#EXAMPLE%3A-Use-XML-as-input">EXAMPLE: Use XML as input</a></li>
+      <li><a href="#EXAMPLE%3A-Run-the-same-command-10-times">EXAMPLE: Run the same command 10 times</a></li>
+      <li><a href="#EXAMPLE%3A-Working-as-cat-sh.-Resource-inexpensive-jobs-and-evaluation">EXAMPLE: Working as cat | sh. Resource inexpensive jobs and evaluation</a></li>
+      <li><a href="#EXAMPLE%3A-Call-program-with-FASTA-sequence">EXAMPLE: Call program with FASTA sequence</a></li>
+      <li><a href="#EXAMPLE%3A-Call-program-with-interleaved-FASTQ-records">EXAMPLE: Call program with interleaved FASTQ records</a></li>
+      <li><a href="#EXAMPLE%3A-Processing-a-big-file-using-more-CPUs">EXAMPLE: Processing a big file using more CPUs</a></li>
+      <li><a href="#EXAMPLE%3A-Grouping-input-lines">EXAMPLE: Grouping input lines</a></li>
+      <li><a href="#EXAMPLE%3A-Running-more-than-250-jobs-workaround">EXAMPLE: Running more than 250 jobs workaround</a></li>
+      <li><a href="#EXAMPLE%3A-Working-as-mutex-and-counting-semaphore">EXAMPLE: Working as mutex and counting semaphore</a></li>
+      <li><a href="#EXAMPLE%3A-Mutex-for-a-script">EXAMPLE: Mutex for a script</a></li>
+      <li><a href="#EXAMPLE%3A-Start-editor-with-file-names-from-stdin-standard-input">EXAMPLE: Start editor with file names from stdin (standard input)</a></li>
+      <li><a href="#EXAMPLE%3A-Running-sudo">EXAMPLE: Running sudo</a></li>
+      <li><a href="#EXAMPLE%3A-Run-ping-in-parallel">EXAMPLE: Run ping in parallel</a></li>
+      <li><a href="#EXAMPLE%3A-GNU-Parallel-as-queue-system-batch-manager">EXAMPLE: GNU Parallel as queue system/batch manager</a></li>
+      <li><a href="#EXAMPLE%3A-GNU-Parallel-as-dir-processor">EXAMPLE: GNU Parallel as dir processor</a></li>
+      <li><a href="#EXAMPLE%3A-Locate-the-missing-package">EXAMPLE: Locate the missing package</a></li>
+    </ul>
+  </li>
+  <li><a href="#AUTHOR">AUTHOR</a></li>
+  <li><a href="#LICENSE">LICENSE</a>
+    <ul>
+      <li><a href="#Documentation-license-I">Documentation license I</a></li>
+      <li><a href="#Documentation-license-II">Documentation license II</a></li>
+    </ul>
+  </li>
+  <li><a href="#SEE-ALSO">SEE ALSO</a></li>
+</ul>
+
+<h1 id="GNU-PARALLEL-EXAMPLES">GNU PARALLEL EXAMPLES</h1>
+
+<h2 id="EXAMPLE:-Working-as-xargs--n1.-Argument-appending">EXAMPLE: Working as xargs -n1. Argument appending</h2>
+
+<p>GNU <b>parallel</b> can work similar to <b>xargs -n1</b>.</p>
+
+<p>To compress all html files using <b>gzip</b> run:</p>
+
+<pre><code>find . -name &#39;*.html&#39; | parallel gzip --best</code></pre>
+
+<p>If the file names may contain a newline use <b>-0</b>. Substitute FOO BAR with FUBAR in all files in this dir and subdirs:</p>
+
+<pre><code>find . -type f -print0 | \
+  parallel -q0 perl -i -pe &#39;s/FOO BAR/FUBAR/g&#39;</code></pre>
+
+<p>Note <b>-q</b> is needed because of the space in &#39;FOO BAR&#39;.</p>
+
+<h2 id="EXAMPLE:-Reading-arguments-from-command-line">EXAMPLE: Reading arguments from command line</h2>
+
+<p>GNU <b>parallel</b> can take the arguments from command line instead of stdin (standard input). To compress all html files in the current dir using <b>gzip</b> run:</p>
+
+<pre><code>parallel gzip --best ::: *.html</code></pre>
+
+<p>To convert *.wav to *.mp3 using LAME running one process per CPU run:</p>
+
+<pre><code>parallel lame {} -o {.}.mp3 ::: *.wav</code></pre>
+
+<h2 id="EXAMPLE:-Running-full-commands-in-parallel">EXAMPLE: Running full commands in parallel</h2>
+
+<p>If there is no command given to GNU <b>parallel</b>, then the arguments are treated as a command line.</p>
+
+<p>To run <b>gzip foo</b> and <b>bzip2 bar</b> in parallel run:</p>
+
+<pre><code>parallel ::: &quot;gzip foo&quot; &quot;bzip2 bar&quot;</code></pre>
+
+<p>or:</p>
+
+<pre><code>(echo &quot;gzip foo&quot;; echo &quot;bzip2 bar&quot;) | parallel</code></pre>
+
+<h2 id="EXAMPLE:-Inserting-multiple-arguments">EXAMPLE: Inserting multiple arguments</h2>
+
+<p>When moving a lot of files like this: <b>mv *.log destdir</b> you will sometimes get the error:</p>
+
+<pre><code>bash: /bin/mv: Argument list too long</code></pre>
+
+<p>because there are too many files. You can instead do:</p>
+
+<pre><code>ls | grep -E &#39;\.log$&#39; | parallel mv {} destdir</code></pre>
+
+<p>This will run <b>mv</b> for each file. It can be done faster if <b>mv</b> gets as many arguments that will fit on the line:</p>
+
+<pre><code>ls | grep -E &#39;\.log$&#39; | parallel -m mv {} destdir</code></pre>
+
+<p>In many shells you can also use <b>printf</b>:</p>
+
+<pre><code>printf &#39;%s\0&#39; *.log | parallel -0 -m mv {} destdir</code></pre>
+
+<h2 id="EXAMPLE:-Context-replace">EXAMPLE: Context replace</h2>
+
+<p>To remove the files <i>pict0000.jpg</i> .. <i>pict9999.jpg</i> you could do:</p>
+
+<pre><code>seq -w 0 9999 | parallel rm pict{}.jpg</code></pre>
+
+<p>You could also do:</p>
+
+<pre><code>seq -w 0 9999 | perl -pe &#39;s/(.*)/pict$1.jpg/&#39; | parallel -m rm</code></pre>
+
+<p>The first will run <b>rm</b> 10000 times, while the last will only run <b>rm</b> as many times needed to keep the command line length short enough to avoid <b>Argument list too long</b> (it typically runs 1-2 times).</p>
+
+<p>You could also run:</p>
+
+<pre><code>seq -w 0 9999 | parallel -X rm pict{}.jpg</code></pre>
+
+<p>This will also only run <b>rm</b> as many times needed to keep the command line length short enough.</p>
+
+<h2 id="EXAMPLE:-Compute-intensive-jobs-and-substitution">EXAMPLE: Compute intensive jobs and substitution</h2>
+
+<p>If ImageMagick is installed this will generate a thumbnail of a jpg file:</p>
+
+<pre><code>convert -geometry 120 foo.jpg thumb_foo.jpg</code></pre>
+
+<p>This will run with number-of-cpus jobs in parallel for all jpg files in a directory:</p>
+
+<pre><code>ls *.jpg | parallel convert -geometry 120 {} thumb_{}</code></pre>
+
+<p>To do it recursively use <b>find</b>:</p>
+
+<pre><code>find . -name &#39;*.jpg&#39; | \
+  parallel convert -geometry 120 {} {}_thumb.jpg</code></pre>
+
+<p>Notice how the argument has to start with <b>{}</b> as <b>{}</b> will include path (e.g. running <b>convert -geometry 120 ./foo/bar.jpg thumb_./foo/bar.jpg</b> would clearly be wrong). The command will generate files like ./foo/bar.jpg_thumb.jpg.</p>
+
+<p>Use <b>{.}</b> to avoid the extra .jpg in the file name. This command will make files like ./foo/bar_thumb.jpg:</p>
+
+<pre><code>find . -name &#39;*.jpg&#39; | \
+  parallel convert -geometry 120 {} {.}_thumb.jpg</code></pre>
+
+<h2 id="EXAMPLE:-Substitution-and-redirection">EXAMPLE: Substitution and redirection</h2>
+
+<p>This will generate an uncompressed version of .gz-files next to the .gz-file:</p>
+
+<pre><code>parallel zcat {} &quot;&gt;&quot;{.} ::: *.gz</code></pre>
+
+<p>Quoting of &gt; is necessary to postpone the redirection. Another solution is to quote the whole command:</p>
+
+<pre><code>parallel &quot;zcat {} &gt;{.}&quot; ::: *.gz</code></pre>
+
+<p>Other special shell characters (such as * ; $ &gt; &lt; | &gt;&gt; &lt;&lt;) also need to be put in quotes, as they may otherwise be interpreted by the shell and not given to GNU <b>parallel</b>.</p>
+
+<h2 id="EXAMPLE:-Composed-commands">EXAMPLE: Composed commands</h2>
+
+<p>A job can consist of several commands. This will print the number of files in each directory:</p>
+
+<pre><code>ls | parallel &#39;echo -n {}&quot; &quot;; ls {}|wc -l&#39;</code></pre>
+
+<p>To put the output in a file called &lt;name&gt;.dir:</p>
+
+<pre><code>ls | parallel &#39;(echo -n {}&quot; &quot;; ls {}|wc -l) &gt;{}.dir&#39;</code></pre>
+
+<p>Even small shell scripts can be run by GNU <b>parallel</b>:</p>
+
+<pre><code>find . | parallel &#39;a={}; name=${a##*/};&#39; \
+  &#39;upper=$(echo &quot;$name&quot; | tr &quot;[:lower:]&quot; &quot;[:upper:]&quot;);&#39;\
+  &#39;echo &quot;$name - $upper&quot;&#39;
+
+ls | parallel &#39;mv {} &quot;$(echo {} | tr &quot;[:upper:]&quot; &quot;[:lower:]&quot;)&quot;&#39;</code></pre>
+
+<p>Given a list of URLs, list all URLs that fail to download. Print the line number and the URL.</p>
+
+<pre><code>cat urlfile | parallel &quot;wget {} 2&gt;/dev/null || grep -n {} urlfile&quot;</code></pre>
+
+<p>Create a mirror directory with the same file names except all files and symlinks are empty files.</p>
+
+<pre><code>cp -rs /the/source/dir mirror_dir
+find mirror_dir -type l | parallel -m rm {} &#39;&amp;&amp;&#39; touch {}</code></pre>
+
+<p>Find the files in a list that do not exist</p>
+
+<pre><code>cat file_list | parallel &#39;if [ ! -e {} ] ; then echo {}; fi&#39;</code></pre>
+
+<h2 id="EXAMPLE:-Composed-command-with-perl-replacement-string">EXAMPLE: Composed command with perl replacement string</h2>
+
+<p>You have a bunch of file. You want them sorted into dirs. The dir of each file should be named the first letter of the file name.</p>
+
+<pre><code>parallel &#39;mkdir -p {=s/(.).*/$1/=}; mv {} {=s/(.).*/$1/=}&#39; ::: *</code></pre>
+
+<p>In practice you would probably not use a perl replacement string but instead <b>--match</b>:</p>
+
+<pre><code>parallel --match &#39;(.)&#39; &#39;mkdir -p {1.1} &amp;&amp; mv {} {1.1}&#39; ::: *</code></pre>
+
+<h2 id="EXAMPLE:-Composed-command-with-multiple-input-sources">EXAMPLE: Composed command with multiple input sources</h2>
+
+<p>You have a dir with files named as 24 hours in 5 minute intervals: 00:00, 00:05, 00:10 .. 23:55. You want to find the files missing:</p>
+
+<pre><code>parallel [ -f {1}:{2} ] &quot;||&quot; echo {1}:{2} does not exist \
+  ::: {00..23} ::: {00..55..5}</code></pre>
+
+<h2 id="EXAMPLE:-Match-parts-of-input-source">EXAMPLE: Match parts of input source</h2>
+
+<p>Match first initial and last name:</p>
+
+<pre><code>parallel --match &#39;(.).* (.*)&#39; echo {1.1}. {1.2} \
+  ::: &quot;Arthur Dent&quot; &quot;Ford Prefect&quot; &quot;Tricia McMillan&quot; &quot;Zaphod Beeblebrox&quot;</code></pre>
+
+<p>Re-arrange (stupid) US date format into (nice) ISO-8601:</p>
+
+<pre><code>parallel --match &#39;(.*)/(.*)/(.*)&#39; echo {1.3}-{1.1:%02d}-{1.2:%02d} \
+  ::: 12/31/1969 1/19/2038 6/1/2002</code></pre>
+
+<p>Match url into domain and path:</p>
+
+<pre><code>parallel --match &#39;https://(.*?)/(.*)&#39; echo Domain: {1.1} Path: {1.2} \
+  ::: https://example.com/dir/page https://gnu.org/s/parallel</code></pre>
+
+<p>Get URLs into dirs named by 2nd level domain name, e.g. https://www.gnu.org/s/parallel will be put into the dir gnu.org.</p>
+
+<pre><code>cat urls | parallel --match &#39;//[^/]*?([^/.]+\.[^/.]+)/&#39; \
+  &#39;mkdir -p {1.1} &amp;&amp; cd {1.1} &amp;&amp; wget {}&#39;</code></pre>
+
+<p>Match host.domain:port from a log file:</p>
+
+<pre><code>cat log |
+  parallel --match &#39;\b([a-z0-9.]+):(\d+)\b&#39; echo host:{1.1} port:{1.2}</code></pre>
+
+<p>Reorder comma-separated values:</p>
+
+<pre><code>parallel --match &#39;(.*),(.*)&#39; echo Second: {1.2}, First: {1.1} \
+  ::: &quot;Arthur,Babel fish&quot; &quot;Adams,Betelgeuse&quot; &quot;Arcturan,Bistro&quot;</code></pre>
+
+<p>Capitalize word:</p>
+
+<pre><code>parallel --match &#39;([a-z])([a-z]*) ([a-z])([a-z]*)&#39; \
+  echo &#39;{=1.1 $_=uc($_) =}{1.2} {=1.3 $_=uc($_) =}{1.4}&#39; \
+  ::: &quot;pan galactic&quot; &quot;gargle blaster&quot;</code></pre>
+
+<p>Make an international dialing prefix table:</p>
+
+<pre><code>dial=(
+  &quot;DK(Denmark) 00,45&quot;
+  &quot;US(United States) 011,1&quot;
+  &quot;JP(Japan) 010,81&quot;
+  &quot;AU(Australia) 0011,61&quot;
+  &quot;CA(Canada) 011,1&quot;
+  &quot;RU(Russia) 810,7&quot;
+  &quot;TH(Thailand) 001,66&quot;
+  &quot;TW(Taiwan) 002,886&quot;
+)
+parallel --match &#39;(.*)\((.*)\) (.*),(.*)&#39; --match +1 \
+  echo From {1.1}/{1.2} to {2.1}/{2.2} dial {1.3}-{2.4} \
+  ::: &quot;${dial[@]}&quot; ::: &quot;${dial[@]}&quot;</code></pre>
+
+<p>Note how input source 2 reuses the <b>--match</b> from input source 1.</p>
+
+<h2 id="EXAMPLE:-Replacement-fields-from-CSV-file-with-headers">EXAMPLE: Replacement fields from CSV file with headers</h2>
+
+<p>This is an advanced example. You have:</p>
+
+<pre><code>Date;Name;Location
+3/8/1978;&quot;Beeblebrox; Zaphod&quot;;&quot;Betelgeuse V&quot;
+10/12/1979;&quot;Dent; Arthur&quot;;Earth
+1/5/1981;Slartibartfast;Magrathea</code></pre>
+
+<p>You want:</p>
+
+<pre><code>Z. Beeblebrox: 1978-03-08/BET
+A. Dent: 1979-10-12/EAR
+Slartibartfast: 1981-01-05/MAG</code></pre>
+
+<p>Run:</p>
+
+<pre><code>parallel --csv --colsep &#39;;&#39; --header : --match &quot;(\d+)/(\d+)/(\d+)&quot; \
+  --match &quot;^([^;]+)(; (.))?&quot; --match &quot;(...)&quot;   \
+  echo &#39;{=Name.3 s/(.)/$1. /;=}&#39;{Name.1}: \
+    {Date.3}-{Date.1:%02d}-{Date.2:%02d}/&#39;{=Location.1 $_=uc =}&#39; \
+  :::: people.csv</code></pre>
+
+<p><b>--csv</b> parses the input as CSV with <b>--colsep ;</b> as the separator - dealing correctly with quoted strings. The input is split into 3 columns. <b>--header :</b> makes the columns available as <b>{</b><i>columnname</i><b>}</b>. Each column has their corresponding <b>--match</b> so each field can be accessed as <b>{</b><i>columnname</i>.<i>#</i><b>}</b>. <b>s/(.)/$1. /</b> is a perl expression that appends &quot;. &quot; if the name has an initial. <b>:%02d</b> formats single digits as two digits. <b>uc</b> upper cases the argument.</p>
+
+<h2 id="EXAMPLE:-Calling-Bash-functions">EXAMPLE: Calling Bash functions</h2>
+
+<p>If the composed command is longer than a line, it becomes hard to read. In Bash you can use functions. Just remember to <b>export -f</b> the function.</p>
+
+<pre><code>doit() {
+  echo Doing it for $1
+  sleep 2
+  echo Done with $1
+}
+export -f doit
+parallel doit ::: 1 2 3
+
+doubleit() {
+  echo Doing it for $1 $2
+  sleep 2
+  echo Done with $1 $2
+}
+export -f doubleit
+parallel doubleit ::: 1 2 3 ::: a b</code></pre>
+
+<p>To do this on remote servers you need to transfer the function using <b>--env</b>:</p>
+
+<pre><code>parallel --env doit -S server doit ::: 1 2 3
+parallel --env doubleit -S server doubleit ::: 1 2 3 ::: a b</code></pre>
+
+<p>If your environment (aliases, variables, and functions) is small you can copy the full environment without having to <b>export -f</b> anything. See <b>env_parallel</b>.</p>
+
+<h2 id="EXAMPLE:-Function-tester">EXAMPLE: Function tester</h2>
+
+<p>To test a program with different parameters:</p>
+
+<pre><code>tester() {
+  if (eval &quot;$@&quot;) &gt;&amp;/dev/null; then
+    perl -e &#39;printf &quot;\033[30;102m[ OK ]\033[0m @ARGV\n&quot;&#39; &quot;$@&quot;
+  else
+    perl -e &#39;printf &quot;\033[30;101m[FAIL]\033[0m @ARGV\n&quot;&#39; &quot;$@&quot;
+  fi
+}
+export -f tester
+parallel tester my_program ::: arg1 arg2
+parallel tester exit ::: 1 0 2 0</code></pre>
+
+<p>If <b>my_program</b> fails a red FAIL will be printed followed by the failing command; otherwise a green OK will be printed followed by the command.</p>
+
+<h2 id="EXAMPLE:-Identify-few-failing-jobs">EXAMPLE: Identify few failing jobs</h2>
+
+<p><b>--bar</b> works best if jobs have no output. If the failing jobs have output you can identify the jobs like this:</p>
+
+<pre><code>job-with-few-failures() {
+    # Force reproducibility
+    RANDOM=$1
+    # This fails 1% (328 of 32768)
+    if [ $RANDOM -lt 328 ] ; then
+      echo Failed $1
+    fi
+}
+export -f job-with-few-failures
+seq 1000 | parallel --bar --tag job-with-few-failures</code></pre>
+
+<h2 id="EXAMPLE:-Continously-show-the-latest-line-of-output">EXAMPLE: Continously show the latest line of output</h2>
+
+<p>It can be useful to monitor the output of running jobs.</p>
+
+<p>This shows the most recent output line until a job finishes. After which the output of the job is printed in full:</p>
+
+<pre><code>parallel &#39;{} | tee &gt;(cat &gt;&amp;3)&#39; ::: &#39;command 1&#39; &#39;command 2&#39; \
+  3&gt; &gt;(perl -ne &#39;$|=1;chomp;printf&quot;%.&#39;$COLUMNS&#39;s\r&quot;,$_.&quot; &quot;x100&#39;)</code></pre>
+
+<h2 id="EXAMPLE:-Log-rotate">EXAMPLE: Log rotate</h2>
+
+<p>Log rotation renames a logfile to an extension with a higher number: log.1 becomes log.2, log.2 becomes log.3, and so on. The oldest log is removed. To avoid overwriting files the process starts backwards from the high number to the low number. This will keep 10 old versions of the log:</p>
+
+<pre><code>seq 9 -1 1 | parallel -j1 mv log.{} log.&#39;{= $_++ =}&#39;
+mv log log.1</code></pre>
+
+<h2 id="EXAMPLE:-Simple-network-scanner">EXAMPLE: Simple network scanner</h2>
+
+<p><b>prips</b> can generate IP-addresses from CIDR notation. With GNU <b>parallel</b> you can build a simple network scanner to see which addresses respond to <b>ping</b>:</p>
+
+<pre><code>prips 130.229.16.0/20 | \
+  parallel --timeout 2 -j0 \
+    &#39;ping -c 1 {} &gt;/dev/null &amp;&amp; echo {}&#39; 2&gt;/dev/null</code></pre>
+
+<h2 id="EXAMPLE:-Removing-file-extension-when-processing-files">EXAMPLE: Removing file extension when processing files</h2>
+
+<p>When processing files removing the file extension using <b>{.}</b> is often useful.</p>
+
+<p>Create a directory for each zip-file and unzip it in that dir:</p>
+
+<pre><code>parallel &#39;mkdir {.}; cd {.}; unzip ../{}&#39; ::: *.zip</code></pre>
+
+<p>Recompress all .gz files in current directory using <b>bzip2</b> running 1 job per CPU in parallel:</p>
+
+<pre><code>parallel &quot;zcat {} | bzip2 &gt;{.}.bz2 &amp;&amp; rm {}&quot; ::: *.gz</code></pre>
+
+<p>Convert all WAV files to MP3 using LAME:</p>
+
+<pre><code>find sounddir -type f -name &#39;*.wav&#39; | parallel lame {} -o {.}.mp3</code></pre>
+
+<p>Put all converted in the same directory:</p>
+
+<pre><code>find sounddir -type f -name &#39;*.wav&#39; | \
+  parallel lame {} -o mydir/{/.}.mp3</code></pre>
+
+<h2 id="EXAMPLE:-Replacing-parts-of-file-names">EXAMPLE: Replacing parts of file names</h2>
+
+<p>If you deal with paired end reads, you will have files like barcode1_R1.fq.gz, barcode1_R2.fq.gz, barcode2_R1.fq.gz, and barcode2_R2.fq.gz.</p>
+
+<p>You want barcode<i>N</i>_R1 to be processed with barcode<i>N</i>_R2.</p>
+
+<pre><code>parallel --plus myprocess {} {/_R1.fq.gz/_R2.fq.gz} ::: *_R1.fq.gz</code></pre>
+
+<p>If the barcode does not contain &#39;_R1&#39;, you can do:</p>
+
+<pre><code>parallel --plus myprocess {} {/_R1/_R2} ::: *_R1.fq.gz</code></pre>
+
+<p>Or you can use <b>--match</b>:</p>
+
+<pre><code>parallel --match &#39;(.*)_R1(.*)&#39; myprocess {} {1.1}_R2{1.2} ::: *_R1.fq.gz</code></pre>
+
+<h2 id="EXAMPLE:-Removing-strings-from-the-argument">EXAMPLE: Removing strings from the argument</h2>
+
+<p>If you have directory with tar.gz files and want these extracted in the corresponding dir (e.g foo.tar.gz will be extracted in the dir foo) you can do:</p>
+
+<pre><code>parallel --plus &#39;mkdir {..}; tar -C {..} -xf {}&#39; ::: *.tar.gz</code></pre>
+
+<p>If you want to remove a different ending, you can use {%string}:</p>
+
+<pre><code>parallel --plus echo {%_demo} ::: mycode_demo keep_demo_here</code></pre>
+
+<p>You can also remove a starting string with {#string}</p>
+
+<pre><code>parallel --plus echo {#demo_} ::: demo_mycode keep_demo_here</code></pre>
+
+<p>To remove a string anywhere you can use regular expressions with {/regexp/replacement} and leave the replacement empty:</p>
+
+<pre><code>parallel --plus echo {/demo_/} ::: demo_mycode remove_demo_here</code></pre>
+
+<p>You can often also use <b>--match</b>:</p>
+
+<pre><code>parallel --match &#39;(.*)demo_(.*)&#39; echo {1.1}{1.2} ::: demo_mycode remove_demo_here</code></pre>
+
+<h2 id="EXAMPLE:-Download-24-images-for-each-of-the-past-30-days">EXAMPLE: Download 24 images for each of the past 30 days</h2>
+
+<p>Let us assume a website stores images like:</p>
+
+<pre><code>https://www.example.com/path/to/YYYYMMDD_##.jpg</code></pre>
+
+<p>where YYYYMMDD is the date and ## is the number 01-24. This will download images for the past 30 days:</p>
+
+<pre><code> getit() {
+   date=$(date -d &quot;today -$1 days&quot; +%Y%m%d)
+   num=$2
+   echo wget https://www.example.com/path/to/${date}_${num}.jpg
+ }
+ export -f getit
+ 
+ parallel getit ::: $(seq 30) ::: $(seq -w 24)</code></pre>
+
+<p><b>$(date -d &quot;today -$1 days&quot; +%Y%m%d)</b> will give the dates in YYYYMMDD with <b>$1</b> days subtracted.</p>
+
+<h2 id="EXAMPLE:-Download-world-map-from-NASA">EXAMPLE: Download world map from NASA</h2>
+
+<p>NASA provides tiles to download on earthdata.nasa.gov. Download tiles for Blue Marble world map and create a 10240x20480 map.</p>
+
+<pre><code>base=https://map1a.vis.earthdata.nasa.gov/wmts-geo/wmts.cgi
+service=&quot;SERVICE=WMTS&amp;REQUEST=GetTile&amp;VERSION=1.0.0&quot;
+layer=&quot;LAYER=BlueMarble_ShadedRelief_Bathymetry&quot;
+set=&quot;STYLE=&amp;TILEMATRIXSET=EPSG4326_500m&amp;TILEMATRIX=5&quot;
+tile=&quot;TILEROW={1}&amp;TILECOL={2}&quot;
+format=&quot;FORMAT=image%2Fjpeg&quot;
+url=&quot;$base?$service&amp;$layer&amp;$set&amp;$tile&amp;$format&quot;
+
+parallel -j0 -q wget &quot;$url&quot; -O {1}_{2}.jpg ::: {0..19} ::: {0..39}
+parallel eval convert +append {}_{0..39}.jpg line{}.jpg ::: {0..19}
+convert -append line{0..19}.jpg world.jpg</code></pre>
+
+<h2 id="EXAMPLE:-Download-Apollo-11-images-from-NASA-using-jq">EXAMPLE: Download Apollo-11 images from NASA using jq</h2>
+
+<p>Search NASA using their API to get JSON for images related to &#39;apollo 11&#39; and has &#39;moon landing&#39; in the description.</p>
+
+<p>The search query returns JSON containing URLs to JSON containing collections of pictures. One of the pictures in each of these collection is <i>large</i>.</p>
+
+<p><b>wget</b> is used to get the JSON for the search query. <b>jq</b> is then used to extract the URLs of the collections. <b>parallel</b> then calls <b>wget</b> to get each collection, which is passed to <b>jq</b> to extract the URLs of all images. <b>grep</b> filters out the <i>large</i> images, and <b>parallel</b> finally uses <b>wget</b> to fetch the images.</p>
+
+<pre><code>base=&quot;https://images-api.nasa.gov/search&quot;
+q=&quot;q=apollo 11&quot;
+description=&quot;description=moon landing&quot;
+media_type=&quot;media_type=image&quot;
+wget -O - &quot;$base?$q&amp;$description&amp;$media_type&quot; |
+  jq -r .collection.items[].href |
+  parallel wget -O - |
+  jq -r .[] |
+  grep large |
+  parallel wget</code></pre>
+
+<h2 id="EXAMPLE:-Download-video-playlist-in-parallel">EXAMPLE: Download video playlist in parallel</h2>
+
+<p><b>youtube-dl</b> is an excellent tool to download videos. It can, however, not download videos in parallel. This takes a playlist and downloads 10 videos in parallel.</p>
+
+<pre><code>url=&#39;youtu.be/watch?v=0wOf2Fgi3DE&amp;list=UU_cznB5YZZmvAmeq7Y3EriQ&#39;
+export url
+youtube-dl --flat-playlist &quot;https://$url&quot; |
+  parallel --tagstring {#} --lb -j10 \
+    youtube-dl --playlist-start {#} --playlist-end {#} &#39;&quot;https://$url&quot;&#39;</code></pre>
+
+<h2 id="EXAMPLE:-Prepend-last-modified-date-ISO8601-to-file-name">EXAMPLE: Prepend last modified date (ISO8601) to file name</h2>
+
+<pre><code>parallel mv {} &#39;{= $a=pQ($_); $b=$_;&#39; \
+  &#39;$_=qx{date -r &quot;$a&quot; +%FT%T}; chomp; $_=&quot;$_ $b&quot; =}&#39; ::: *</code></pre>
+
+<p><b>{=</b> and <b>=}</b> mark a perl expression. <b>pQ</b> perl-quotes the string. <b>date +%FT%T</b> is the date in ISO8601 with time.</p>
+
+<h2 id="EXAMPLE:-Save-output-in-ISO8601-dirs">EXAMPLE: Save output in ISO8601 dirs</h2>
+
+<p>Save output from <b>ps aux</b> every second into dirs named yyyy-mm-ddThh:mm:ss+zz:zz.</p>
+
+<pre><code>seq 1000 | parallel -N0 -j1 --delay 1 \
+  --results &#39;{= $_=`date -Isec`; chomp=}/&#39; ps aux</code></pre>
+
+<h2 id="EXAMPLE:-Digital-clock-with-blinking">EXAMPLE: Digital clock with &quot;blinking&quot; :</h2>
+
+<p>The : in a digital clock blinks. To make every other line have a &#39;:&#39; and the rest a &#39; &#39; a perl expression is used to look at the 3rd input source. If the value modulo 2 is 1: Use &quot;:&quot; otherwise use &quot; &quot;:</p>
+
+<pre><code>parallel -k echo {1}&#39;{=3 $_=$_%2?&quot;:&quot;:&quot; &quot;=}&#39;{2}{3} \
+  ::: {0..23} ::: {0..5} ::: {0..9}</code></pre>
+
+<h2 id="EXAMPLE:-Aggregating-content-of-files">EXAMPLE: Aggregating content of files</h2>
+
+<p>This:</p>
+
+<pre><code>parallel --header : echo x{X}y{Y}z{Z} \&gt; x{X}y{Y}z{Z} \
+::: X {1..5} ::: Y {01..10} ::: Z {1..5}</code></pre>
+
+<p>will generate the files x1y01z1 .. x5y10z5. If you want to aggregate the output grouping on x and z you can do this:</p>
+
+<pre><code>parallel eval &#39;cat {=s/y01/y*/=} &gt; {=s/y01//=}&#39; ::: *y01*</code></pre>
+
+<p>For all values of x and z it runs commands like:</p>
+
+<pre><code>cat x1y*z1 &gt; x1z1</code></pre>
+
+<p>So you end up with x1z1 .. x5z5 each containing the content of all values of y.</p>
+
+<h2 id="EXAMPLE:-Breadth-first-parallel-dir-crawler">EXAMPLE: Breadth first parallel dir crawler</h2>
+
+<p>To process all files in dirs and subdirs you would normally run:</p>
+
+<pre><code>find . -print | parallel do_stuff</code></pre>
+
+<p>But sometimes you want to parallelize each dir. Maybe doing a dir scan is slow?</p>
+
+<p>Then you can use a breadth first directory scan.</p>
+
+<pre><code> process() {
+     process_file() {
+         echo &quot;Do your processing of file here $1&quot;
+     }
+
+     queue=&quot;$1&quot;
+     shift
+     if  [ -d &quot;$1&quot; ] ; then
+         echo &quot;queueing $1&quot;
+         find &quot;$1&quot; -mindepth 1 -maxdepth 1 &gt; &quot;$queue&quot;
+         if [ ! -s &quot;$queue&quot; ] ; then
+             # Ignore empty dirs
+             rm &quot;$queue&quot;
+         fi
+     else
+         process_file &quot;$1&quot;
+     fi
+ }
+ export -f process
+ 
+ # Queue lists
+ queue=$(mktemp)
+ queuenew=$(mktemp -d)
+ 
+ # Start dir
+ echo . &gt; &quot;$queue&quot;
+ 
+ while [ -s &quot;$queue&quot; ] ; do
+     # Run one round for every directory level
+     # (Breadth first)
+     cat &quot;$queue&quot; |
+         parallel process &quot;$queuenew&quot;/{#} {}
+     # Each job may create a list in &quot;$queuenew&quot;/job_no
+     cat &quot;$queuenew&quot;/* &gt; &quot;$queue&quot; 2&gt;/dev/null
+     rm -f &quot;$queuenew&quot;/*
+ done
+ rmdir &quot;$queuenew&quot;
+ rm &quot;$queue&quot;
+ </code></pre>
+
+<p>This is not a perfect replacement (e.g. <b>--halt</b> is not respected, and <b>$?</b> is not set correctly).</p>
+
+<h2 id="EXAMPLE:-Breadth-first-parallel-web-crawler-mirrorer">EXAMPLE: Breadth first parallel web crawler/mirrorer</h2>
+
+<p>This script below will crawl and mirror a URL in parallel. It downloads first pages that are 1 click down, then 2 clicks down, then 3; instead of the normal depth first, where the first link link on each page is fetched first.</p>
+
+<p>Run like this:</p>
+
+<pre><code>PARALLEL=-j100 ./parallel-crawl http://gatt.org.yeslab.org/</code></pre>
+
+<p>Remove the <b>wget</b> part if you only want a web crawler.</p>
+
+<p>It works by fetching a page from a list of URLs and looking for links in that page that are within the same starting URL and that have not already been seen. These links are added to a new queue. When all the pages from the list is done, the new queue is moved to the list of URLs and the process is started over until no unseen links are found.</p>
+
+<pre><code>#!/bin/bash
+
+# E.g. http://gatt.org.yeslab.org/
+URL=$1
+# Stay inside the start dir
+BASEURL=$(echo $URL | perl -pe &#39;s:#.*::; s:(//.*/)[^/]*:$1:&#39;)
+URLLIST=$(mktemp urllist.XXXX)
+URLLIST2=$(mktemp urllist.XXXX)
+SEEN=$(mktemp seen.XXXX)
+
+# Spider to get the URLs
+echo $URL &gt;$URLLIST
+cp $URLLIST $SEEN
+
+while [ -s $URLLIST ] ; do
+  cat $URLLIST |
+    parallel lynx -listonly -image_links -dump {} \; \
+      wget -qm -l1 -Q1 {} \; echo Spidered: {} \&gt;\&amp;2 |
+      perl -ne &#39;s/#.*//; s/\s+\d+.\s(\S+)$/$1/ and
+        do { $seen{$1}++ or print }&#39; |
+    grep -F $BASEURL |
+    grep -v -x -F -f $SEEN | tee -a $SEEN &gt; $URLLIST2
+  mv $URLLIST2 $URLLIST
+done
+
+rm -f $URLLIST $URLLIST2 $SEEN</code></pre>
+
+<h2 id="EXAMPLE:-Process-files-from-a-tar-file-while-unpacking">EXAMPLE: Process files from a tar file while unpacking</h2>
+
+<p>If the files to be processed are in a tar file then unpacking one file and processing it immediately may be faster than first unpacking all files.</p>
+
+<pre><code>tar xvf foo.tgz | perl -ne &#39;print $l;$l=$_;END{print $l}&#39; | \
+  parallel echo</code></pre>
+
+<p>The Perl one-liner is needed to make sure the file is complete before handing it to GNU <b>parallel</b>.</p>
+
+<h2 id="EXAMPLE:-Rewriting-a-for-loop-and-a-while-read-loop">EXAMPLE: Rewriting a for-loop and a while-read-loop</h2>
+
+<p>for-loops like this:</p>
+
+<pre><code>(for x in `cat list` ; do
+  do_something $x
+done) | process_output</code></pre>
+
+<p>and while-read-loops like this:</p>
+
+<pre><code>cat list | (while read x ; do
+  do_something $x
+done) | process_output</code></pre>
+
+<p>can be written like this:</p>
+
+<pre><code>cat list | parallel do_something | process_output</code></pre>
+
+<p>For example: Find which host name in a list has IP address 1.2.3 4:</p>
+
+<pre><code>cat hosts.txt | parallel -P 100 host | grep 1.2.3.4</code></pre>
+
+<p>If the processing requires more steps the for-loop like this:</p>
+
+<pre><code>(for x in `cat list` ; do
+  no_extension=${x%.*};
+  do_step1 $x scale $no_extension.jpg
+  do_step2 &lt;$x $no_extension
+done) | process_output</code></pre>
+
+<p>and while-loops like this:</p>
+
+<pre><code>cat list | (while read x ; do
+  no_extension=${x%.*};
+  do_step1 $x scale $no_extension.jpg
+  do_step2 &lt;$x $no_extension
+done) | process_output</code></pre>
+
+<p>can be written like this:</p>
+
+<pre><code>cat list | parallel &quot;do_step1 {} scale {.}.jpg ; do_step2 &lt;{} {.}&quot; |\
+  process_output</code></pre>
+
+<p>If the body of the loop is bigger, it improves readability to use a function:</p>
+
+<pre><code>(for x in `cat list` ; do
+  do_something $x
+  [... 100 lines that do something with $x ...]
+done) | process_output
+
+cat list | (while read x ; do
+  do_something $x
+  [... 100 lines that do something with $x ...]
+done) | process_output</code></pre>
+
+<p>can both be rewritten as:</p>
+
+<pre><code>doit() {
+  x=$1
+  do_something $x
+  [... 100 lines that do something with $x ...]
+}
+export -f doit
+cat list | parallel doit</code></pre>
+
+<h2 id="EXAMPLE:-Rewriting-nested-for-loops">EXAMPLE: Rewriting nested for-loops</h2>
+
+<p>Nested for-loops like this:</p>
+
+<pre><code>(for x in `cat xlist` ; do
+  for y in `cat ylist` ; do
+    do_something $x $y
+  done
+done) | process_output</code></pre>
+
+<p>can be written like this:</p>
+
+<pre><code>parallel do_something {1} {2} :::: xlist ylist | process_output</code></pre>
+
+<p>Nested for-loops like this:</p>
+
+<pre><code>(for colour in red green blue ; do
+  for size in S M L XL XXL ; do
+    echo $colour $size
+  done
+done) | sort</code></pre>
+
+<p>can be written like this:</p>
+
+<pre><code>parallel echo {1} {2} ::: red green blue ::: S M L XL XXL | sort</code></pre>
+
+<h2 id="EXAMPLE:-Finding-the-lowest-difference-between-files">EXAMPLE: Finding the lowest difference between files</h2>
+
+<p><b>diff</b> is good for finding differences in text files. <b>diff | wc -l</b> gives an indication of the size of the difference. To find the differences between all files in the current dir do:</p>
+
+<pre><code>parallel --tag &#39;diff {1} {2} | wc -l&#39; ::: * ::: * | sort -nk3</code></pre>
+
+<p>This way it is possible to see if some files are closer to other files.</p>
+
+<h2 id="EXAMPLE:-for-loops-with-column-names">EXAMPLE: for-loops with column names</h2>
+
+<p>When doing multiple nested for-loops it can be easier to keep track of the loop variable if is is named instead of just having a number. Use <b>--header :</b> to let the first argument be an named alias for the positional replacement string:</p>
+
+<pre><code>parallel --header : echo {colour} {size} \
+  ::: colour red green blue ::: size S M L XL XXL</code></pre>
+
+<p>This also works if the input file is a file with columns:</p>
+
+<pre><code>cat addressbook.tsv | \
+  parallel --colsep &#39;\t&#39; --header : echo {Name} {E-mail address}</code></pre>
+
+<h2 id="EXAMPLE:-All-combinations-in-a-list">EXAMPLE: All combinations in a list</h2>
+
+<p>GNU <b>parallel</b> makes all combinations when given two lists.</p>
+
+<p>To make all combinations in a single list with unique values, you repeat the list and use replacement string <b>{choose_k}</b>:</p>
+
+<pre><code>parallel --plus echo {choose_k} ::: A B C D ::: A B C D
+
+parallel --plus echo 2{2choose_k} 1{1choose_k} ::: A B C D ::: A B C D</code></pre>
+
+<p><b>{choose_k}</b> works for any number of input sources:</p>
+
+<pre><code>parallel --plus echo {choose_k} ::: A B C D ::: A B C D ::: A B C D</code></pre>
+
+<p>Where <b>{choose_k}</b> does not care about order, <b>{uniq}</b> cares about order. It simply skips jobs where values from different input sources are the same:</p>
+
+<pre><code>parallel --plus echo {uniq} ::: A B C  ::: A B C  ::: A B C
+parallel --plus echo {1uniq}+{2uniq}+{3uniq} \
+  ::: A B C  ::: A B C  ::: A B C</code></pre>
+
+<p>The behaviour of <b>{choose_k}</b> is undefined, if the input values of each source are different.</p>
+
+<h2 id="EXAMPLE:-From-a-to-b-and-b-to-c">EXAMPLE: From a to b and b to c</h2>
+
+<p>Assume you have input like:</p>
+
+<pre><code>aardvark
+babble
+cab
+dab
+each</code></pre>
+
+<p>and want to run combinations like:</p>
+
+<pre><code>aardvark babble
+babble cab
+cab dab
+dab each</code></pre>
+
+<p>If the input is in the file in.txt:</p>
+
+<pre><code>parallel echo {1} - {2} ::::+ &lt;(head -n -1 in.txt) &lt;(tail -n +2 in.txt)</code></pre>
+
+<p>If the input is in the array $a here are two solutions:</p>
+
+<pre><code>seq $((${#a[@]}-1)) | \
+  env_parallel --env a echo &#39;${a[{=$_--=}]} - ${a[{}]}&#39;
+parallel echo {1} - {2} ::: &quot;${a[@]::${#a[@]}-1}&quot; :::+ &quot;${a[@]:1}&quot;</code></pre>
+
+<h2 id="EXAMPLE:-Count-the-differences-between-all-files-in-a-dir">EXAMPLE: Count the differences between all files in a dir</h2>
+
+<p>Using <b>--results</b> the results are saved in /tmp/diffcount*.</p>
+
+<pre><code>parallel --results /tmp/diffcount &quot;diff -U 0 {1} {2} | \
+  tail -n +3 |grep -v &#39;^@&#39;|wc -l&quot; ::: * ::: *</code></pre>
+
+<p>To see the difference between file A and file B look at the file &#39;/tmp/diffcount/1/A/2/B&#39;.</p>
+
+<h2 id="EXAMPLE:-Speeding-up-fast-jobs">EXAMPLE: Speeding up fast jobs</h2>
+
+<p>Starting a job on the local machine takes around 3-10 ms. This can be a big overhead if the job takes very few ms to run. Often you can group small jobs together using <b>-X</b> which will make the overhead less significant. Compare the speed of these:</p>
+
+<pre><code>seq -w 0 9999 | parallel touch pict{}.jpg
+seq -w 0 9999 | parallel -X touch pict{}.jpg</code></pre>
+
+<p>If your program cannot take multiple arguments, then you can use GNU <b>parallel</b> to spawn multiple GNU <b>parallel</b>s:</p>
+
+<pre><code>seq -w 0 9999999 | \
+  parallel -j10 -q -I,, --pipe parallel -j0 touch pict{}.jpg</code></pre>
+
+<p>If <b>-j0</b> normally spawns 252 jobs, then the above will try to spawn 2520 jobs. On a normal GNU/Linux system you can spawn 32000 jobs using this technique with no problems. To raise the 32000 jobs limit raise /proc/sys/kernel/pid_max to 4194303.</p>
+
+<p>If you do not need GNU <b>parallel</b> to have control over each job (so no need for <b>--retries</b> or <b>--joblog</b> or similar), then it can be even faster if you can generate the command lines and pipe those to a shell. So if you can do this:</p>
+
+<pre><code>mygenerator | sh</code></pre>
+
+<p>Then that can be parallelized like this:</p>
+
+<pre><code>mygenerator | parallel --pipe --block 10M sh</code></pre>
+
+<p>E.g.</p>
+
+<pre><code>mygenerator() {
+  seq 10000000 | perl -pe &#39;print &quot;echo This is fast job number &quot;&#39;;
+}
+mygenerator | parallel --pipe --block 10M sh</code></pre>
+
+<p>The overhead is 100000 times smaller namely around 100 nanoseconds per job.</p>
+
+<h2 id="EXAMPLE:-Using-shell-variables">EXAMPLE: Using shell variables</h2>
+
+<p>When using shell variables you need to quote them correctly as they may otherwise be interpreted by the shell.</p>
+
+<p>Notice the difference between:</p>
+
+<pre><code>ARR=(&quot;My brother&#39;s 12\&quot; records are worth &lt;\$\$\$&gt;&quot;&#39;!&#39; Foo Bar)
+parallel echo ::: ${ARR[@]} # This is probably not what you want</code></pre>
+
+<p>and:</p>
+
+<pre><code>ARR=(&quot;My brother&#39;s 12\&quot; records are worth &lt;\$\$\$&gt;&quot;&#39;!&#39; Foo Bar)
+parallel echo ::: &quot;${ARR[@]}&quot;</code></pre>
+
+<p>When using variables in the actual command that contains special characters (e.g. space) you can quote them using <b>&#39;&quot;$VAR&quot;&#39;</b> or using &quot;&#39;s and <b>-q</b>:</p>
+
+<pre><code>VAR=&quot;My brother&#39;s 12\&quot; records are worth &lt;\$\$\$&gt;&quot;
+parallel -q echo &quot;$VAR&quot; ::: &#39;!&#39;
+export VAR
+parallel echo &#39;&quot;$VAR&quot;&#39; ::: &#39;!&#39;</code></pre>
+
+<p>If <b>$VAR</b> does not contain &#39; then <b>&quot;&#39;$VAR&#39;&quot;</b> will also work (and does not need <b>export</b>):</p>
+
+<pre><code>VAR=&quot;My 12\&quot; records are worth &lt;\$\$\$&gt;&quot;
+parallel echo &quot;&#39;$VAR&#39;&quot; ::: &#39;!&#39;</code></pre>
+
+<p>If you use them in a function you just quote as you normally would do:</p>
+
+<pre><code>VAR=&quot;My brother&#39;s 12\&quot; records are worth &lt;\$\$\$&gt;&quot;
+export VAR
+myfunc() { echo &quot;$VAR&quot; &quot;$1&quot;; }
+export -f myfunc
+parallel myfunc ::: &#39;!&#39;</code></pre>
+
+<h2 id="EXAMPLE:-Group-output-lines">EXAMPLE: Group output lines</h2>
+
+<p>When running jobs that output data, you often do not want the output of multiple jobs to run together. GNU <b>parallel</b> defaults to grouping the output of each job, so the output is printed when the job finishes. If you want full lines to be printed while the job is running you can use <b>--line-buffer</b>. If you want output to be printed as soon as possible you can use <b>-u</b>.</p>
+
+<p>Compare the output of:</p>
+
+<pre><code>parallel wget --progress=dot --limit-rate=100k \
+  https://ftpmirror.gnu.org/parallel/parallel-20{}0822.tar.bz2 \
+  ::: {12..16}
+parallel --line-buffer wget --progress=dot --limit-rate=100k \
+  https://ftpmirror.gnu.org/parallel/parallel-20{}0822.tar.bz2 \
+  ::: {12..16}
+parallel --latest-line wget --progress=dot --limit-rate=100k \
+  https://ftpmirror.gnu.org/parallel/parallel-20{}0822.tar.bz2 \
+  ::: {12..16}
+parallel -u wget --progress=dot --limit-rate=100k \
+  https://ftpmirror.gnu.org/parallel/parallel-20{}0822.tar.bz2 \
+  ::: {12..16}</code></pre>
+
+<h2 id="EXAMPLE:-Tag-output-lines">EXAMPLE: Tag output lines</h2>
+
+<p>GNU <b>parallel</b> groups the output lines, but it can be hard to see where the different jobs begin. <b>--tag</b> prepends the argument to make that more visible:</p>
+
+<pre><code>parallel --tag wget --limit-rate=100k \
+  https://ftpmirror.gnu.org/parallel/parallel-20{}0822.tar.bz2 \
+  ::: {12..16}</code></pre>
+
+<p><b>--tag</b> works with <b>--line-buffer</b> but not with <b>-u</b>:</p>
+
+<pre><code>parallel --tag --line-buffer wget --limit-rate=100k \
+  https://ftpmirror.gnu.org/parallel/parallel-20{}0822.tar.bz2 \
+  ::: {12..16}</code></pre>
+
+<p>Check the uptime of the servers in <i>~/.parallel/sshloginfile</i>:</p>
+
+<pre><code>parallel --tag -S .. --nonall uptime</code></pre>
+
+<h2 id="EXAMPLE:-Colorize-output">EXAMPLE: Colorize output</h2>
+
+<p>Give each job a new color. Most terminals support ANSI colors with the escape code &quot;\033[30;3Xm&quot; where 0 &lt;= X &lt;= 7:</p>
+
+<pre><code>seq 10 | \
+  parallel --tagstring &#39;\033[30;3{=$_=++$::color%8=}m&#39; seq {}
+parallel --rpl &#39;{color} $_=&quot;\033[30;3&quot;.(++$::color%8).&quot;m&quot;&#39; \
+  --tagstring {color} seq {} ::: {1..10}</code></pre>
+
+<p>To get rid of the initial \t (which comes from <b>--tagstring</b>):</p>
+
+<pre><code>... | perl -pe &#39;s/\t//&#39;</code></pre>
+
+<h2 id="EXAMPLE:-Keep-order-of-output-same-as-order-of-input">EXAMPLE: Keep order of output same as order of input</h2>
+
+<p>Normally the output of a job will be printed as soon as it completes. Sometimes you want the order of the output to remain the same as the order of the input. This is often important, if the output is used as input for another system. <b>-k</b> will make sure the order of output will be in the same order as input even if later jobs end before earlier jobs.</p>
+
+<p>Append a string to every line in a text file:</p>
+
+<pre><code>cat textfile | parallel -k echo {} append_string</code></pre>
+
+<p>If you remove <b>-k</b> some of the lines may come out in the wrong order.</p>
+
+<p>Another example is <b>traceroute</b>:</p>
+
+<pre><code>parallel traceroute ::: qubes-os.org debian.org freenetproject.org</code></pre>
+
+<p>will give traceroute of qubes-os.org, debian.org and freenetproject.org, but it will be sorted according to which job completed first.</p>
+
+<p>To keep the order the same as input run:</p>
+
+<pre><code>parallel -k traceroute ::: qubes-os.org debian.org freenetproject.org</code></pre>
+
+<p>This will make sure the traceroute to qubes-os.org will be printed first.</p>
+
+<p>A bit more complex example is downloading a huge file in chunks in parallel: Some internet connections will deliver more data if you download files in parallel. For downloading files in parallel see: &quot;EXAMPLE: Download 10 images for each of the past 30 days&quot;. But if you are downloading a big file you can download the file in chunks in parallel.</p>
+
+<p>To download byte 10000000-19999999 you can use <b>curl</b>:</p>
+
+<pre><code>curl -r 10000000-19999999 https://example.com/the/big/file &gt;file.part</code></pre>
+
+<p>To download a 1 GB file we need 100 10MB chunks downloaded and combined in the correct order.</p>
+
+<pre><code>seq 0 99 | parallel -k curl -r \
+  {}0000000-{}9999999 https://example.com/the/big/file &gt; file</code></pre>
+
+<h2 id="EXAMPLE:-Keep-order-but-make-job-1-output-fast">EXAMPLE: Keep order, but make job 1 output fast</h2>
+
+<p>If you want the output of job 1 unbuffered, but otherwise keep the order, you can do this:</p>
+
+<pre><code>doit() {
+  echo &quot;$@&quot; ERR &gt;&amp;2
+  echo &quot;$@&quot; out
+  sleep 0.$1
+  echo &quot;$@&quot; ERR &gt;&amp;2
+  echo &quot;$@&quot; out
+}
+export -f doit
+parallel -k -u doit {= &#39;seq() &gt; 1 and $opt::ungroup = 0&#39; =} ::: 9 1 2 3</code></pre>
+
+<p>It will output job 1 with less overhead.</p>
+
+<h2 id="EXAMPLE:-Parallel-grep">EXAMPLE: Parallel grep</h2>
+
+<p><b>grep -r</b> greps recursively through directories. GNU <b>parallel</b> can often speed this up.</p>
+
+<pre><code>find . -type f | parallel -k -j150% -n 1000 -m grep -H -n STRING {}</code></pre>
+
+<p>This will run 1.5 job per CPU, and give 1000 arguments to <b>grep</b>.</p>
+
+<p>There are situations where the above will be slower than <b>grep -r</b>:</p>
+
+<ul>
+
+<li><p>If data is already in RAM. The overhead of starting jobs and buffering output may outweigh the benefit of running in parallel.</p>
+
+</li>
+<li><p>If the files are big. If a file cannot be read in a single seek, the disk may start thrashing.</p>
+
+</li>
+</ul>
+
+<p>The speedup is caused by two factors:</p>
+
+<ul>
+
+<li><p>On rotating harddisks small files often require a seek for each file. By searching for more files in parallel, the arm may pass another wanted file on its way.</p>
+
+</li>
+<li><p>NVMe drives often perform better by having multiple command running in parallel.</p>
+
+</li>
+</ul>
+
+<h2 id="EXAMPLE:-Grepping-n-lines-for-m-regular-expressions">EXAMPLE: Grepping n lines for m regular expressions.</h2>
+
+<p>The simplest solution to grep a big file for a lot of regexps is:</p>
+
+<pre><code>grep -f regexps.txt bigfile</code></pre>
+
+<p>Or if the regexps are fixed strings:</p>
+
+<pre><code>grep -F -f regexps.txt bigfile</code></pre>
+
+<p>There are 3 limiting factors: CPU, RAM, and disk I/O.</p>
+
+<p>RAM is easy to measure: If the <b>grep</b> process takes up most of your free memory (e.g. when running <b>top</b>), then RAM is a limiting factor.</p>
+
+<p>CPU is also easy to measure: If the <b>grep</b> takes &gt;90% CPU in <b>top</b>, then the CPU is a limiting factor, and parallelization will speed this up.</p>
+
+<p>It is harder to see if disk I/O is the limiting factor, and depending on the disk system it may be faster or slower to parallelize. The only way to know for certain is to test and measure.</p>
+
+<h3 id="Limiting-factor:-RAM">Limiting factor: RAM</h3>
+
+<p>The normal <b>grep -f regexps.txt bigfile</b> works no matter the size of bigfile, but if regexps.txt is so big it cannot fit into memory, then you need to split this.</p>
+
+<p><b>grep -F</b> takes around 100 bytes of RAM and <b>grep</b> takes about 500 bytes of RAM per 1 byte of regexp. So if regexps.txt is 1% of your RAM, then it may be too big.</p>
+
+<p>If you can convert your regexps into fixed strings do that. E.g. if the lines you are looking for in bigfile all looks like:</p>
+
+<pre><code>ID1 foo bar baz Identifier1 quux
+fubar ID2 foo bar baz Identifier2</code></pre>
+
+<p>then your regexps.txt can be converted from:</p>
+
+<pre><code>ID1.*Identifier1
+ID2.*Identifier2</code></pre>
+
+<p>into:</p>
+
+<pre><code>ID1 foo bar baz Identifier1
+ID2 foo bar baz Identifier2</code></pre>
+
+<p>This way you can use <b>grep -F</b> which takes around 80% less memory and is much faster.</p>
+
+<p>If it still does not fit in memory you can do this:</p>
+
+<pre><code>parallel --pipe-part -a regexps.txt --block 1M grep -F -f - -n bigfile | \
+  sort -un | perl -pe &#39;s/^\d+://&#39;</code></pre>
+
+<p>The 1M should be your free memory divided by the number of CPU threads and divided by 200 for <b>grep -F</b> and by 1000 for normal <b>grep</b>. On GNU/Linux you can do:</p>
+
+<pre><code>free=$(awk &#39;/^((Swap)?Cached|MemFree|Buffers):/ { sum += $2 }
+            END { print sum }&#39; /proc/meminfo)
+percpu=$((free / 200 / $(parallel --number-of-threads)))k
+
+parallel --pipe-part -a regexps.txt --block $percpu --compress \
+  grep -F -f - -n bigfile | \
+  sort -un | perl -pe &#39;s/^\d+://&#39;</code></pre>
+
+<p>If you can live with duplicated lines and wrong order, it is faster to do:</p>
+
+<pre><code>parallel --pipe-part -a regexps.txt --block $percpu --compress \
+  grep -F -f - bigfile</code></pre>
+
+<h3 id="Limiting-factor:-CPU">Limiting factor: CPU</h3>
+
+<p>If the CPU is the limiting factor parallelization should be done on the regexps:</p>
+
+<pre><code>cat regexps.txt | parallel --pipe -L1000 --round-robin --compress \
+  grep -f - -n bigfile | \
+  sort -un | perl -pe &#39;s/^\d+://&#39;</code></pre>
+
+<p>The command will start one <b>grep</b> per CPU and read <i>bigfile</i> one time per CPU, but as that is done in parallel, all reads except the first will be cached in RAM. Depending on the size of <i>regexps.txt</i> it may be faster to use <b>--block 10m</b> instead of <b>-L1000</b>.</p>
+
+<p>Some storage systems perform better when reading multiple chunks in parallel. This is true for some RAID systems and for some network file systems. To parallelize the reading of <i>bigfile</i>:</p>
+
+<pre><code>parallel --pipe-part --block 100M -a bigfile -k --compress \
+  grep -f regexps.txt</code></pre>
+
+<p>This will split <i>bigfile</i> into 100MB chunks and run <b>grep</b> on each of these chunks. To parallelize both reading of <i>bigfile</i> and <i>regexps.txt</i> combine the two using <b>--cat</b>:</p>
+
+<pre><code>parallel --pipe-part --block 100M -a bigfile --cat cat regexps.txt \
+  \| parallel --pipe -L1000 --round-robin grep -f - {}</code></pre>
+
+<p>If a line matches multiple regexps, the line may be duplicated.</p>
+
+<h3 id="Bigger-problem">Bigger problem</h3>
+
+<p>If the problem is too big to be solved by this, you are probably ready for Lucene.</p>
+
+<h2 id="EXAMPLE:-Using-remote-computers">EXAMPLE: Using remote computers</h2>
+
+<p>To run commands on a remote computer SSH needs to be set up and you must be able to login without entering a password (The commands <b>ssh-copy-id</b>, <b>ssh-agent</b>, and <b>sshpass</b> may help you do that).</p>
+
+<p>If you need to login to a whole cluster, you typically do not want to accept the host key for every host. You want to accept them the first time and be warned if they are ever changed. To do that:</p>
+
+<pre><code># Add the servers to the sshloginfile
+(echo servera; echo serverb) &gt; .parallel/my_cluster
+# Make sure .ssh/config exist
+touch .ssh/config
+cp .ssh/config .ssh/config.backup
+# Disable StrictHostKeyChecking temporarily
+(echo &#39;Host *&#39;; echo StrictHostKeyChecking no) &gt;&gt; .ssh/config
+parallel --slf my_cluster --nonall true
+# Remove the disabling of StrictHostKeyChecking
+mv .ssh/config.backup .ssh/config</code></pre>
+
+<p>The servers in <b>.parallel/my_cluster</b> are now added in <b>.ssh/known_hosts</b>.</p>
+
+<p>To run <b>echo</b> on <b>server.example.com</b>:</p>
+
+<pre><code>seq 10 | parallel --sshlogin server.example.com echo</code></pre>
+
+<p>To run commands on more than one remote computer run:</p>
+
+<pre><code>seq 10 | parallel --sshlogin s1.example.com,s2.example.net echo</code></pre>
+
+<p>Or:</p>
+
+<pre><code>seq 10 | parallel --sshlogin server.example.com \
+  --sshlogin server2.example.net echo</code></pre>
+
+<p>If the login username is <i>foo</i> on <i>server2.example.net</i> use:</p>
+
+<pre><code>seq 10 | parallel --sshlogin server.example.com \
+  --sshlogin foo@server2.example.net echo</code></pre>
+
+<p>If your list of hosts is <i>server1-88.example.net</i> with login <i>foo</i>:</p>
+
+<pre><code>seq 10 | parallel -Sfoo@server{1..88}.example.net echo</code></pre>
+
+<p>To distribute the commands to a list of computers, make a file <i>mycomputers</i> with all the computers:</p>
+
+<pre><code>server.example.com
+foo@server2.example.com
+server3.example.com</code></pre>
+
+<p>Then run:</p>
+
+<pre><code>seq 10 | parallel --sshloginfile mycomputers echo</code></pre>
+
+<p>To include the local computer add the special sshlogin &#39;:&#39; to the list:</p>
+
+<pre><code>server.example.com
+foo@server2.example.com
+server3.example.com
+:</code></pre>
+
+<p>GNU <b>parallel</b> will try to determine the number of CPUs on each of the remote computers, and run one job per CPU - even if the remote computers do not have the same number of CPUs.</p>
+
+<p>If the number of CPUs on the remote computers is not identified correctly the number of CPUs can be added in front. Here the computer has 8 CPUs.</p>
+
+<pre><code>seq 10 | parallel --sshlogin 8/server.example.com echo</code></pre>
+
+<h2 id="EXAMPLE:-Transferring-of-files">EXAMPLE: Transferring of files</h2>
+
+<p>To recompress gzipped files with <b>bzip2</b> using a remote computer run:</p>
+
+<pre><code>find logs/ -name &#39;*.gz&#39; | \
+  parallel --sshlogin server.example.com \
+  --transfer &quot;zcat {} | bzip2 -9 &gt;{.}.bz2&quot;</code></pre>
+
+<p>This will list the .gz-files in the <i>logs</i> directory and all directories below. Then it will transfer the files to <i>server.example.com</i> to the corresponding directory in <i>$HOME/logs</i>. On <i>server.example.com</i> the file will be recompressed using <b>zcat</b> and <b>bzip2</b> resulting in the corresponding file with <i>.gz</i> replaced with <i>.bz2</i>.</p>
+
+<p>If you want the resulting bz2-file to be transferred back to the local computer add <i>--return {.}.bz2</i>:</p>
+
+<pre><code>find logs/ -name &#39;*.gz&#39; | \
+  parallel --sshlogin server.example.com \
+  --transfer --return {.}.bz2 &quot;zcat {} | bzip2 -9 &gt;{.}.bz2&quot;</code></pre>
+
+<p>After the recompressing is done the <i>.bz2</i>-file is transferred back to the local computer and put next to the original <i>.gz</i>-file.</p>
+
+<p>If you want to delete the transferred files on the remote computer add <i>--cleanup</i>. This will remove both the file transferred to the remote computer and the files transferred from the remote computer:</p>
+
+<pre><code>find logs/ -name &#39;*.gz&#39; | \
+  parallel --sshlogin server.example.com \
+  --transfer --return {.}.bz2 --cleanup &quot;zcat {} | bzip2 -9 &gt;{.}.bz2&quot;</code></pre>
+
+<p>If you want run on several computers add the computers to <i>--sshlogin</i> either using &#39;,&#39; or multiple <i>--sshlogin</i>:</p>
+
+<pre><code>find logs/ -name &#39;*.gz&#39; | \
+  parallel --sshlogin server.example.com,server2.example.com \
+  --sshlogin server3.example.com \
+  --transfer --return {.}.bz2 --cleanup &quot;zcat {} | bzip2 -9 &gt;{.}.bz2&quot;</code></pre>
+
+<p>You can add the local computer using <i>--sshlogin :</i>. This will disable the removing and transferring for the local computer only:</p>
+
+<pre><code>find logs/ -name &#39;*.gz&#39; | \
+  parallel --sshlogin server.example.com,server2.example.com \
+  --sshlogin server3.example.com \
+  --sshlogin : \
+  --transfer --return {.}.bz2 --cleanup &quot;zcat {} | bzip2 -9 &gt;{.}.bz2&quot;</code></pre>
+
+<p>Often <i>--transfer</i>, <i>--return</i> and <i>--cleanup</i> are used together. They can be shortened to <i>--trc</i>:</p>
+
+<pre><code>find logs/ -name &#39;*.gz&#39; | \
+  parallel --sshlogin server.example.com,server2.example.com \
+  --sshlogin server3.example.com \
+  --sshlogin : \
+  --trc {.}.bz2 &quot;zcat {} | bzip2 -9 &gt;{.}.bz2&quot;</code></pre>
+
+<p>With the file <i>mycomputers</i> containing the list of computers it becomes:</p>
+
+<pre><code>find logs/ -name &#39;*.gz&#39; | parallel --sshloginfile mycomputers \
+  --trc {.}.bz2 &quot;zcat {} | bzip2 -9 &gt;{.}.bz2&quot;</code></pre>
+
+<p>If the file <i>~/.parallel/sshloginfile</i> contains the list of computers the special short hand <i>-S ..</i> can be used:</p>
+
+<pre><code>find logs/ -name &#39;*.gz&#39; | parallel -S .. \
+  --trc {.}.bz2 &quot;zcat {} | bzip2 -9 &gt;{.}.bz2&quot;</code></pre>
+
+<h2 id="EXAMPLE:-Advanced-file-transfer">EXAMPLE: Advanced file transfer</h2>
+
+<p>Assume you have files in in/*, want them processed on server, and transferred back into /other/dir:</p>
+
+<pre><code>parallel -S server --trc /other/dir/./{/}.out \
+  cp {/} {/}.out ::: in/./*</code></pre>
+
+<h2 id="EXAMPLE:-Distributing-work-to-local-and-remote-computers">EXAMPLE: Distributing work to local and remote computers</h2>
+
+<p>Convert *.mp3 to *.ogg running one process per CPU on local computer and server2:</p>
+
+<pre><code>parallel --trc {.}.ogg -S server2,: \
+  &#39;mpg321 -w - {} | oggenc -q0 - -o {.}.ogg&#39; ::: *.mp3</code></pre>
+
+<h2 id="EXAMPLE:-Running-the-same-command-on-remote-computers">EXAMPLE: Running the same command on remote computers</h2>
+
+<p>To run the command <b>uptime</b> on remote computers you can do:</p>
+
+<pre><code>parallel --tag --nonall -S server1,server2 uptime</code></pre>
+
+<p><b>--nonall</b> reads no arguments. If you have a list of jobs you want to run on each computer you can do:</p>
+
+<pre><code>parallel --tag --onall -S server1,server2 echo ::: 1 2 3</code></pre>
+
+<p>Remove <b>--tag</b> if you do not want the sshlogin added before the output.</p>
+
+<p>If you have a lot of hosts use &#39;-j0&#39; to access more hosts in parallel.</p>
+
+<h2 id="EXAMPLE:-Running-sudo-on-remote-computers">EXAMPLE: Running &#39;sudo&#39; on remote computers</h2>
+
+<p>Put the password into passwordfile then run:</p>
+
+<pre><code>parallel --ssh &#39;cat passwordfile | ssh&#39; --nonall \
+  -S user@server1,user@server2 sudo -S ls -l /root</code></pre>
+
+<h2 id="EXAMPLE:-Using-remote-computers-behind-NAT-wall">EXAMPLE: Using remote computers behind NAT wall</h2>
+
+<p>If the workers are behind a NAT wall, you need some trickery to get to them.</p>
+
+<p>If you can <b>ssh</b> to a jumphost, and reach the workers from there, then the obvious solution would be this, but it <b>does not work</b>:</p>
+
+<pre><code>parallel --ssh &#39;ssh jumphost ssh&#39; -S host1 echo ::: DOES NOT WORK</code></pre>
+
+<p>It does not work because the command is dequoted by <b>ssh</b> twice where as GNU <b>parallel</b> only expects it to be dequoted once.</p>
+
+<p>You can use a bash function and have GNU <b>parallel</b> quote the command:</p>
+
+<pre><code>jumpssh() { ssh -A jumphost ssh $(parallel --shellquote ::: &quot;$@&quot;); }
+export -f jumpssh
+parallel --ssh jumpssh -S host1 echo ::: this works</code></pre>
+
+<p>Or you can instead put this in <b>~/.ssh/config</b>:</p>
+
+<pre><code>Host host1 host2 host3
+  ProxyCommand ssh jumphost.domain nc -w 1 %h 22</code></pre>
+
+<p>It requires <b>nc(netcat)</b> to be installed on jumphost. With this you can simply:</p>
+
+<pre><code>parallel -S host1,host2,host3 echo ::: This does work</code></pre>
+
+<h3 id="No-jumphost-but-port-forwards">No jumphost, but port forwards</h3>
+
+<p>If there is no jumphost but each server has port 22 forwarded from the firewall (e.g. the firewall&#39;s port 22001 = port 22 on host1, 22002 = host2, 22003 = host3) then you can use <b>~/.ssh/config</b>:</p>
+
+<pre><code>Host host1.v
+  Port 22001
+Host host2.v
+  Port 22002
+Host host3.v
+  Port 22003
+Host *.v
+  Hostname firewall</code></pre>
+
+<p>And then use host{1..3}.v as normal hosts:</p>
+
+<pre><code>parallel -S host1.v,host2.v,host3.v echo ::: a b c</code></pre>
+
+<h3 id="No-jumphost-no-port-forwards">No jumphost, no port forwards</h3>
+
+<p>If ports cannot be forwarded, you need some sort of VPN to traverse the NAT-wall. TOR is one options for that, as it is very easy to get working.</p>
+
+<p>You need to install TOR and setup a hidden service. In <b>torrc</b> put:</p>
+
+<pre><code>HiddenServiceDir /var/lib/tor/hidden_service/
+HiddenServicePort 22 127.0.0.1:22</code></pre>
+
+<p>Then start TOR: <b>/etc/init.d/tor restart</b></p>
+
+<p>The TOR hostname is now in <b>/var/lib/tor/hidden_service/hostname</b> and is something similar to <b>izjafdceobowklhz.onion</b>. Now you simply prepend <b>torsocks</b> to <b>ssh</b>:</p>
+
+<pre><code>parallel --ssh &#39;torsocks ssh&#39; -S izjafdceobowklhz.onion \
+  -S zfcdaeiojoklbwhz.onion,auclucjzobowklhi.onion echo ::: a b c</code></pre>
+
+<p>If not all hosts are accessible through TOR:</p>
+
+<pre><code>parallel -S &#39;torsocks ssh izjafdceobowklhz.onion,host2,host3&#39; \
+  echo ::: a b c</code></pre>
+
+<p>See more <b>ssh</b> tricks on https://en.wikibooks.org/wiki/OpenSSH/Cookbook/Proxies_and_Jump_Hosts</p>
+
+<h2 id="EXAMPLE:-Use-sshpass-with-ssh">EXAMPLE: Use sshpass with ssh</h2>
+
+<p>If you cannot use passwordless login, you may be able to use <b>sshpass</b>:</p>
+
+<pre><code>seq 10 | parallel -S user-with-password:MyPassword@server echo</code></pre>
+
+<p>or:</p>
+
+<pre><code>export SSHPASS=&#39;MyPa$$w0rd&#39;
+seq 10 | parallel -S user-with-password:@server echo</code></pre>
+
+<h2 id="EXAMPLE:-Use-outrun-instead-of-ssh">EXAMPLE: Use outrun instead of ssh</h2>
+
+<p><b>outrun</b> lets you run a command on a remote server. <b>outrun</b> sets up a connection to access files at the source server, and automatically transfers files. <b>outrun</b> must be installed on the remote system.</p>
+
+<p>You can use <b>outrun</b> in an sshlogin this way:</p>
+
+<pre><code>parallel -S &#39;outrun user@server&#39; command</code></pre>
+
+<p>or:</p>
+
+<pre><code>parallel --ssh outrun -S server command</code></pre>
+
+<h2 id="EXAMPLE:-Slurm-cluster">EXAMPLE: Slurm cluster</h2>
+
+<p>The Slurm Workload Manager is used in many clusters.</p>
+
+<p>Here is a simple example of using GNU <b>parallel</b> to call <b>srun</b>:</p>
+
+<pre><code> #!/bin/bash
+ 
+ #SBATCH --time 00:02:00
+ #SBATCH --ntasks=4
+ #SBATCH --job-name GnuParallelDemo
+ #SBATCH --output gnuparallel.out
+ 
+ module purge
+ module load gnu_parallel
+ 
+ my_parallel=&quot;parallel --delay .2 -j $SLURM_NTASKS&quot;
+ my_srun=&quot;srun --export=all --exclusive -n1&quot;
+ my_srun=&quot;$my_srun --cpus-per-task=1 --cpu-bind=cores&quot;
+ $my_parallel &quot;$my_srun&quot; echo This is job {} ::: {1..20}</code></pre>
+
+<h2 id="EXAMPLE:-Parallelizing-rsync">EXAMPLE: Parallelizing rsync</h2>
+
+<p><b>rsync</b> is a great tool, but sometimes it will not fill up the available bandwidth. Running multiple <b>rsync</b> in parallel can fix this.</p>
+
+<pre><code>cd src-dir
+find . -type f |
+  parallel -j10 -X rsync -zR -Ha ./{} fooserver:/dest-dir/</code></pre>
+
+<p>Adjust <b>-j10</b> until you find the optimal number.</p>
+
+<p><b>rsync -R</b> will create the needed subdirectories, so all files are not put into a single dir. The <b>./</b> is needed so the resulting command looks similar to:</p>
+
+<pre><code>rsync -zR ././sub/dir/file fooserver:/dest-dir/</code></pre>
+
+<p>The <b>/./</b> is what <b>rsync -R</b> works on.</p>
+
+<p>If you are unable to push data, but need to pull them and the files are called digits.png (e.g. 000000.png) you might be able to do:</p>
+
+<pre><code>seq -w 0 99 | parallel rsync -Havessh fooserver:src/*{}.png destdir/</code></pre>
+
+<h2 id="EXAMPLE:-Use-multiple-inputs-in-one-command">EXAMPLE: Use multiple inputs in one command</h2>
+
+<p>Copy files like foo.es.ext to foo.ext:</p>
+
+<pre><code>ls *.es.* | perl -pe &#39;print; s/\.es//&#39; | parallel -N2 cp {1} {2}</code></pre>
+
+<p>The perl command spits out 2 lines for each input. GNU <b>parallel</b> takes 2 inputs (using <b>-N2</b>) and replaces {1} and {2} with the inputs.</p>
+
+<p>Count in binary:</p>
+
+<pre><code>parallel -k echo ::: 0 1 ::: 0 1 ::: 0 1 ::: 0 1 ::: 0 1 ::: 0 1</code></pre>
+
+<p>Print the number on the opposing sides of a six sided die:</p>
+
+<pre><code>parallel --link -a &lt;(seq 6) -a &lt;(seq 6 -1 1) echo
+parallel --link echo :::: &lt;(seq 6) &lt;(seq 6 -1 1)</code></pre>
+
+<p>Convert files from all subdirs to PNG-files with consecutive numbers (useful for making input PNG&#39;s for <b>ffmpeg</b>):</p>
+
+<pre><code>parallel --link -a &lt;(find . -type f | sort) \
+  -a &lt;(seq $(find . -type f|wc -l)) convert {1} {2}.png</code></pre>
+
+<p>Alternative version:</p>
+
+<pre><code>find . -type f | sort | parallel convert {} {#}.png</code></pre>
+
+<h2 id="EXAMPLE:-Use-a-table-as-input">EXAMPLE: Use a table as input</h2>
+
+<p>Content of table_file.tsv:</p>
+
+<pre><code>foo&lt;TAB&gt;bar
+baz &lt;TAB&gt; quux</code></pre>
+
+<p>To run:</p>
+
+<pre><code>cmd -o bar -i foo
+cmd -o quux -i baz</code></pre>
+
+<p>you can run:</p>
+
+<pre><code>parallel -a table_file.tsv --colsep &#39;\t&#39; cmd -o {2} -i {1}</code></pre>
+
+<p>Note: The default for GNU <b>parallel</b> is to remove the spaces around the columns. To keep the spaces:</p>
+
+<pre><code>parallel -a table_file.tsv --trim n --colsep &#39;\t&#39; cmd -o {2} -i {1}</code></pre>
+
+<h2 id="EXAMPLE:-Output-to-database">EXAMPLE: Output to database</h2>
+
+<p>GNU <b>parallel</b> can output to a database table and a CSV-file:</p>
+
+<pre><code>dburl=csv:///%2Ftmp%2Fmydir
+dbtableurl=$dburl/mytable.csv
+parallel --sqlandworker $dbtableurl seq ::: {1..10}</code></pre>
+
+<p>It is rather slow and takes up a lot of CPU time because GNU <b>parallel</b> parses the whole CSV file for each update.</p>
+
+<p>A better approach is to use an SQLite-base and then convert that to CSV:</p>
+
+<pre><code>dburl=sqlite3:///%2Ftmp%2Fmy.sqlite
+dbtableurl=$dburl/mytable
+parallel --sqlandworker $dbtableurl seq ::: {1..10}
+sql $dburl &#39;.headers on&#39; &#39;.mode csv&#39; &#39;SELECT * FROM mytable;&#39;</code></pre>
+
+<p>This takes around a second per job.</p>
+
+<p>If you have access to a real database system, such as PostgreSQL, it is even faster:</p>
+
+<pre><code>dburl=pg://user:pass@host/mydb
+dbtableurl=$dburl/mytable
+parallel --sqlandworker $dbtableurl seq ::: {1..10}
+sql $dburl \
+  &quot;COPY (SELECT * FROM mytable) TO stdout DELIMITER &#39;,&#39; CSV HEADER;&quot;</code></pre>
+
+<p>Or MySQL:</p>
+
+<pre><code>dburl=mysql://user:pass@host/mydb
+dbtableurl=$dburl/mytable
+parallel --sqlandworker $dbtableurl seq ::: {1..10}
+sql -p -B $dburl &quot;SELECT * FROM mytable;&quot; &gt; mytable.tsv
+perl -pe &#39;s/&quot;/&quot;&quot;/g; s/\t/&quot;,&quot;/g; s/^/&quot;/; s/$/&quot;/;
+  %s=(&quot;\\&quot; =&gt; &quot;\\&quot;, &quot;t&quot; =&gt; &quot;\t&quot;, &quot;n&quot; =&gt; &quot;\n&quot;);
+  s/\\([\\tn])/$s{$1}/g;&#39; mytable.tsv</code></pre>
+
+<h2 id="EXAMPLE:-Output-to-CSV-file-for-R">EXAMPLE: Output to CSV-file for R</h2>
+
+<p>If you have no need for the advanced job distribution control that a database provides, but you simply want output into a CSV file that you can read into R or LibreCalc, then you can use <b>--results</b>:</p>
+
+<pre><code>parallel --results my.csv seq ::: 10 20 30
+R
+&gt; mydf &lt;- read.csv(&quot;my.csv&quot;);
+&gt; print(mydf[2,])
+&gt; write(as.character(mydf[2,c(&quot;Stdout&quot;)]),&#39;&#39;)</code></pre>
+
+<h2 id="EXAMPLE:-Use-XML-as-input">EXAMPLE: Use XML as input</h2>
+
+<p>The show Aflyttet on Radio 24syv publishes an RSS feed with their audio podcasts on: http://arkiv.radio24syv.dk/audiopodcast/channel/4466232</p>
+
+<p>Using <b>xpath</b> you can extract the URLs for 2019 and download them using GNU <b>parallel</b>:</p>
+
+<pre><code>wget -O - http://arkiv.radio24syv.dk/audiopodcast/channel/4466232 | \
+  xpath -e &quot;//pubDate[contains(text(),&#39;2019&#39;)]/../enclosure/@url&quot; | \
+  parallel -u wget &#39;{= s/ url=&quot;//; s/&quot;//; =}&#39;</code></pre>
+
+<h2 id="EXAMPLE:-Run-the-same-command-10-times">EXAMPLE: Run the same command 10 times</h2>
+
+<p>If you want to run the same command with the same arguments 10 times in parallel you can do:</p>
+
+<pre><code>seq 10 | parallel -n0 my_command my_args</code></pre>
+
+<h2 id="EXAMPLE:-Working-as-cat-sh.-Resource-inexpensive-jobs-and-evaluation">EXAMPLE: Working as cat | sh. Resource inexpensive jobs and evaluation</h2>
+
+<p>GNU <b>parallel</b> can work similar to <b>cat | sh</b>.</p>
+
+<p>A resource inexpensive job is a job that takes very little CPU, disk I/O and network I/O. Ping is an example of a resource inexpensive job. wget is too - if the webpages are small.</p>
+
+<p>The content of the file jobs_to_run:</p>
+
+<pre><code>ping -c 1 10.0.0.1
+wget http://example.com/status.cgi?ip=10.0.0.1
+ping -c 1 10.0.0.2
+wget http://example.com/status.cgi?ip=10.0.0.2
+...
+ping -c 1 10.0.0.255
+wget http://example.com/status.cgi?ip=10.0.0.255</code></pre>
+
+<p>To run 100 processes simultaneously do:</p>
+
+<pre><code>parallel -j 100 &lt; jobs_to_run</code></pre>
+
+<p>As there is not a <i>command</i> the jobs will be evaluated by the shell.</p>
+
+<h2 id="EXAMPLE:-Call-program-with-FASTA-sequence">EXAMPLE: Call program with FASTA sequence</h2>
+
+<p>FASTA files have the format:</p>
+
+<pre><code>&gt;Sequence name1
+sequence
+sequence continued
+&gt;Sequence name2
+sequence
+sequence continued
+more sequence</code></pre>
+
+<p>To call <b>myprog</b> with the sequence as argument run:</p>
+
+<pre><code>cat file.fasta |
+  parallel --pipe -N1 --recstart &#39;&gt;&#39; --rrs \
+    &#39;read a; echo Name: &quot;$a&quot;; myprog $(tr -d &quot;\n&quot;)&#39;</code></pre>
+
+<h2 id="EXAMPLE:-Call-program-with-interleaved-FASTQ-records">EXAMPLE: Call program with interleaved FASTQ records</h2>
+
+<p>FASTQ files have the format:</p>
+
+<pre><code>@M10991:61:000000000-A7EML:1:1101:14011:1001 1:N:0:28
+CTCCTAGGTCGGCATGATGGGGGAAGGAGAGCATGGGAAGAAATGAGAGAGTAGCAAGG
++
+#8BCCGGGGGFEFECFGGGGGGGGG@;FFGGGEG@FF&lt;EE&lt;@FFC,CEGCCGGFF&lt;FGF</code></pre>
+
+<p>Interleaved FASTQ starts with a line like these:</p>
+
+<pre><code>@HWUSI-EAS100R:6:73:941:1973#0/1
+@EAS139:136:FC706VJ:2:2104:15343:197393 1:Y:18:ATCACG
+@EAS139:136:FC706VJ:2:2104:15343:197393 1:N:18:1</code></pre>
+
+<p>where &#39;/1&#39; and &#39; 1:&#39; determines this is read 1.</p>
+
+<p>This will cut big.fq into one chunk per CPU thread and pass it on stdin (standard input) to the program fastq-reader:</p>
+
+<pre><code>parallel --pipe-part -a big.fq --block -1 --regexp \
+  --recend &#39;\n&#39; --recstart &#39;@.*(/1| 1:.*)\n[A-Za-z\n\.~]&#39; \
+  fastq-reader</code></pre>
+
+<h2 id="EXAMPLE:-Processing-a-big-file-using-more-CPUs">EXAMPLE: Processing a big file using more CPUs</h2>
+
+<p>To process a big file or some output you can use <b>--pipe</b> to split up the data into blocks and pipe the blocks into the processing program.</p>
+
+<p>If the program is <b>gzip -9</b> you can do:</p>
+
+<pre><code>cat bigfile | parallel --pipe --recend &#39;&#39; -k gzip -9 &gt; bigfile.gz</code></pre>
+
+<p>This will split <b>bigfile</b> into blocks of 1 MB and pass that to <b>gzip -9</b> in parallel. One <b>gzip</b> will be run per CPU. The output of <b>gzip -9</b> will be kept in order and saved to <b>bigfile.gz</b></p>
+
+<p><b>gzip</b> works fine if the output is appended, but some processing does not work like that - for example sorting. For this GNU <b>parallel</b> can put the output of each command into a file. This will sort a big file in parallel:</p>
+
+<pre><code>cat bigfile | parallel --pipe --files sort |\
+  parallel -Xj1 sort -m {} &#39;;&#39; rm {} &gt;bigfile.sort</code></pre>
+
+<p>Here <b>bigfile</b> is split into blocks of around 1MB, each block ending in &#39;\n&#39; (which is the default for <b>--recend</b>). Each block is passed to <b>sort</b> and the output from <b>sort</b> is saved into files. These files are passed to the second <b>parallel</b> that runs <b>sort -m</b> on the files before it removes the files. The output is saved to <b>bigfile.sort</b>.</p>
+
+<p>GNU <b>parallel</b>&#39;s <b>--pipe</b> maxes out at around 100 MB/s because every byte has to be copied through GNU <b>parallel</b>. But if <b>bigfile</b> is a real (seekable) file GNU <b>parallel</b> can by-pass the copying and send the parts directly to the program:</p>
+
+<pre><code>parallel --pipe-part --block 100m -a bigfile --files sort |\
+  parallel -Xj1 sort -m {} &#39;;&#39; rm {} &gt;bigfile.sort</code></pre>
+
+<h2 id="EXAMPLE:-Grouping-input-lines">EXAMPLE: Grouping input lines</h2>
+
+<p>When processing with <b>--pipe</b> you may have lines grouped by a value. Here is <i>my.csv</i>:</p>
+
+<pre><code>Transaction Customer Item
+     1       a       53
+     2       b       65
+     3       b       82
+     4       c       96
+     5       c       67
+     6       c       13
+     7       d       90
+     8       d       43
+     9       d       91
+     10      d       84
+     11      e       72
+     12      e       102
+     13      e       63
+     14      e       56
+     15      e       74</code></pre>
+
+<p>Let us assume you want GNU <b>parallel</b> to process each customer. In other words: You want all the transactions for a single customer to be treated as a single record.</p>
+
+<p>To do this we preprocess the data with a program that inserts a record separator before each customer (column 2 = $F[1]). Here we first make a 50 character random string, which we then use as the separator:</p>
+
+<pre><code>sep=`perl -e &#39;print map { (&quot;a&quot;..&quot;z&quot;,&quot;A&quot;..&quot;Z&quot;)[rand(52)] } (1..50);&#39;`
+cat my.csv | \
+   perl -ape &#39;$F[1] ne $l and print &quot;&#39;$sep&#39;&quot;; $l = $F[1]&#39; | \
+   parallel --recend $sep --rrs --pipe -N1 wc</code></pre>
+
+<p>If your program can process multiple customers replace <b>-N1</b> with a reasonable <b>--blocksize</b>.</p>
+
+<h2 id="EXAMPLE:-Running-more-than-250-jobs-workaround">EXAMPLE: Running more than 250 jobs workaround</h2>
+
+<p>If you need to run a massive amount of jobs in parallel, then you will likely hit the filehandle limit which is often around 250 jobs. If you are super user you can raise the limit in /etc/security/limits.conf but you can also use this workaround. The filehandle limit is per process. That means that if you just spawn more GNU <b>parallel</b>s then each of them can run 250 jobs. This will spawn up to 2500 jobs:</p>
+
+<pre><code>cat myinput |\
+  parallel --pipe -N 50 --round-robin -j50 parallel -j50 your_prg</code></pre>
+
+<p>This will spawn up to 62500 jobs (use with caution - you need 64 GB RAM to do this, and you may need to increase /proc/sys/kernel/pid_max):</p>
+
+<pre><code>cat myinput |\
+  parallel --pipe -N 250 --round-robin -j250 parallel -j250 your_prg</code></pre>
+
+<h2 id="EXAMPLE:-Working-as-mutex-and-counting-semaphore">EXAMPLE: Working as mutex and counting semaphore</h2>
+
+<p>The command <b>sem</b> is an alias for <b>parallel --semaphore</b>.</p>
+
+<p>A counting semaphore will allow a given number of jobs to be started in the background. When the number of jobs are running in the background, GNU <b>sem</b> will wait for one of these to complete before starting another command. <b>sem --wait</b> will wait for all jobs to complete.</p>
+
+<p>Run 10 jobs concurrently in the background:</p>
+
+<pre><code>for i in *.log ; do
+  echo $i
+  sem -j10 gzip $i &quot;;&quot; echo done
+done
+sem --wait</code></pre>
+
+<p>A mutex is a counting semaphore allowing only one job to run. This will edit the file <i>myfile</i> and prepends the file with lines with the numbers 1 to 3.</p>
+
+<pre><code>seq 3 | parallel sem sed -i -e &#39;1i{}&#39; myfile</code></pre>
+
+<p>As <i>myfile</i> can be very big it is important only one process edits the file at the same time.</p>
+
+<p>Name the semaphore to have multiple different semaphores active at the same time:</p>
+
+<pre><code>seq 3 | parallel sem --id mymutex sed -i -e &#39;1i{}&#39; myfile</code></pre>
+
+<h2 id="EXAMPLE:-Mutex-for-a-script">EXAMPLE: Mutex for a script</h2>
+
+<p>Assume a script is called from cron or from a web service, but only one instance can be run at a time. With <b>sem</b> and <b>--shebang-wrap</b> the script can be made to wait for other instances to finish. Here in <b>bash</b>:</p>
+
+<pre><code> #!/usr/bin/sem --shebang-wrap -u --id $0 --fg /bin/bash
+ 
+ echo This will run
+ sleep 5
+ echo exclusively</code></pre>
+
+<p>Here <b>perl</b>:</p>
+
+<pre><code> #!/usr/bin/sem --shebang-wrap -u --id $0 --fg /usr/bin/perl
+ 
+ print &quot;This will run &quot;;
+ sleep 5;
+ print &quot;exclusively\n&quot;;</code></pre>
+
+<p>Here <b>python</b>:</p>
+
+<pre><code> #!/usr/local/bin/sem --shebang-wrap -u --id $0 --fg /usr/bin/python
+ 
+ import time
+ print &quot;This will run &quot;;
+ time.sleep(5)
+ print &quot;exclusively&quot;;</code></pre>
+
+<h2 id="EXAMPLE:-Start-editor-with-file-names-from-stdin-standard-input">EXAMPLE: Start editor with file names from stdin (standard input)</h2>
+
+<p>You can use GNU <b>parallel</b> to start interactive programs like emacs or vi:</p>
+
+<pre><code>cat filelist | parallel --tty -X emacs
+cat filelist | parallel --tty -X vi</code></pre>
+
+<p>If there are more files than will fit on a single command line, the editor will be started again with the remaining files.</p>
+
+<h2 id="EXAMPLE:-Running-sudo">EXAMPLE: Running sudo</h2>
+
+<p><b>sudo</b> requires a password to run a command as root. It caches the access, so you only need to enter the password again if you have not used <b>sudo</b> for a while.</p>
+
+<p>The command:</p>
+
+<pre><code>parallel sudo echo ::: This is a bad idea</code></pre>
+
+<p>is no good, as you would be prompted for the sudo password for each of the jobs. Instead do:</p>
+
+<pre><code>sudo parallel echo ::: This is a good idea</code></pre>
+
+<p>This way you only have to enter the sudo password once.</p>
+
+<h2 id="EXAMPLE:-Run-ping-in-parallel">EXAMPLE: Run ping in parallel</h2>
+
+<p><b>ping</b> prints out statistics when killed with CTRL-C.</p>
+
+<p>Unfortunately, CTRL-C will also normally kill GNU <b>parallel</b>.</p>
+
+<p>But by using <b>--open-tty</b> and ignoring SIGINT you can get the wanted effect:</p>
+
+<pre><code>parallel -j0 --open-tty --lb --tag ping &#39;{= $SIG{INT}=sub {} =}&#39; \
+  ::: 1.1.1.1 8.8.8.8 9.9.9.9 21.21.21.21 80.80.80.80 88.88.88.88</code></pre>
+
+<p><b>--open-tty</b> will make the <b>ping</b>s receive SIGINT (from CTRL-C). CTRL-C will not kill GNU <b>parallel</b>, so that will only exit after <b>ping</b> is done.</p>
+
+<h2 id="EXAMPLE:-GNU-Parallel-as-queue-system-batch-manager">EXAMPLE: GNU Parallel as queue system/batch manager</h2>
+
+<p>GNU <b>parallel</b> can work as a simple job queue system or batch manager. The idea is to put the jobs into a file and have GNU <b>parallel</b> read from that continuously. As GNU <b>parallel</b> will stop at end of file we use <b>tail</b> to continue reading:</p>
+
+<pre><code>true &gt;jobqueue; tail -n+0 -f jobqueue | parallel</code></pre>
+
+<p>To submit your jobs to the queue:</p>
+
+<pre><code>echo my_command my_arg &gt;&gt; jobqueue</code></pre>
+
+<p>You can of course use <b>-S</b> to distribute the jobs to remote computers:</p>
+
+<pre><code>true &gt;jobqueue; tail -n+0 -f jobqueue | parallel -S ..</code></pre>
+
+<p>Output only will be printed when reading the next input after a job has finished: So you need to submit a job after the first has finished to see the output from the first job.</p>
+
+<p>If you keep this running for a long time, jobqueue will grow. A way of removing the jobs already run is by making GNU <b>parallel</b> stop when it hits a special value and then restart. To use <b>--eof</b> to make GNU <b>parallel</b> exit, <b>tail</b> also needs to be forced to exit:</p>
+
+<pre><code>true &gt;jobqueue;
+while true; do
+  tail -n+0 -f jobqueue |
+    (parallel -E StOpHeRe -S ..; echo GNU Parallel is now done;
+     perl -e &#39;while(&lt;&gt;){/StOpHeRe/ and last};print &lt;&gt;&#39; jobqueue &gt; j2;
+     (seq 1000 &gt;&gt; jobqueue &amp;);
+     echo Done appending dummy data forcing tail to exit)
+  echo tail exited;
+  mv j2 jobqueue
+done</code></pre>
+
+<p>In some cases you can run on more CPUs and computers during the night:</p>
+
+<pre><code># Day time
+echo 50% &gt; jobfile
+cp day_server_list ~/.parallel/sshloginfile
+# Night time
+echo 100% &gt; jobfile
+cp night_server_list ~/.parallel/sshloginfile
+tail -n+0 -f jobqueue | parallel --jobs jobfile -S ..</code></pre>
+
+<p>GNU <b>parallel</b> discovers if <b>jobfile</b> or <b>~/.parallel/sshloginfile</b> changes.</p>
+
+<h2 id="EXAMPLE:-GNU-Parallel-as-dir-processor">EXAMPLE: GNU Parallel as dir processor</h2>
+
+<p>If you have a dir in which users drop files that needs to be processed you can do this on GNU/Linux (If you know what <b>inotifywait</b> is called on other platforms file a bug report):</p>
+
+<pre><code>inotifywait -qmre MOVED_TO -e CLOSE_WRITE --format %w%f my_dir |\
+  parallel -u echo</code></pre>
+
+<p>This will run the command <b>echo</b> on each file put into <b>my_dir</b> or subdirs of <b>my_dir</b>.</p>
+
+<p>You can of course use <b>-S</b> to distribute the jobs to remote computers:</p>
+
+<pre><code>inotifywait -qmre MOVED_TO -e CLOSE_WRITE --format %w%f my_dir |\
+  parallel -S ..  -u echo</code></pre>
+
+<p>If the files to be processed are in a tar file then unpacking one file and processing it immediately may be faster than first unpacking all files. Set up the dir processor as above and unpack into the dir.</p>
+
+<p>Using GNU <b>parallel</b> as dir processor has the same limitations as using GNU <b>parallel</b> as queue system/batch manager.</p>
+
+<h2 id="EXAMPLE:-Locate-the-missing-package">EXAMPLE: Locate the missing package</h2>
+
+<p>If you have downloaded source and tried compiling it, you may have seen:</p>
+
+<pre><code>$ ./configure
+[...]
+checking for something.h... no
+configure: error: &quot;libsomething not found&quot;</code></pre>
+
+<p>Often it is not obvious which package you should install to get that file. Debian has `apt-file` to search for a file. `tracefile` from https://codeberg.org/tange/tangetools can tell which files a program tried to access. In this case we are interested in one of the last files:</p>
+
+<pre><code>$ tracefile -un ./configure | tail | parallel -j0 apt-file search</code></pre>
+
+<h1 id="AUTHOR">AUTHOR</h1>
+
+<p>When using GNU <b>parallel</b> for a publication please cite:</p>
+
+<p>O. Tange (2011): GNU Parallel - The Command-Line Power Tool, ;login: The USENIX Magazine, February 2011:42-47.</p>
+
+<p>This helps funding further development; and it won&#39;t cost you a cent. If you pay 10000 EUR you should feel free to use GNU Parallel without citing.</p>
+
+<p>Copyright (C) 2007-10-18 Ole Tange, http://ole.tange.dk</p>
+
+<p>Copyright (C) 2008-2010 Ole Tange, http://ole.tange.dk</p>
+
+<p>Copyright (C) 2010-2025 Ole Tange, http://ole.tange.dk and Free Software Foundation, Inc.</p>
+
+<p>Parts of the manual concerning <b>xargs</b> compatibility is inspired by the manual of <b>xargs</b> from GNU findutils 4.4.2.</p>
+
+<h1 id="LICENSE">LICENSE</h1>
+
+<p>This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or at your option any later version.</p>
+
+<p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</p>
+
+<p>You should have received a copy of the GNU General Public License along with this program. If not, see &lt;https://www.gnu.org/licenses/&gt;.</p>
+
+<h2 id="Documentation-license-I">Documentation license I</h2>
+
+<p>Permission is granted to copy, distribute and/or modify this documentation under the terms of the GNU Free Documentation License, Version 1.3 or any later version published by the Free Software Foundation; with no Invariant Sections, with no Front-Cover Texts, and with no Back-Cover Texts. A copy of the license is included in the file LICENSES/GFDL-1.3-or-later.txt.</p>
+
+<h2 id="Documentation-license-II">Documentation license II</h2>
+
+<p>You are free:</p>
+
+<dl>
+
+<dt id="to-Share"><b>to Share</b></dt>
+<dd>
+
+<p>to copy, distribute and transmit the work</p>
+
+</dd>
+<dt id="to-Remix"><b>to Remix</b></dt>
+<dd>
+
+<p>to adapt the work</p>
+
+</dd>
+</dl>
+
+<p>Under the following conditions:</p>
+
+<dl>
+
+<dt id="Attribution"><b>Attribution</b></dt>
+<dd>
+
+<p>You must attribute the work in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work).</p>
+
+</dd>
+<dt id="Share-Alike"><b>Share Alike</b></dt>
+<dd>
+
+<p>If you alter, transform, or build upon this work, you may distribute the resulting work only under the same, similar or a compatible license.</p>
+
+</dd>
+</dl>
+
+<p>With the understanding that:</p>
+
+<dl>
+
+<dt id="Waiver"><b>Waiver</b></dt>
+<dd>
+
+<p>Any of the above conditions can be waived if you get permission from the copyright holder.</p>
+
+</dd>
+<dt id="Public-Domain"><b>Public Domain</b></dt>
+<dd>
+
+<p>Where the work or any of its elements is in the public domain under applicable law, that status is in no way affected by the license.</p>
+
+</dd>
+<dt id="Other-Rights"><b>Other Rights</b></dt>
+<dd>
+
+<p>In no way are any of the following rights affected by the license:</p>
+
+<ul>
+
+<li><p>Your fair dealing or fair use rights, or other applicable copyright exceptions and limitations;</p>
+
+</li>
+<li><p>The author&#39;s moral rights;</p>
+
+</li>
+<li><p>Rights other persons may have either in the work itself or in how the work is used, such as publicity or privacy rights.</p>
+
+</li>
+</ul>
+
+</dd>
+</dl>
+
+<dl>
+
+<dt id="Notice"><b>Notice</b></dt>
+<dd>
+
+<p>For any reuse or distribution, you must make clear to others the license terms of this work.</p>
+
+</dd>
+</dl>
+
+<p>A copy of the full license is included in the file as LICENCES/CC-BY-SA-4.0.txt</p>
+
+<h1 id="SEE-ALSO">SEE ALSO</h1>
+
+<p><b>parallel</b>(1), <b>parallel_tutorial</b>(7), <b>env_parallel</b>(1), <b>parset</b>(1), <b>parsort</b>(1), <b>parallel_alternatives</b>(7), <b>parallel_design</b>(7), <b>niceload</b>(1), <b>sql</b>(1), <b>ssh</b>(1), <b>ssh-agent</b>(1), <b>sshpass</b>(1), <b>ssh-copy-id</b>(1), <b>rsync</b>(1)</p>
+
+
+</body>
+
+</html>
+
+
