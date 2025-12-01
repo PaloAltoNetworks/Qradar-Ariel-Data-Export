@@ -11,4 +11,4 @@ Included with this package is a document that provides a detailed overview of th
 
 Note: This extraction/conversion process is only for events, not flows. Flow record extraction/conversion is not supported at this time.
 
-Full complete instructions are included in the PDF file titled "QRadar Ariel Data Export Documentation".
+Full complete instructions are included in the PDF file titled "QRadar Ariel Export Documentation".
